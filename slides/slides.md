@@ -1,7 +1,7 @@
 ---
 theme: default
-title: 'Determy - The Trust Layer Between AI and Your Code'
-info: 'Spec-driven. Deterministic. Regeneration-safe.'
+title: 'FixedCode - Should We Productise This?'
+info: 'Internal discussion deck'
 class: text-center
 highlighter: shiki
 drawings:
@@ -14,171 +14,124 @@ transition: slide-left
 </style>
 
 <div class="flex flex-col items-center justify-center h-full">
-  <div class="gradient-text-lg mb-4">Determy</div>
+  <div class="gradient-text-lg mb-4">FixedCode</div>
   <div class="separator"></div>
-  <p class="text-xl mt-4 !color-white opacity-90">The Trust Layer Between AI and Your Code</p>
-  <p class="text-sm mt-6 opacity-50 tracking-widest uppercase">Spec-driven &middot; Deterministic &middot; Regeneration-safe</p>
+  <p class="text-xl mt-4 !color-white opacity-90">Should we productise this?</p>
+  <p class="text-base mt-6 opacity-50">An honest assessment of what we have, what it's worth, and what it would take to find out.</p>
 </div>
 
 ---
 transition: slide-left
 ---
 
-# The Problem
-
-<div class="grid grid-cols-3 gap-6 mt-10">
-
-<div class="card">
-  <h3 class="!text-lg mb-3"><span class="gradient-text">AI Tools Are Inconsistent</span></h3>
-  <p class="!text-sm opacity-80">Two developers, same prompt, different output. Every time.</p>
-  <p class="!text-sm opacity-60 mt-3">Structural consistency is left to chance.</p>
-</div>
-
-<div class="card">
-  <h3 class="!text-lg mb-3"><span class="gradient-text">Scaffolding Is Fire-and-Forget</span></h3>
-  <p class="!text-sm opacity-80">Generate once, then you're on your own. Templates improve? Too bad.</p>
-  <p class="!text-sm opacity-60 mt-3">No path back to the generator.</p>
-</div>
-
-<div class="card">
-  <h3 class="!text-lg mb-3"><span class="gradient-text">Architecture Drifts at Scale</span></h3>
-  <p class="!text-sm opacity-80">Patterns live in docs. Delivery pressure wins. Drift accumulates.</p>
-  <p class="!text-sm opacity-60 mt-3">Every team reinvents the wheel.</p>
-</div>
-
-</div>
-
----
-transition: slide-left
----
-
-# What Happens Without Enforcement
-
-<div class="mt-8">
-
-<v-clicks>
-
-- Teams interpret patterns individually
-- Architectural consistency depends on people *remembering*
-- Pattern drift accumulates silently across services
-- Code reviews enforce rules **after** violations have already been written
-- Regional teams solve the same structural problems independently
-
-</v-clicks>
-
-</div>
-
-<div class="callout mt-8" v-click>
-"We could make progress in isolation -- but not safely and repeatedly."
-</div>
-
----
-transition: slide-left
----
-
-# The Question That Started This
-
-<div class="flex flex-col items-center justify-center mt-12">
-
-<blockquote class="!text-2xl !text-center max-w-2xl">
-"Why are you still using templates when you have AI?"
-</blockquote>
-
-<div v-click class="mt-8 text-center">
-<p class="!text-lg opacity-90">Because they're <strong>consistent</strong> and generate in <strong>seconds</strong>.</p>
-<p class="!text-lg opacity-90">And the output is <strong>identical every time</strong>.</p>
-</div>
-
-<div v-click class="mt-8 card-highlight text-center px-8 py-4">
-<p class="!text-base"><span class="gradient-text font-semibold">The real question:</span> How do we use AI <em>and</em> determinism together?</p>
-</div>
-
-</div>
-
----
-transition: slide-left
----
-
-# The AI Sandwich
-
-<div class="flex flex-col items-center mt-8 gap-3">
-
-<div class="layer layer-ai w-full max-w-2xl text-center" v-click>
-  <p class="!text-xs uppercase tracking-widest opacity-60 mb-1">Layer 1</p>
-  <p class="!text-lg font-bold !text-purple-400">AI (Creative)</p>
-  <p class="!text-sm opacity-80">Define intent. Draft specs from natural language.</p>
-</div>
-
-<div class="text-center opacity-40">&#8595;</div>
-
-<div class="layer layer-determy w-full max-w-2xl text-center" v-click>
-  <p class="!text-xs uppercase tracking-widest opacity-60 mb-1">Layer 2</p>
-  <p class="!text-lg font-bold !text-blue-400">Determy (Deterministic)</p>
-  <p class="!text-sm opacity-80">Same spec &rarr; identical output. Every time.</p>
-</div>
-
-<div class="text-center opacity-40">&#8595;</div>
-
-<div class="layer layer-ai w-full max-w-2xl text-center" v-click>
-  <p class="!text-xs uppercase tracking-widest opacity-60 mb-1">Layer 3</p>
-  <p class="!text-lg font-bold !text-purple-400">AI (Creative)</p>
-  <p class="!text-sm opacity-80">Write business logic in safe extension points.</p>
-</div>
-
-</div>
-
-<p class="text-center mt-6 opacity-70 !text-sm" v-click>AI handles the creative work. Determy handles the guarantees.</p>
-
----
-transition: slide-left
----
-
-# Four Steps
-
-<div class="grid grid-cols-4 gap-4 mt-12">
-
-<div class="card text-center" v-click>
-  <div class="step-number mx-auto mb-3">1</div>
-  <p class="!text-base font-bold !text-purple-400">Define</p>
-  <p class="!text-xs opacity-60 mt-1">AI</p>
-  <p class="!text-sm mt-2 opacity-80">Describe what you need in natural language</p>
-</div>
-
-<div class="card text-center" v-click>
-  <div class="step-number mx-auto mb-3">2</div>
-  <p class="!text-base font-bold !text-blue-400">Validate</p>
-  <p class="!text-xs opacity-60 mt-1">Deterministic</p>
-  <p class="!text-sm mt-2 opacity-80">Schema validation ensures spec correctness</p>
-</div>
-
-<div class="card text-center" v-click>
-  <div class="step-number mx-auto mb-3">3</div>
-  <p class="!text-base font-bold !text-blue-400">Generate</p>
-  <p class="!text-xs opacity-60 mt-1">Deterministic</p>
-  <p class="!text-sm mt-2 opacity-80">Same spec produces identical output every time</p>
-</div>
-
-<div class="card text-center" v-click>
-  <div class="step-number mx-auto mb-3">4</div>
-  <p class="!text-base font-bold !text-purple-400">Embellish</p>
-  <p class="!text-xs opacity-60 mt-1">AI</p>
-  <p class="!text-sm mt-2 opacity-80">Write business logic in protected extension points</p>
-</div>
-
-</div>
-
----
-transition: slide-left
----
-
-# ~20 Lines of YAML
+# What We've Already Built
 
 <div class="grid grid-cols-2 gap-6 mt-4">
 
 <div>
+<div class="card-highlight !py-3 mb-3">
+  <p class="!text-sm font-semibold"><span class="gradient-text">Production-validated at Pexa</span></p>
+</div>
+
+- ~30 lines of YAML &rarr; a complete service with **every cross-functional requirement built in**
+- Auth, audit trails, structured logging, event sourcing, DLQ, policy engine, optimistic locking, migrations, CQRS, tests &mdash; all generated
+- Regeneration-safe: templates improve, all services upgrade, hand-written code untouched
+- New teams never ask "how do we wire up logging" &mdash; it's already there
+
+</div>
+
+<div>
+<div class="grid grid-cols-2 gap-2">
+  <div class="card text-center !py-3">
+    <p class="font-bold !text-lg !text-purple-400">3s</p>
+    <p class="!text-xs opacity-60">generation time</p>
+  </div>
+  <div class="card text-center !py-3">
+    <p class="font-bold !text-lg !text-blue-400">90%</p>
+    <p class="!text-xs opacity-60">code automated</p>
+  </div>
+  <div class="card text-center !py-3">
+    <p class="font-bold !text-lg !text-cyan-400">0</p>
+    <p class="!text-xs opacity-60">architectural drift</p>
+  </div>
+  <div class="card text-center !py-3">
+    <p class="font-bold !text-lg !text-green-400">2d</p>
+    <p class="!text-xs opacity-60">idea to deployed</p>
+  </div>
+</div>
+
+<div class="card mt-3 !py-3">
+  <p class="!text-sm opacity-80">4+ microservices &middot; 100+ entities &middot; 1000+ endpoints &middot; multiple jurisdictions</p>
+</div>
+
+</div>
+
+</div>
+
+---
+transition: slide-left
+---
+
+# The Problem Others Have
+
+<div class="grid grid-cols-3 gap-6 mt-6">
+
+<div class="card">
+  <h3 class="!text-lg mb-3"><span class="gradient-text">CFRs Slow Everyone Down</span></h3>
+  <p class="!text-sm opacity-80">Auth, logging, observability, retry logic, DLQ handling, database migrations &mdash; every new service spends weeks wiring these up. Teams block on platform teams for guidance. Each team does it differently.</p>
+</div>
+
+<div class="card">
+  <h3 class="!text-lg mb-3"><span class="gradient-text">Guardrails Are Social, Not Structural</span></h3>
+  <p class="!text-sm opacity-80">Golden paths live in wikis. CLAUDE.md files are suggestions. Code reviews catch violations after the fact. Nothing enforces standards at generation time.</p>
+</div>
+
+<div class="card">
+  <h3 class="!text-lg mb-3"><span class="gradient-text">AI Makes It Worse at Scale</span></h3>
+  <p class="!text-sm opacity-80">AI tools are fast but inconsistent. 10 teams using Copilot/Claude generate 10 different service structures. Speed without guardrails is just faster drift.</p>
+</div>
+
+</div>
+
+<div class="callout mt-6" v-click>
+The real cost isn't building services. It's the weeks spent on cross-functional requirements, the coordination overhead, and fixing the drift afterwards.
+</div>
+
+---
+transition: slide-left
+---
+
+# The Core Idea: AI Sandwich
+
+<div class="grid grid-cols-2 gap-8 mt-4">
+
+<div class="flex flex-col items-center gap-1">
+
+<div class="layer layer-ai w-full text-center !py-2 !px-4">
+  <p class="!text-sm font-bold !text-purple-400 !mb-0">AI (Creative)</p>
+  <p class="!text-xs opacity-80 !mb-0">Developer describes what they need. AI drafts the spec.</p>
+</div>
+
+<div class="text-center opacity-40 !text-sm">&#8595;</div>
+
+<div class="layer layer-fixedcode w-full text-center !py-2 !px-4">
+  <p class="!text-sm font-bold !text-blue-400 !mb-0">FixedCode (Deterministic)</p>
+  <p class="!text-xs opacity-80 !mb-0">Same spec &rarr; identical output. Every time. In seconds.</p>
+</div>
+
+<div class="text-center opacity-40 !text-sm">&#8595;</div>
+
+<div class="layer layer-ai w-full text-center !py-2 !px-4">
+  <p class="!text-sm font-bold !text-purple-400 !mb-0">AI (Creative)</p>
+  <p class="!text-xs opacity-80 !mb-0">Business logic in protected extension points.</p>
+</div>
+
+</div>
+
+<div>
 
 ```yaml
-schema: ddd-cqrs/1.0
+schema: ddd/1.0
 boundedContext: Workspace
 aggregates:
   Workspace:
@@ -186,37 +139,20 @@ aggregates:
       workspaceId!: uuid
       name!: string
       status: string = Status
-      customAttributes: object
     commands:
       - CreateWorkspace{name!, status}
           -> WorkspaceCreated
-      - UpdateWorkspace(workspaceId!){name!}
-          -> WorkspaceUpdated
     queries:
       - GetWorkspace(workspaceId!)
           -> Workspace
-      - SearchWorkspace(page, size, filters)
-          -> PagedList
     entities:
       Party:
         partyId!: uuid
         partyType!: string = PartyType
 ```
 
-</div>
+<p class="!text-xs opacity-60 mt-2">The AI agent calls <code>fixedcode generate</code> directly. No plugins needed &mdash; AI coding agents already know how to use CLIs.</p>
 
-<div class="flex flex-col justify-center">
-  <p class="!text-lg font-semibold mb-4"><span class="gradient-text">This is the entire input.</span></p>
-  <div class="space-y-3 !text-sm">
-    <p>Define your <strong>bounded context</strong></p>
-    <p>Declare <strong>aggregates</strong> and their attributes</p>
-    <p>Specify <strong>commands</strong> with their events</p>
-    <p>Define <strong>queries</strong> and return types</p>
-    <p>Add <strong>entities</strong> as needed</p>
-  </div>
-  <div class="callout mt-6 !text-sm">
-    Readable by humans. Parseable by machines. Versionable in Git.
-  </div>
 </div>
 
 </div>
@@ -225,56 +161,55 @@ aggregates:
 transition: slide-left
 ---
 
-# From That Spec, You Get
+# The Review Problem at Scale
 
-<div class="grid grid-cols-2 gap-8 mt-6">
+<div class="grid grid-cols-2 gap-6 mt-4">
 
 <div>
-<p class="!text-sm font-semibold opacity-60 uppercase tracking-wider mb-3">Generated File Tree</p>
+<p class="!text-sm font-semibold !text-red-400 uppercase tracking-wider mb-3">How AI code gets reviewed today</p>
 
-```
-workspace-service/
-  domain/
-    Workspace.kt
-    WorkspaceId.kt
-    Party.kt
-  commands/
-    CreateWorkspaceCommand.kt
-    CreateWorkspaceHandler.kt
-    UpdateWorkspaceCommand.kt
-    UpdateWorkspaceHandler.kt
-  queries/
-    GetWorkspaceQuery.kt
-    SearchWorkspaceQuery.kt
-  events/
-    WorkspaceCreated.kt
-    WorkspaceUpdated.kt
-  api/
-    WorkspaceController.kt
-    openapi.yaml
-  migrations/
-    V1__create_workspace.sql
-  tests/
-    WorkspaceCommandTests.kt
-```
+<div class="card mb-2">
+  <p class="!text-xs">1. Write shared specs, CLAUDE.md, coding standards</p>
+</div>
+<div class="card mb-2">
+  <p class="!text-xs">2. AI generates code &mdash; <em>hopefully</em> following the spec</p>
+</div>
+<div class="card mb-2">
+  <p class="!text-xs">3. Deploy review agents to check it did</p>
+</div>
+<div class="card mb-2">
+  <p class="!text-xs">4. Human reviews what agents flagged</p>
+</div>
+<div class="card mb-2">
+  <p class="!text-xs">5. Fix drift, re-review, repeat</p>
+</div>
+
+<div class="callout !text-xs mt-2">
+Every step is lossy. At 50 services, stuff slips through. The entire pipeline exists to compensate for non-deterministic output.
+</div>
 
 </div>
 
 <div>
-<p class="!text-sm font-semibold opacity-60 uppercase tracking-wider mb-3">What's Included</p>
+<p class="!text-sm font-semibold !text-green-400 uppercase tracking-wider mb-3">How FixedCode changes this</p>
 
-<v-clicks>
+<div class="card mb-2">
+  <p class="!text-xs">1. Platform team encodes standards into schemas + templates <strong>(reviewed once)</strong></p>
+</div>
+<div class="card mb-2">
+  <p class="!text-xs">2. FixedCode generates structural code &mdash; <strong>identical every time, from reviewed templates</strong></p>
+</div>
+<div class="card mb-2">
+  <p class="!text-xs">3. Developer writes business logic in extension points</p>
+</div>
+<div class="card-highlight mb-2">
+  <p class="!text-xs"><strong class="!text-green-400">4. Review only the extension points</strong> &mdash; the 10% that's actually unique</p>
+</div>
 
-- **Domain model** -- aggregates, entities, value objects
-- **CQRS** -- commands, handlers, queries
-- **Events** -- domain events with full payloads
-- **API layer** -- controllers, DTOs, mapping
-- **OpenAPI spec** -- auto-generated, always in sync
-- **Database migrations** -- schema creation scripts
-- **Test scaffolding** -- unit tests for command handlers
-- **Extension points** -- marked regions for business logic
+<div class="callout !text-xs mt-2">
+No review agent needed for auth, logging, events, DLQ. Those are generated from reviewed templates. Known-good by construction.
+</div>
 
-</v-clicks>
 </div>
 
 </div>
@@ -283,254 +218,124 @@ workspace-service/
 transition: slide-left
 ---
 
-# Not Scaffolding. Regeneration.
+# Who Would Buy This
+
+<div class="mt-4">
+
+<div class="card-highlight !py-3 mb-4">
+  <p class="!text-sm"><span class="gradient-text font-semibold">Platform teams who want to accelerate delivery without sacrificing governance.</span> The value isn't consistency for its own sake &mdash; it's removing weeks of cross-functional work from every new service so teams ship faster without ever touching the platform team.</p>
+</div>
+
+<div class="grid grid-cols-2 gap-6">
+
+<div>
+<p class="!text-sm font-semibold opacity-60 uppercase tracking-wider mb-3">What they get today (without us)</p>
+
+- Weeks per service wiring up auth, logging, events, DLQ, audit, migrations
+- Teams blocked waiting for platform guidance on cross-functional requirements
+- Each team interprets the golden path differently
+- Code reviews catching structural violations after the fact
+
+</div>
+
+<div>
+<p class="!text-sm font-semibold opacity-60 uppercase tracking-wider mb-3">What they get with FixedCode</p>
+
+- **Every CFR built in from day zero** &mdash; auth, audit, logging, events, DLQ, policy, tests
+- **Teams never block on platform** &mdash; the schema encodes the golden path, not a wiki
+- **Violations are structurally impossible** &mdash; not caught in review, prevented at generation
+- **New starters productive in days** &mdash; clone, generate, run, extend
+
+</div>
+
+</div>
+
+</div>
+
+---
+transition: slide-left
+---
+
+# What's Defensible
+
+<div class="grid grid-cols-2 gap-6 mt-4">
+
+<div>
+<p class="!text-sm font-semibold !text-green-400 uppercase tracking-wider mb-3">Hard to replicate</p>
+
+<div class="card mb-2">
+  <p class="!text-sm"><strong>Schema + enrichment knowledge</strong></p>
+  <p class="!text-xs opacity-70">Where the regenerate/once/extension-point boundaries belong for DDD services. Learned through production failures over 2-3 years.</p>
+</div>
+
+<div class="card mb-2">
+  <p class="!text-sm"><strong>Production proof</strong></p>
+  <p class="!text-xs opacity-70">Evidence that this actually works at scale. Most scaffolding tools never prove this. We have the numbers.</p>
+</div>
+
+<div class="card mb-2">
+  <p class="!text-sm"><strong>The team's expertise</strong></p>
+  <p class="!text-xs opacity-70">Understanding *why* certain boundaries exist, not just where. This is tacit knowledge that doesn't transfer via code.</p>
+</div>
+
+</div>
+
+<div>
+<p class="!text-sm font-semibold !text-red-400 uppercase tracking-wider mb-3">Not defensible</p>
+
+<div class="card mb-2">
+  <p class="!text-sm"><strong>The engine itself</strong></p>
+  <p class="!text-xs opacity-70">A YAML-to-code template renderer is rebuildable in a quarter by any competent team.</p>
+</div>
+
+<div class="card mb-2">
+  <p class="!text-sm"><strong>The AI Sandwich concept</strong></p>
+  <p class="!text-xs opacity-70">It's a pattern, not IP. Anyone can describe it and implement it.</p>
+</div>
+
+<div class="card mb-2">
+  <p class="!text-sm"><strong>Bundle library (today)</strong></p>
+  <p class="!text-xs opacity-70">At 50+ bundles, the ecosystem becomes a moat. At 3 bundles, it's a demo.</p>
+</div>
+
+</div>
+
+</div>
+
+---
+transition: slide-left
+---
+
+# The Real Moat Question
 
 <div class="mt-6">
 
-<div class="card-highlight text-center py-4 mb-8" v-click>
-<p class="!text-lg">Templates improve &rarr; <strong>Regenerate</strong> &rarr; Every service gets the upgrade</p>
+<div class="card-highlight !py-4 px-6 mb-6">
+  <p class="!text-lg text-center"><span class="gradient-text font-semibold">The moat isn't the technology. It's speed to market.</span></p>
+  <p class="!text-sm opacity-70 text-center mt-2">If we ship before anyone else connects deterministic generation to AI coding tools, we own the category long enough to build network effects. The window is 12-18 months.</p>
 </div>
-
-<div class="grid grid-cols-3 gap-6 mt-6">
-
-<div class="card text-center" v-click>
-  <p class="!text-3xl mb-2">&#128196;</p>
-  <p class="font-bold !text-blue-400">Generated Files</p>
-  <p class="!text-sm opacity-80 mt-2">Fully owned by Determy. Regenerated on every run. Never edit these.</p>
-</div>
-
-<div class="card text-center" v-click>
-  <p class="!text-3xl mb-2">&#9998;</p>
-  <p class="font-bold !text-purple-400">Extension Points</p>
-  <p class="!text-sm opacity-80 mt-2">Your code goes here. Clearly marked. Never overwritten by the engine.</p>
-</div>
-
-<div class="card text-center" v-click>
-  <p class="!text-3xl mb-2">&#128221;</p>
-  <p class="font-bold !text-cyan-400">Manifest</p>
-  <p class="!text-sm opacity-80 mt-2">Tracks what was generated, when, and from which spec version.</p>
-</div>
-
-</div>
-
-<p class="text-center mt-8 opacity-70 !text-sm" v-click>Your business logic is <strong>always</strong> safe.</p>
-
-</div>
-
----
-transition: slide-left
----
-
-# One Engine. Five Architecture Types.
-
-<div class="grid grid-cols-5 gap-4 mt-10">
-
-<div class="card text-center" v-click>
-  <p class="!text-2xl mb-2">&#127981;</p>
-  <p class="font-bold !text-sm !text-purple-400">DDD / CQRS</p>
-  <p class="!text-xs opacity-70 mt-2">Aggregates, commands, events, queries</p>
-</div>
-
-<div class="card text-center" v-click>
-  <p class="!text-2xl mb-2">&#128640;</p>
-  <p class="font-bold !text-sm !text-blue-400">REST / CRUD</p>
-  <p class="!text-xs opacity-70 mt-2">Resources, endpoints, validation, pagination</p>
-</div>
-
-<div class="card text-center" v-click>
-  <p class="!text-2xl mb-2">&#9889;</p>
-  <p class="font-bold !text-sm !text-cyan-400">Event-Driven</p>
-  <p class="!text-xs opacity-70 mt-2">Producers, consumers, schemas, dead letters</p>
-</div>
-
-<div class="card text-center" v-click>
-  <p class="!text-2xl mb-2">&#127912;</p>
-  <p class="font-bold !text-sm !text-green-400">Frontend</p>
-  <p class="!text-xs opacity-70 mt-2">Pages, components, state, API client</p>
-</div>
-
-<div class="card text-center" v-click>
-  <p class="!text-2xl mb-2">&#9881;</p>
-  <p class="font-bold !text-sm !text-yellow-400">Infrastructure</p>
-  <p class="!text-xs opacity-70 mt-2">Terraform, Helm, CI/CD, monitoring</p>
-</div>
-
-</div>
-
-<div class="text-center mt-10" v-click>
-  <p class="!text-sm opacity-60">Schemas are <strong>pluggable</strong>. Build your own.</p>
-</div>
-
----
-transition: slide-left
----
-
-# Pick Your Schema. Pick Your Stack.
-
-<div class="mt-6">
-<p class="!text-sm opacity-60 mb-4">Bundles = Schema + Stack. Each bundle is a set of templates targeting a specific architecture and language.</p>
 
 <div class="grid grid-cols-3 gap-4">
 
 <div class="card" v-click>
-  <p class="badge badge-purple mb-2">DDD / CQRS</p>
-  <p class="!text-sm font-semibold">Spring Kotlin</p>
-  <p class="!text-xs opacity-60 mt-1">Axon Framework, PostgreSQL, OpenAPI</p>
+  <p class="font-bold !text-sm !text-purple-400">Anthropic / GitHub / JetBrains</p>
+  <p class="!text-xs opacity-70 mt-2">Could build this, but it's orthogonal to their core product. More likely to acquire or partner than build.</p>
 </div>
 
 <div class="card" v-click>
-  <p class="badge badge-purple mb-2">DDD / CQRS</p>
-  <p class="!text-sm font-semibold">NestJS TypeScript</p>
-  <p class="!text-xs opacity-60 mt-1">CQRS module, TypeORM, Swagger</p>
+  <p class="font-bold !text-sm !text-blue-400">Backstage / Platform Tools</p>
+  <p class="!text-xs opacity-70 mt-2">Closest threat. But they're focused on service catalogues, not regeneration-safe generation. Different problem.</p>
 </div>
 
 <div class="card" v-click>
-  <p class="badge badge-blue mb-2">REST / CRUD</p>
-  <p class="!text-sm font-semibold">Spring Kotlin</p>
-  <p class="!text-xs opacity-60 mt-1">JPA, Flyway, OpenAPI</p>
+  <p class="font-bold !text-sm !text-cyan-400">Random startup, same idea</p>
+  <p class="!text-xs opacity-70 mt-2">Possible, but they'd lack the production-validated schemas. Our head start is 2-3 years of getting the boundaries right.</p>
 </div>
-
-<div class="card" v-click>
-  <p class="badge badge-blue mb-2">REST / CRUD</p>
-  <p class="!text-sm font-semibold">FastAPI Python</p>
-  <p class="!text-xs opacity-60 mt-1">SQLAlchemy, Pydantic, Alembic</p>
-</div>
-
-<div class="card" v-click>
-  <p class="badge badge-cyan mb-2">Event-Driven</p>
-  <p class="!text-sm font-semibold">Spring Kafka</p>
-  <p class="!text-xs opacity-60 mt-1">Avro schemas, dead letters, retry</p>
-</div>
-
-<div class="card" v-click>
-  <p class="badge badge-green mb-2">Frontend</p>
-  <p class="!text-sm font-semibold">React TypeScript</p>
-  <p class="!text-xs opacity-60 mt-1">TanStack Query, Zustand, Zod</p>
-</div>
-
-</div>
-
-<p class="text-center mt-6 !text-sm opacity-50" v-click>More bundles ship with the marketplace. Or build your own.</p>
-</div>
-
----
-transition: slide-left
----
-
-# Why Not Just Use...
-
-<div class="mt-6">
-
-| Capability | Yeoman | Cookiecutter | AI Assistants | **Determy** |
-|---|---|---|---|---|
-| Schema-driven | No | No | No | **Yes** |
-| Deterministic output | Yes | Yes | **No** | **Yes** |
-| Regeneration-safe | No | No | No | **Yes** |
-| Multi-language | Yes | Python-only | Yes | **Yes** |
-| Architecture-aware | No | No | Partial | **Yes** |
-| Extension points | No | No | No | **Yes** |
-| Maintained | **Deprecated** | Minimal | Active | **Active** |
-| AI integration | No | No | Native | **Sandwich** |
 
 </div>
 
 <div class="callout mt-4" v-click>
-Determy is the only tool that combines deterministic generation with AI integration and regeneration safety.
-</div>
-
----
-transition: slide-left
----
-
-# Proven at Scale
-
-<div class="grid grid-cols-4 gap-6 mt-12">
-
-<div class="stat" v-click>
-  <div class="stat-value">3s</div>
-  <div class="stat-label">Generation time<br/>per service</div>
-</div>
-
-<div class="stat" v-click>
-  <div class="stat-value">90%</div>
-  <div class="stat-label">Code automated<br/>from spec</div>
-</div>
-
-<div class="stat" v-click>
-  <div class="stat-value">0</div>
-  <div class="stat-label">Architecture drift<br/>across services</div>
-</div>
-
-<div class="stat" v-click>
-  <div class="stat-value">2d</div>
-  <div class="stat-label">Idea to all<br/>services deployed</div>
-</div>
-
-</div>
-
-<div class="text-center mt-12" v-click>
-  <p class="!text-lg opacity-80">3 jurisdictions &middot; 4+ microservices &middot; 100+ entities &middot; 1000+ endpoints</p>
-</div>
-
----
-transition: slide-left
----
-
-# Three Stages
-
-<div class="grid grid-cols-3 gap-6 mt-10">
-
-<div class="card" v-click>
-  <p class="badge badge-purple mb-3">Stage 1</p>
-  <h3 class="!text-lg font-bold">Starter Kit</h3>
-  <p class="!text-sm opacity-80 mt-2">Open-source engine + core bundles. Build community. Prove the model.</p>
-  <p class="!text-xs opacity-50 mt-4">Revenue: sponsorships, premium bundles</p>
-</div>
-
-<div class="card" v-click>
-  <p class="badge badge-blue mb-3">Stage 2</p>
-  <h3 class="!text-lg font-bold">Consulting</h3>
-  <p class="!text-sm opacity-80 mt-2">Custom schema design + bundle development for enterprise teams.</p>
-  <p class="!text-xs opacity-50 mt-4">Revenue: professional services</p>
-</div>
-
-<div class="card" v-click>
-  <p class="badge badge-cyan mb-3">Stage 3</p>
-  <h3 class="!text-lg font-bold">Marketplace</h3>
-  <p class="!text-sm opacity-80 mt-2">Community-contributed bundles. Revenue share. Network effects.</p>
-  <p class="!text-xs opacity-50 mt-4">Revenue: marketplace commission</p>
-</div>
-
-</div>
-
-<p class="text-center mt-8 opacity-60 !text-sm" v-click>Each stage funds the next.</p>
-
----
-transition: slide-left
----
-
-# Why Now
-
-<div class="mt-8 space-y-6">
-
-<div class="card" v-click>
-  <p class="!text-base"><strong class="!text-purple-400">AI tools are amplifying architectural drift.</strong></p>
-  <p class="!text-sm opacity-80 mt-1">Every team using Copilot or ChatGPT generates structurally different code. The consistency problem is getting worse, not better.</p>
-</div>
-
-<div class="card" v-click>
-  <p class="!text-base"><strong class="!text-blue-400">Yeoman is effectively dead.</strong></p>
-  <p class="!text-sm opacity-80 mt-1">The most widely adopted code generator is deprecated with no successor. The space is open.</p>
-</div>
-
-<div class="card" v-click>
-  <p class="!text-base"><strong class="!text-cyan-400">The AI Sandwich is a new category.</strong></p>
-  <p class="!text-sm opacity-80 mt-1">No existing tool combines deterministic generation with AI for creative work. This isn't incremental -- it's a new approach.</p>
-</div>
-
-<div class="card" v-click>
-  <p class="!text-base"><strong class="!text-green-400">Enterprise demand is real.</strong></p>
-  <p class="!text-sm opacity-80 mt-1">Teams with 50+ microservices spend months on consistency. They're looking for exactly this.</p>
+The risk of <em>not</em> building it: someone else ships a worse version, gets mindshare, and our superior schemas never reach the market.
 </div>
 
 </div>
@@ -539,87 +344,90 @@ transition: slide-left
 transition: slide-left
 ---
 
-# This Isn't Theoretical
+# The Minimum Viable Test
 
-<div class="mt-8">
+<div class="mt-4">
 
-<div class="card-highlight p-6 mb-6">
-  <p class="!text-lg font-semibold mb-4"><span class="gradient-text">Built and validated in production</span></p>
-  <div class="grid grid-cols-2 gap-4 !text-sm">
-    <div>
-      <p class="opacity-60 mb-1">Services generated</p>
-      <p class="font-bold !text-lg">4+ microservices</p>
-    </div>
-    <div>
-      <p class="opacity-60 mb-1">Entities modeled</p>
-      <p class="font-bold !text-lg">100+ domain entities</p>
-    </div>
-    <div>
-      <p class="opacity-60 mb-1">API endpoints</p>
-      <p class="font-bold !text-lg">1000+ endpoints</p>
-    </div>
-    <div>
-      <p class="opacity-60 mb-1">Jurisdictions</p>
-      <p class="font-bold !text-lg">3 regional deployments</p>
-    </div>
-  </div>
-</div>
+<p class="!text-sm opacity-60 mb-4">Before committing 6 months, we can validate demand in weeks.</p>
 
-<v-clicks>
-
-- Full DDD/CQRS architecture generated from specs
-- Regenerated multiple times as templates improved -- zero business logic lost
-- Cross-service consistency maintained without manual enforcement
-- New developers productive within days, not weeks
-
-</v-clicks>
-
-</div>
-
----
-transition: slide-left
----
-
-# Stage 1 Scope
-
-<div class="grid grid-cols-2 gap-8 mt-6">
+<div class="grid grid-cols-2 gap-6">
 
 <div>
-<p class="!text-sm font-semibold opacity-60 uppercase tracking-wider mb-3">MVP Deliverables</p>
+<p class="!text-sm font-semibold opacity-60 uppercase tracking-wider mb-3">What to build</p>
 
-<v-clicks>
+<div class="card mb-2">
+  <p class="!text-sm"><strong class="!text-purple-400">Open-source the engine</strong> with one schema (DDD) and one bundle (Spring Kotlin)</p>
+</div>
 
-- CLI tool: `determy generate`
-- Core engine with schema validation
-- DDD/CQRS schema (v1.0)
-- REST/CRUD schema (v1.0)
-- Spring Kotlin bundle
-- Extension point system
-- Regeneration manifest
-- Documentation site
+<div class="card mb-2">
+  <p class="!text-sm"><strong class="!text-blue-400">CLI that AI agents call directly</strong> &mdash; <code>fixedcode generate</code></p>
+</div>
 
-</v-clicks>
+<div class="card mb-2">
+  <p class="!text-sm"><strong class="!text-cyan-400">Getting-started guide</strong> &mdash; spec to running service in 10 minutes</p>
+</div>
+
 </div>
 
 <div>
-<p class="!text-sm font-semibold opacity-60 uppercase tracking-wider mb-3">Open Decisions</p>
+<p class="!text-sm font-semibold opacity-60 uppercase tracking-wider mb-3">What tells us it's working</p>
 
-<v-clicks>
+<div class="card mb-2">
+  <p class="!text-sm"><strong class="!text-green-400">1 platform engineer outside our org</strong> tries it and finds it useful</p>
+</div>
 
-- Spec language: YAML vs. custom DSL?
-- AI integration depth for v1
-- Bundle packaging format
-- Marketplace architecture
-- Pricing model for premium bundles
-- Community governance model
+<div class="card mb-2">
+  <p class="!text-sm"><strong class="!text-yellow-400">Someone asks "can I write my own schema?"</strong> &mdash; that's the signal the real product has demand</p>
+</div>
 
-</v-clicks>
+<div class="card mb-2">
+  <p class="!text-sm"><strong class="!text-purple-400">GitHub traction</strong> &mdash; not vanity stars, but issues, forks, questions about extending it</p>
 </div>
 
 </div>
 
-<div class="callout mt-6" v-click>
-Stage 1 goal: ship the engine, prove the model, build the community.
+</div>
+
+<div class="callout mt-4" v-click>
+If nobody outside our org wants to use it after a few weeks, we have our answer before investing further.
+</div>
+
+</div>
+
+---
+transition: slide-left
+---
+
+# The Decision
+
+<div class="flex flex-col items-center mt-6">
+
+<div class="grid grid-cols-3 gap-6 w-full max-w-3xl">
+
+<div class="card text-center !py-4" v-click>
+  <p class="font-bold !text-green-400 !text-base mb-3">Go</p>
+  <p class="!text-sm opacity-80">Open-source it. Run the minimum test. See if anyone cares.</p>
+  <p class="!text-xs opacity-50 mt-3">Cost: a few weeks of effort.<br/>Upside: category ownership + acquisition path.</p>
+</div>
+
+<div class="card text-center !py-4" v-click>
+  <p class="font-bold !text-yellow-400 !text-base mb-3">Slow Go</p>
+  <p class="!text-sm opacity-80">Write the methodology paper. Give talks. Gauge interest without shipping product.</p>
+  <p class="!text-xs opacity-50 mt-3">Cost: lower. But slower signal<br/>and someone else may ship first.</p>
+</div>
+
+<div class="card text-center !py-4" v-click>
+  <p class="font-bold !text-red-400 !text-base mb-3">No Go</p>
+  <p class="!text-sm opacity-80">Keep it internal. Use the expertise for career leverage and reputation.</p>
+  <p class="!text-xs opacity-50 mt-3">Cost: none. But the window<br/>closes without us in it.</p>
+</div>
+
+</div>
+
+<div class="card-highlight text-center !py-3 mt-8 max-w-2xl" v-click>
+<p class="!text-sm"><span class="gradient-text font-semibold">The core question:</span> Can we find one platform engineer outside our org who would use this? If yes, the rest follows. If no, we know before we've invested.</p>
+</div>
+
 </div>
 
 ---
@@ -628,8 +436,8 @@ class: text-center
 ---
 
 <div class="flex flex-col items-center justify-center h-full">
-  <div class="gradient-text-lg mb-6">Determy</div>
+  <div class="gradient-text-lg mb-6">FixedCode</div>
   <div class="separator"></div>
-  <p class="text-xl mt-6 opacity-80">The Trust Layer Between AI and Your Code</p>
-  <p class="text-3xl mt-12 opacity-60">Questions?</p>
+  <p class="text-xl mt-6 opacity-80">Deterministic Code Generation for the AI Era</p>
+  <p class="text-base mt-4 opacity-60">The technology is proven. The category is empty. The question is whether we move.</p>
 </div>
