@@ -10,7 +10,7 @@ export default function Footer() {
               FixedCode
             </a>
             <p className="text-gray-500 mt-2 text-sm">
-              Built for the AI era. Not by it.
+              AI creates. FixedCode guarantees. You ship.
             </p>
           </div>
 

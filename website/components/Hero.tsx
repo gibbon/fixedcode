@@ -2,14 +2,45 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
+import SandwichDiagram from "./SandwichDiagram";
 
-const terminalLines = [
-  { type: "command", text: "$ # PM creates Jira ticket: \"Need an order management service\"" },
-  { type: "output", text: "\u2713 Agent picks up request, drafts YAML domain spec from requirements" },
-  { type: "output", text: "\u2713 Schema validates spec — conforms to org standards" },
-  { type: "command", text: "$ fixedcode generate --spec order.yaml --bundle spring-kotlin" },
-  { type: "output", text: "\u2713 Generated 47 files in 2.3s — auth, audit, logging, events, tests" },
-  { type: "output", text: "\u2713 Pushed to service repo → CI/CD deploying → PM fills extension points with AI" },
+const modes = [
+  {
+    id: "agent",
+    label: "AI Agent",
+    lines: [
+      { type: "human", text: "[ORD-42] New ticket: \"Need an order management service\"" },
+      { type: "output", text: "\u2713 Agent picks up request from Jira / Linear / Slack / doc" },
+      { type: "output", text: "\u2713 Drafts YAML domain spec → schema validates → conforms to org standards" },
+      { type: "output", text: "\u2713 Generated 47 files in ~3s — auth, audit, logging, events, tests" },
+      { type: "output", text: "\u2713 Pushed to order-service repo → CI/CD deploying" },
+      { type: "output", text: "\u2713 Agent updates ticket: \"Service deployed. Extension points ready.\"" },
+    ],
+  },
+  {
+    id: "cli",
+    label: "CLI",
+    lines: [
+      { type: "command", text: "$ fixedcode generate --spec order.yaml --bundle spring-kotlin" },
+      { type: "output", text: "\u2713 Schema: ddd/1.0 — valid" },
+      { type: "output", text: "\u2713 Generated 47 files in 2.3s — auth, audit, logging, events, tests" },
+      { type: "output", text: "\u2713 Extension points: OrderValidator.kt, OrderScorer.kt" },
+      { type: "command", text: "$ git push && # CI/CD deploys automatically" },
+      { type: "human", text: "\u2713 Fill extension points with business logic → deploy" },
+    ],
+  },
+  {
+    id: "pipeline",
+    label: "CI Pipeline",
+    lines: [
+      { type: "command", text: "$ git push origin main  # push order.yaml to standards repo" },
+      { type: "output", text: "\u2713 GitHub Actions triggered → fixedcode generate → 47 files" },
+      { type: "output", text: "\u2713 PR created on order-service repo → auto-merged" },
+      { type: "output", text: "\u2713 CI/CD: build → test → deploy to staging" },
+      { type: "output", text: "\u2713 Service running at https://staging.orders.internal" },
+      { type: "human", text: "\u2713 PM fills extension points with AI → production ready" },
+    ],
+  },
 ];
 
 function useTypewriter(text: string, speed: number = 30, start: boolean = false) {
@@ -52,6 +83,11 @@ function TerminalLine({
   const { displayed, done } = useTypewriter(line.text, speed, start);
 
   const doneRef = useRef(false);
+
+  useEffect(() => {
+    doneRef.current = false;
+  }, [start]);
+
   useEffect(() => {
     if (done && !doneRef.current) {
       doneRef.current = true;
@@ -70,7 +106,7 @@ function TerminalLine({
   return (
     <div
       className={`font-mono text-sm leading-relaxed ${
-        line.type === "command" ? "text-gray-300" : "text-green-400"
+        line.type === "command" ? "text-gray-300" : line.type === "human" ? "text-purple-400" : "text-green-400"
       }`}
     >
       {displayed}
@@ -82,6 +118,7 @@ function TerminalLine({
 }
 
 export default function Hero() {
+  const [activeMode, setActiveMode] = useState(0);
   const [currentLine, setCurrentLine] = useState(0);
   const [startAnimation, setStartAnimation] = useState(false);
 
@@ -89,6 +126,15 @@ export default function Hero() {
     const timer = setTimeout(() => setStartAnimation(true), 1200);
     return () => clearTimeout(timer);
   }, []);
+
+  const switchMode = (idx: number) => {
+    setActiveMode(idx);
+    setCurrentLine(0);
+    setStartAnimation(false);
+    setTimeout(() => setStartAnimation(true), 200);
+  };
+
+  const terminalLines = modes[activeMode].lines;
 
   const advanceLine = () => {
     setCurrentLine((prev) => prev + 1);
@@ -113,6 +159,15 @@ export default function Hero() {
           </span>
         </motion.div>
 
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="mb-4"
+        >
+          <SandwichDiagram />
+        </motion.div>
+
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -131,7 +186,7 @@ export default function Hero() {
         >
           AI + deterministic generation replaces the coordination overhead that slows every software org down.
           <br className="hidden sm:block" />
-          <span className="text-base text-gray-500">PM creates a Jira ticket. Gets a running service back. No handoffs.</span>
+          <span className="text-base text-gray-500">Create a ticket. Get a running service back. No handoffs.</span>
         </motion.p>
 
         <motion.div
@@ -160,7 +215,9 @@ export default function Hero() {
             </svg>
           </a>
           <a
-            href="#"
+            href="/slides/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-gray-300 font-medium text-sm hover:bg-surface-light hover:border-gray-600 transition-all"
           >
             <svg
@@ -189,19 +246,33 @@ export default function Hero() {
         >
           <div className="rounded-xl border border-border bg-surface/80 backdrop-blur-sm overflow-hidden shadow-2xl shadow-black/50">
             {/* Terminal header */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-surface">
-              <div className="w-3 h-3 rounded-full bg-red-500/80" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-              <div className="w-3 h-3 rounded-full bg-green-500/80" />
-              <span className="ml-2 text-xs text-gray-500 font-mono">
-                terminal
-              </span>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                <div className="w-3 h-3 rounded-full bg-green-500/80" />
+              </div>
+              <div className="flex items-center gap-1">
+                {modes.map((mode, idx) => (
+                  <button
+                    key={mode.id}
+                    onClick={() => switchMode(idx)}
+                    className={`text-xs font-mono px-3 py-1 rounded transition-colors ${
+                      activeMode === idx
+                        ? "bg-purple-500/20 text-purple-400"
+                        : "text-gray-500 hover:text-gray-300"
+                    }`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
             </div>
             {/* Terminal body */}
             <div className="p-5 min-h-[180px] text-left">
               {terminalLines.map((line, i) => (
                 <TerminalLine
-                  key={i}
+                  key={`${activeMode}-${i}`}
                   line={line}
                   start={startAnimation && i <= currentLine}
                   onDone={i === currentLine ? advanceLine : () => {}}

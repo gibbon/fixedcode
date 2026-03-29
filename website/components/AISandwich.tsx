@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { RobotIcon, FactoryIcon } from "./Icons";
+
 
 function PatentBadge() {
   const [clicked, setClicked] = useState(false);
@@ -127,13 +129,20 @@ export default function AISandwich() {
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <h3
-                    className={`text-xl font-bold ${
-                      layer.isCenter ? "text-gradient" : "text-white"
-                    }`}
-                  >
-                    {layer.label}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    {layer.isCenter ? (
+                      <FactoryIcon className="w-6 h-6 text-blue-400" />
+                    ) : (
+                      <RobotIcon className="w-6 h-6 text-purple-400" />
+                    )}
+                    <h3
+                      className={`text-xl font-bold ${
+                        layer.isCenter ? "text-gradient" : "text-white"
+                      }`}
+                    >
+                      {layer.label}
+                    </h3>
+                  </div>
                   <span
                     className={`text-xs font-medium px-2.5 py-1 rounded-full ${layer.tagClass}`}
                   >

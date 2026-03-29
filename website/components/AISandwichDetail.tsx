@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
+import SandwichDiagram from "./SandwichDiagram";
+import { PersonIcon, FactoryIcon } from "./Icons";
 
 function PatentBadge() {
   const [clicked, setClicked] = useState(false);
@@ -66,6 +68,8 @@ export default function AISandwichDetail() {
           guarantees in the middle. Same spec, identical output, every time.
         </p>
       </motion.div>
+
+      <SandwichDiagram />
 
       {/* Three layers */}
       <motion.div {...fadeUp} className="mb-16">
@@ -330,41 +334,45 @@ export default function AISandwichDetail() {
         </div>
       </motion.div>
 
-      {/* Who does what */}
+      {/* Who does what — roles blur */}
       <motion.div {...fadeUp}>
-        <h2 className="text-2xl font-bold mb-6">Who Does What</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <h2 className="text-2xl font-bold mb-2">Two Focus Areas, Not Three Roles</h2>
+        <p className="text-gray-400 text-sm mb-6">
+          The traditional PM / developer / platform team split dissolves. What matters is the type of knowledge, not the job title.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="rounded-xl border border-purple-500/20 bg-surface p-6">
-            <h3 className="text-lg font-semibold text-purple-400 mb-3">
-              PM / Domain Expert
-            </h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Writes requirements in plain English. AI translates to YAML domain
-              spec. Schema validates it — if it conforms, the output is
-              guaranteed correct. PM implements business rules in extension
-              points with AI help. No infrastructure, no waiting for developers.
+            <div className="flex items-center gap-2 mb-3">
+              <PersonIcon className="w-5 h-5 text-purple-400" />
+              <h3 className="text-lg font-semibold text-purple-400">
+                Domain Knowledge
+              </h3>
+            </div>
+            <p className="text-gray-400 text-sm leading-relaxed mb-3">
+              Understands the business: what services are needed, what the rules are,
+              what the domain looks like. Writes requirements, defines specs,
+              implements business logic in extension points — all with AI assistance.
+            </p>
+            <p className="text-gray-500 text-xs">
+              Could be a PM, a business analyst, a domain expert, or a developer
+              who understands the domain. The title doesn&apos;t matter.
             </p>
           </div>
           <div className="rounded-xl border border-blue-500/20 bg-surface p-6">
-            <h3 className="text-lg font-semibold text-blue-400 mb-3">
-              Developer
-            </h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Curates and evolves templates with AI. Handles service-specific
-              code that doesn&apos;t fit generation. Manages schemas, enrichment
-              rules, and extension point boundaries. Shifts from hand-wiring
-              services to improving the platform.
+            <div className="flex items-center gap-2 mb-3">
+              <FactoryIcon className="w-5 h-5 text-blue-400" />
+              <h3 className="text-lg font-semibold text-blue-400">
+                Platform Knowledge
+              </h3>
+            </div>
+            <p className="text-gray-400 text-sm leading-relaxed mb-3">
+              Understands the infrastructure: how services should be built, what
+              patterns to use, where the boundaries are. Curates templates, evolves
+              schemas, handles code that doesn&apos;t fit generation.
             </p>
-          </div>
-          <div className="rounded-xl border border-cyan-500/20 bg-surface p-6">
-            <h3 className="text-lg font-semibold text-cyan-400 mb-3">
-              Platform Team
-            </h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Encodes standards into schemas and templates once. Owns the
-              pipeline. Improves a template, regenerates, every service across
-              every team upgrades. Never answers the same CFR question twice.
-              The schema is the answer.
+            <p className="text-gray-500 text-xs">
+              Could be a developer, a platform engineer, or a tech lead. They
+              improve the system that everyone else generates from.
             </p>
           </div>
         </div>
