@@ -83,16 +83,17 @@ bundles/ddd-spike/
 │       └── queries.ts              # query context building
 ├── templates/
 │   ├── src/main/kotlin/
-│   │   └── {{#each aggregates}}/
-│   │       ├── domain/
-│   │       │   └── {{names.pascal}}.kt.hbs
-│   │       ├── api/
-│   │       │   └── {{names.pascal}}Controller.kt.hbs
-│   │       ├── application/
-│   │       │   ├── {{names.pascal}}CommandService.kt.hbs
-│   │       │   └── {{names.pascal}}QueryService.kt.hbs
-│   │       └── infrastructure/
-│   │           └── {{names.pascal}}Repository.kt.hbs
+│   │   ├── {{#each aggregates}}/
+│   │   │   ├── domain/
+│   │   │   │   └── {{names.pascal}}.kt.hbs
+│   │   │   ├── api/
+│   │   │   │   └── {{names.pascal}}Controller.kt.hbs
+│   │   │   ├── application/
+│   │   │   │   ├── {{names.pascal}}CommandService.kt.hbs
+│   │   │   │   └── {{names.pascal}}QueryService.kt.hbs
+│   │   │   └── infrastructure/
+│   │   │       └── {{names.pascal}}Repository.kt.hbs
+│   │   └── {{/each}}/
 │   └── src/main/resources/
 │       └── db/migration/
 │           └── V1__create_tables.sql.hbs
@@ -455,6 +456,7 @@ export interface NameVariants {
   plural: string;      // OrderItems (pascal plural)
   camelPlural: string; // orderItems
   snakePlural: string; // order_items
+  kebabPlural: string; // order-items
 }
 
 /** Mapped type information — spec type resolved to target language types */
@@ -631,6 +633,7 @@ describe('toNameVariants', () => {
       plural: 'OrderItems',
       camelPlural: 'orderItems',
       snakePlural: 'order_items',
+      kebabPlural: 'order-items',
     });
   });
 
@@ -719,15 +722,18 @@ export function toNameVariants(name: string): NameVariants {
   const camel = toCamel(words);
   const snake = toSnake(words);
 
+  const kebab = toKebab(words);
+
   return {
     pascal,
     camel,
     snake,
-    kebab: toKebab(words),
+    kebab,
     upper: toUpper(words),
     plural: pluralize(pascal),
     camelPlural: pluralize(camel),
     snakePlural: pluralize(snake),
+    kebabPlural: pluralize(kebab),
   };
 }
 ```
@@ -1341,6 +1347,7 @@ Expected: FAIL
 import type { SpecMetadata } from '@fixedcode/engine';
 import type { DddContext, AggregateContext } from '../context.js';
 import { toNameVariants } from './names.js';
+import { toTypeMapping } from './types.js';
 import { enrichAttribute } from './attributes.js';
 import { enrichCommand } from './commands.js';
 import { enrichQuery } from './queries.js';
@@ -1409,12 +1416,7 @@ function enrichAggregate(raw: RawAggregate): AggregateContext {
     names: toNameVariants(e.name),
     fields: e.fields.map(f => ({
       names: toNameVariants(f.name),
-      type: { spec: f.type, kotlin: '', sql: '', nullable: false, kotlinDecl: '', needsImport: undefined,
-        ...(() => {
-          const { toTypeMapping } = require('./types.js');
-          return toTypeMapping(f.type, true);
-        })(),
-      },
+      type: toTypeMapping(f.type, true),
     })),
   }));
 
@@ -1428,7 +1430,7 @@ function enrichAggregate(raw: RawAggregate): AggregateContext {
     events,
     imports: [], // computed below
     tableName: names.snakePlural,
-    endpoint: `/${names.kebab}s`,
+    endpoint: `/${names.kebabPlural}`,
     hasCommands: commands.length > 0,
     hasQueries: queries.length > 0,
   };
@@ -1445,23 +1447,6 @@ export function enrich(spec: Record<string, unknown>, _metadata: SpecMetadata): 
     aggregates: rawAggregates.map(enrichAggregate),
   };
 }
-```
-
-**Note:** The event field type resolution uses a dynamic require which is not ideal. Refactor to use a direct import instead:
-
-Replace the events mapping block with:
-
-```typescript
-import { toTypeMapping } from './types.js';
-
-// ... inside enrichAggregate:
-const events = (raw.events ?? []).map(e => ({
-  names: toNameVariants(e.name),
-  fields: e.fields.map(f => ({
-    names: toNameVariants(f.name),
-    type: toTypeMapping(f.type, true),
-  })),
-}));
 ```
 
 - [ ] **Step 4: Run tests**
@@ -1493,6 +1478,7 @@ Write templates that consume the enriched context. These should be trivially sim
 - Create: `bundles/ddd-spike/templates/src/main/kotlin/{{#each aggregates}}/application/{{names.pascal}}CommandService.kt.hbs`
 - Create: `bundles/ddd-spike/templates/src/main/kotlin/{{#each aggregates}}/application/{{names.pascal}}QueryService.kt.hbs`
 - Create: `bundles/ddd-spike/templates/src/main/kotlin/{{#each aggregates}}/infrastructure/{{names.pascal}}Repository.kt.hbs`
+- Create: `bundles/ddd-spike/templates/src/main/kotlin/{{/each}}/` (empty boundary directory)
 - Create: `bundles/ddd-spike/templates/src/main/resources/db/migration/V1__create_tables.sql.hbs`
 - Create: `bundles/ddd-spike/test/templates/render.test.ts`
 
@@ -1500,7 +1486,7 @@ Write templates that consume the enriched context. These should be trivially sim
 
 `bundles/ddd-spike/templates/src/main/kotlin/{{#each aggregates}}/domain/{{names.pascal}}.kt.hbs`:
 ```handlebars
-package {{../package}}.domain
+package {{package}}.domain
 
 {{#each imports}}
 import {{this}}
@@ -1518,7 +1504,7 @@ data class {{names.pascal}}(
 
 `bundles/ddd-spike/templates/src/main/kotlin/{{#each aggregates}}/api/{{names.pascal}}Controller.kt.hbs`:
 ```handlebars
-package {{../package}}.api
+package {{package}}.api
 
 {{#each imports}}
 import {{this}}
@@ -1583,13 +1569,13 @@ class {{names.pascal}}Controller(
 
 `bundles/ddd-spike/templates/src/main/kotlin/{{#each aggregates}}/application/{{names.pascal}}CommandService.kt.hbs`:
 ```handlebars
-package {{../package}}.application
+package {{package}}.application
 
 {{#each imports}}
 import {{this}}
 {{/each}}
-import {{../package}}.domain.{{names.pascal}}
-import {{../package}}.infrastructure.{{names.pascal}}Repository
+import {{package}}.domain.{{names.pascal}}
+import {{package}}.infrastructure.{{names.pascal}}Repository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -1624,13 +1610,13 @@ class {{names.pascal}}CommandService(
 
 `bundles/ddd-spike/templates/src/main/kotlin/{{#each aggregates}}/application/{{names.pascal}}QueryService.kt.hbs`:
 ```handlebars
-package {{../package}}.application
+package {{package}}.application
 
 {{#each imports}}
 import {{this}}
 {{/each}}
-import {{../package}}.domain.{{names.pascal}}
-import {{../package}}.infrastructure.{{names.pascal}}Repository
+import {{package}}.domain.{{names.pascal}}
+import {{package}}.infrastructure.{{names.pascal}}Repository
 import org.springframework.stereotype.Service
 
 @Service
@@ -1657,12 +1643,12 @@ class {{names.pascal}}QueryService(
 
 `bundles/ddd-spike/templates/src/main/kotlin/{{#each aggregates}}/infrastructure/{{names.pascal}}Repository.kt.hbs`:
 ```handlebars
-package {{../package}}.infrastructure
+package {{package}}.infrastructure
 
 {{#each imports}}
 import {{this}}
 {{/each}}
-import {{../package}}.domain.{{names.pascal}}
+import {{package}}.domain.{{names.pascal}}
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
@@ -1857,12 +1843,17 @@ const bundle: Bundle = {
 export default bundle;
 ```
 
-- [ ] **Step 4: Verify bundle compiles**
+- [ ] **Step 4: Build engine first (spike bundle depends on it via `file:` link)**
 
-Run: `cd /home/gibbon/projects/fixedcode/bundles/ddd-spike && npx tsc --noEmit`
+Run: `cd /home/gibbon/projects/fixedcode/engine && npx tsc`
+Expected: Compiles successfully, creates `dist/` directory
+
+- [ ] **Step 5: Verify bundle compiles**
+
+Run: `cd /home/gibbon/projects/fixedcode/bundles/ddd-spike && npm install && npx tsc --noEmit`
 Expected: No errors (may need adjustments for JSON import syntax depending on TS version)
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add bundles/ddd-spike/
@@ -3067,7 +3058,7 @@ Expected: PASS
 
 `engine/src/cli/generate.ts`:
 ```typescript
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
 import { generate } from '../engine/pipeline.js';
 import { loadConfig } from '../engine/config.js';
 import { resolveSpecPath } from './spec-resolver.js';
@@ -3080,7 +3071,7 @@ export async function handleGenerate(
 ): Promise<void> {
   const cwd = process.cwd();
   const specPath = resolveSpecPath(specInput, cwd);
-  const config = loadConfig(options.config ? resolve(options.config) : cwd);
+  const config = loadConfig(options.config ? dirname(resolve(options.config)) : cwd);
   const output = resolve(outputDir ?? './build');
 
   try {
@@ -3110,7 +3101,7 @@ export async function handleGenerate(
 
 `engine/src/cli/validate-cmd.ts`:
 ```typescript
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
 import { parseSpec, validateEnvelope } from '../engine/parse.js';
 import { resolveBundle } from '../engine/resolve.js';
 import { validateBody } from '../engine/validate.js';
@@ -3124,7 +3115,7 @@ export async function handleValidate(
 ): Promise<void> {
   const cwd = process.cwd();
   const specPath = resolveSpecPath(specInput, cwd);
-  const config = loadConfig(options.config ? resolve(options.config) : cwd);
+  const config = loadConfig(options.config ? dirname(resolve(options.config)) : cwd);
 
   try {
     const raw = parseSpec(specPath);
@@ -3240,10 +3231,11 @@ bundles:
 import { describe, it, expect } from 'vitest';
 import { generate } from '../../src/engine/pipeline.js';
 import { readFileSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 
-const projectRoot = join(import.meta.dirname, '../../..');
+const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const specPath = join(projectRoot, 'bundles/ddd-spike/test/fixtures/order-spec.yaml');
 
 describe('e2e: generate DDD from order spec', () => {
@@ -3331,5 +3323,6 @@ After this plan is complete, the FixedCode engine is functional with:
 
 **Not included in this plan (future work):**
 - Phase 4: Reference bundle (clean CRUD REST bundle for documentation)
-- Phase 5: Polish (error messages, `bundle init` scaffolding, `--diff`, post-render hooks)
-- Bundle inheritance, git URL sources, MCP integration
+- Phase 5: Polish — `--diff` flag, `fixedcode init --kind`, `fixedcode bundle init`, post-render formatting hooks, improved error messages
+- Bundle inheritance (`extends` field), git URL bundle sources, MCP integration
+- Spec cross-references/imports, parallel generation
