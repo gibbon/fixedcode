@@ -1,26 +1,27 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { FactoryIcon, PersonIcon } from "./Icons";
 
 const withoutItems = [
   "PM → dev → platform → review → fix → re-review → deploy. Multiple handoffs, multiple waits, weeks.",
-  "Every new service: dev hand-wires auth, logging, events. Platform team answers the same questions again.",
+  "Every new service: someone hand-wires auth, logging, events. Platform team answers the same questions.",
   "Review agents check AI output. Humans review what agents flag. Every step is lossy at scale.",
-  "More teams = more drift = more coordination = slower delivery. Opposite of what scaling should do.",
+  "Rigid roles: PM can't ship, developer is stuck on infrastructure, platform team is a bottleneck.",
 ];
 
 const withItems = [
-  "PM creates a request → AI drafts spec → pipeline generates → deployed. One workflow, minutes.",
-  "PMs implement business rules with AI. Developers focus on platform and edge cases. Fewer handoffs.",
-  "Generated code is known-good. Review only extension points — the 10% that's unique.",
-  "Platform team encodes once. Every service inherits every improvement. The org scales without the overhead scaling.",
+  "Create a request → AI drafts spec → pipeline generates → deployed. One person, one workflow, minutes.",
+  "Anyone who understands the domain can ship a service. AI handles the translation. Engine handles the guarantees.",
+  "Generated code is known-good. Review only the 10% that's unique. Templates reviewed once, applied everywhere.",
+  "Roles blur: domain experts ship directly, developers evolve the platform, the org scales without overhead scaling.",
 ];
 
 const stats = [
-  { value: "3s", label: "Generation time" },
-  { value: "90%", label: "Structural code automated" },
-  { value: "0", label: "Architectural drift" },
-  { value: "1 change", label: "Propagates everywhere" },
+  { value: "~3s", label: "Generation time" },
+  { value: "90%", label: "Code automated" },
+  { value: "0", label: "Drift" },
+  { value: "10%", label: "Review surface" },
 ];
 
 export default function BeforeAfter() {
@@ -35,8 +36,11 @@ export default function BeforeAfter() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            The <span className="text-gradient">org change</span>
+            This isn&apos;t a code generator. It&apos;s a <span className="text-gradient">different org structure</span>.
           </h2>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Fewer handoffs. Fewer roles involved per service. The line between PM and developer dissolves — anyone who understands the domain can ship.
+          </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
@@ -50,23 +54,14 @@ export default function BeforeAfter() {
           >
             <div className="flex items-center gap-2 mb-6">
               <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 text-red-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <PersonIcon className="w-5 h-5 text-red-400" />
               </div>
-              <h3 className="text-lg font-semibold text-red-400">
-                Without FixedCode
-              </h3>
+              <div>
+                <h3 className="text-lg font-semibold text-red-400">
+                  Today: Handoffs everywhere
+                </h3>
+                <p className="text-xs text-red-400/60">PM, dev, platform — rigid roles, rigid boundaries</p>
+              </div>
             </div>
             <ul className="space-y-4">
               {withoutItems.map((item, i) => (
@@ -94,23 +89,14 @@ export default function BeforeAfter() {
           >
             <div className="flex items-center gap-2 mb-6">
               <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 text-cyan-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
+                <FactoryIcon className="w-5 h-5 text-cyan-400" />
               </div>
-              <h3 className="text-lg font-semibold text-cyan-400">
-                With FixedCode
-              </h3>
+              <div>
+                <h3 className="text-lg font-semibold text-cyan-400">
+                  With FixedCode: Roles blur
+                </h3>
+                <p className="text-xs text-cyan-400/60">Domain knowledge matters, not job title</p>
+              </div>
             </div>
             <ul className="space-y-4">
               {withItems.map((item, i) => (
