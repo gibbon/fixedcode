@@ -320,6 +320,8 @@ export interface RenderedFile {
 
 export interface FixedCodeConfig {
   bundles: Record<string, string>;
+  /** Directory the config was loaded from — used to resolve relative bundle paths */
+  configDir: string;
 }
 ```
 
@@ -2075,6 +2077,7 @@ describe('loadConfig', () => {
 
     const config = loadConfig(dir);
     expect(config.bundles.test).toBe('./bundles/test');
+    expect(config.configDir).toBe(dir);
 
     rmSync(dir, { recursive: true });
   });
@@ -2109,13 +2112,14 @@ import type { FixedCodeConfig } from '../types.js';
 const PROJECT_CONFIG = '.fixedcode.yaml';
 const USER_CONFIG_PATH = join(homedir(), '.config', 'fixedcode', 'config.yaml');
 
-function tryLoadYaml(filePath: string): FixedCodeConfig | null {
+function tryLoadYaml(filePath: string, configDir: string): FixedCodeConfig | null {
   if (!existsSync(filePath)) return null;
   try {
     const content = readFileSync(filePath, 'utf-8');
     const raw = parse(content) as Record<string, unknown>;
     return {
       bundles: (raw.bundles as Record<string, string>) ?? {},
+      configDir,
     };
   } catch {
     return null;
@@ -2124,14 +2128,15 @@ function tryLoadYaml(filePath: string): FixedCodeConfig | null {
 
 export function loadConfig(cwd: string): FixedCodeConfig {
   // Project-level takes precedence
-  const projectConfig = tryLoadYaml(join(cwd, PROJECT_CONFIG));
+  const projectConfig = tryLoadYaml(join(cwd, PROJECT_CONFIG), cwd);
   if (projectConfig) return projectConfig;
 
   // Fall back to user-level
-  const userConfig = tryLoadYaml(USER_CONFIG_PATH);
+  const userConfigDir = join(homedir(), '.config', 'fixedcode');
+  const userConfig = tryLoadYaml(USER_CONFIG_PATH, userConfigDir);
   if (userConfig) return userConfig;
 
-  return { bundles: {} };
+  return { bundles: {}, configDir: cwd };
 }
 ```
 
@@ -2186,18 +2191,19 @@ describe('resolveBundle', () => {
   it('loads a bundle from a local path', async () => {
     const bundle = await resolveBundle('test-kind', {
       bundles: { 'test-kind': join(fixturesDir, 'test-bundle') },
-    });
+      configDir: fixturesDir,
+    }, fixturesDir);
     expect(bundle.kind).toBe('test-kind');
     expect(typeof bundle.enrich).toBe('function');
   });
 
   it('throws BundleNotFoundError for unknown kind', async () => {
-    await expect(resolveBundle('unknown', { bundles: {} }))
+    await expect(resolveBundle('unknown', { bundles: {}, configDir: '.' }, '.'))
       .rejects.toThrow(BundleNotFoundError);
   });
 
   it('throws BundleLoadError for invalid bundle path', async () => {
-    await expect(resolveBundle('bad', { bundles: { bad: '/nonexistent/path' } }))
+    await expect(resolveBundle('bad', { bundles: { bad: '/nonexistent/path' }, configDir: '.' }, '.'))
       .rejects.toThrow(BundleLoadError);
   });
 });
@@ -2239,7 +2245,7 @@ function validateBundleExport(mod: unknown, source: string): Bundle {
   return bundle as unknown as Bundle;
 }
 
-export async function resolveBundle(kind: string, config: FixedCodeConfig): Promise<Bundle> {
+export async function resolveBundle(kind: string, config: FixedCodeConfig, configDir: string): Promise<Bundle> {
   const source = config.bundles[kind];
   if (!source) {
     throw new BundleNotFoundError(kind);
@@ -2247,7 +2253,7 @@ export async function resolveBundle(kind: string, config: FixedCodeConfig): Prom
 
   try {
     if (isLocalPath(source)) {
-      const absolutePath = resolve(source);
+      const absolutePath = resolve(configDir, source);
       if (!existsSync(absolutePath)) {
         throw new BundleLoadError(source, `path does not exist: ${absolutePath}`);
       }
@@ -2652,7 +2658,7 @@ export async function renderTemplates(
       const innerPath = afterEach.join('/');
 
       for (const item of items) {
-        const itemContext = { ...item, ...context } as Context;
+        const itemContext = { ...context, ...item } as Context;
         // Remove the collection from context to avoid confusion
         delete (itemContext as Record<string, unknown>)[eachKey!];
 
@@ -2810,6 +2816,7 @@ describe('generate (pipeline)', () => {
         bundles: {
           'test-kind': join(fixturesDir, 'test-bundle'),
         },
+        configDir: fixturesDir,
       },
     });
 
@@ -2830,6 +2837,7 @@ describe('generate (pipeline)', () => {
         bundles: {
           'test-kind': join(fixturesDir, 'test-bundle'),
         },
+        configDir: fixturesDir,
       },
     });
 
@@ -2875,7 +2883,7 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
   const envelope = validateEnvelope(raw);
 
   // 3. Resolve bundle
-  const bundle = await resolveBundle(envelope.kind, options.config);
+  const bundle = await resolveBundle(envelope.kind, options.config, options.config.configDir);
 
   // 4. Validate spec body
   validateBody(envelope.spec, bundle.specSchema);
@@ -3120,7 +3128,7 @@ export async function handleValidate(
   try {
     const raw = parseSpec(specPath);
     const envelope = validateEnvelope(raw);
-    const bundle = await resolveBundle(envelope.kind, config);
+    const bundle = await resolveBundle(envelope.kind, config, config.configDir);
     validateBody(envelope.spec, bundle.specSchema);
 
     console.log(`✓ ${specPath} is valid (kind: ${envelope.kind})`);
@@ -3249,6 +3257,7 @@ describe('e2e: generate DDD from order spec', () => {
         bundles: {
           'ddd-domain': join(projectRoot, 'bundles/ddd-spike'),
         },
+        configDir: projectRoot,
       },
     });
 
