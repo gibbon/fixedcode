@@ -41,7 +41,7 @@ transition: slide-left
 
 <div class="card">
   <h3 class="!text-lg mb-3"><span class="gradient-text">At Scale It's Chaos</span></h3>
-  <p class="!text-sm opacity-80">10 teams, 50 services, 50 different structures. Auth, logging, events, DLQ &mdash; each team wires these up differently. Review agents and CLAUDE.md files help, but they're suggestions, not guarantees.</p>
+  <p class="!text-sm opacity-80">10 teams, 50 services, 50 different structures. Auth, logging, events &mdash; each team wires these up differently. Review agents and CLAUDE.md files help, but they're suggestions, not guarantees.</p>
 </div>
 
 </div>
@@ -60,9 +60,18 @@ transition: slide-left
 
 <div class="flex flex-col items-center gap-1">
 
-<div class="layer layer-ai w-full text-center !py-2 !px-4" v-click>
-  <p class="!text-base font-bold !text-purple-400 !mb-0">AI (Creative)</p>
-  <p class="!text-xs opacity-80 !mb-0">Drafts specs from natural language. Also builds and refines the templates.</p>
+<div class="layer layer-ai w-full !py-2 !px-4" v-click>
+  <p class="!text-base font-bold !text-purple-400 !mb-1 text-center">AI + Human (Creative)</p>
+  <div class="grid grid-cols-2 gap-2">
+    <div class="rounded bg-black/20 border border-purple-500/20 !py-1 !px-2">
+      <p class="!text-xs font-semibold !text-white !mb-0">Domain Specs</p>
+      <p class="!text-xs opacity-60 !mb-0">PM defines <em>what</em>. AI translates to YAML domain specs.</p>
+    </div>
+    <div class="rounded bg-black/20 border border-purple-500/20 !py-1 !px-2">
+      <p class="!text-xs font-semibold !text-white !mb-0">Template Curation</p>
+      <p class="!text-xs opacity-60 !mb-0">Dev/platform defines <em>how</em>. AI extracts patterns. Human refines.</p>
+    </div>
+  </div>
 </div>
 
 <div class="text-center opacity-40 !text-sm">&#8595;</div>
@@ -75,8 +84,8 @@ transition: slide-left
 <div class="text-center opacity-40 !text-sm">&#8595;</div>
 
 <div class="layer layer-ai w-full text-center !py-2 !px-4" v-click>
-  <p class="!text-base font-bold !text-purple-400 !mb-0">AI (Creative)</p>
-  <p class="!text-xs opacity-80 !mb-0">Enriches extension points with business logic. Never overwrites generated code.</p>
+  <p class="!text-base font-bold !text-purple-400 !mb-0">AI + Human (Creative)</p>
+  <p class="!text-xs opacity-80 !mb-0">The custom parts: business rules, domain-specific logic, unique integrations. In clearly marked extension points that regeneration never touches.</p>
 </div>
 
 <p class="!text-xs opacity-50 mt-2" v-click>AI creates the patterns. FixedCode locks them in. AI enriches the output. You never re-prompt for the same structure twice.</p>
@@ -146,7 +155,7 @@ transition: slide-left
 
 <div class="card !py-2" v-click>
   <p class="!text-xs font-semibold !text-green-400 mb-1">What the developer gets (without touching infrastructure)</p>
-  <p class="!text-xs opacity-70">Domain model, CQRS, API + OpenAPI, persistence + migrations, auth + policy engine, event sourcing + DLQ, structured logging, audit trails, integration tests, black-box API tests &mdash; all generated from the spec.</p>
+  <p class="!text-xs opacity-70">Domain model, command/query separation, API + OpenAPI, persistence + migrations, auth + policy engine, event sourcing with outbox pattern, structured logging, audit trails, integration tests, black-box API tests &mdash; all generated from the spec.</p>
 </div>
 
 <div class="card !py-2" v-click>
@@ -176,7 +185,7 @@ transition: slide-left
 
 <div class="card" v-click>
   <p class="font-bold !text-sm !text-purple-400 mb-2">1. Define Standards</p>
-  <p class="!text-xs opacity-80">Platform team works with AI to encode their architectural standards into schemas and templates. Auth patterns, logging format, event strategy, DLQ approach, test conventions &mdash; all captured.</p>
+  <p class="!text-xs opacity-80">Platform team works with AI to encode their architectural standards into schemas and templates. Auth patterns, logging format, event strategy, test conventions &mdash; all captured.</p>
   <p class="!text-xs opacity-50 mt-2">Iterative. AI does the componentisation, humans refine until production-grade.</p>
 </div>
 
@@ -188,7 +197,7 @@ transition: slide-left
 
 <div class="card" v-click>
   <p class="font-bold !text-sm !text-green-400 mb-2">3. Evolve</p>
-  <p class="!text-xs opacity-80">Platform team improves a template &mdash; better auth, hardened DLQ, new test pattern. Regenerate. Every service across every team gets the upgrade. Extension points untouched.</p>
+  <p class="!text-xs opacity-80">Platform team improves a template &mdash; better auth, hardened event patterns, new test strategy. Regenerate. Every service across every team gets the upgrade. Extension points untouched.</p>
   <p class="!text-xs opacity-50 mt-2">Platform team shifts from answering questions to improving templates.</p>
 </div>
 
@@ -259,7 +268,7 @@ transition: slide-left
   <p class="!text-xs opacity-70"><strong>Platform team</strong> writes docs, answers CFR questions all day, reviews service code for compliance</p>
 </div>
 <div class="card !py-2 mb-2">
-  <p class="!text-xs opacity-70"><strong>Developers</strong> hand-wire auth, logging, events, DLQ into every service. Weeks of infrastructure before any business logic</p>
+  <p class="!text-xs opacity-70"><strong>Developers</strong> hand-wire auth, logging, events into every service. Weeks of infrastructure before any business logic</p>
 </div>
 <div class="card !py-2 mb-2">
   <p class="!text-xs opacity-70"><strong>PMs</strong> write requirements, throw them over the wall, wait weeks for a service</p>
@@ -395,7 +404,7 @@ This is the quality anxiety companies feel right now: AI is fast, but can you tr
 
 <div class="card mb-2">
   <p class="!text-sm"><strong class="!text-green-400">Generated code is known-good by construction.</strong></p>
-  <p class="!text-xs opacity-70">Auth, logging, events, DLQ, policy &mdash; generated from templates that were reviewed once. No review agent needed.</p>
+  <p class="!text-xs opacity-70">Auth, logging, events, policy &mdash; generated from templates that were reviewed once. No review agent needed.</p>
 </div>
 
 <div class="card-highlight mb-2">
@@ -421,7 +430,7 @@ transition: slide-left
 <div class="grid grid-cols-4 gap-6 mt-6">
 
 <div class="stat" v-click>
-  <div class="stat-value">3s</div>
+  <div class="stat-value">~3s</div>
   <div class="stat-label">Generation time<br/>per service</div>
 </div>
 
@@ -436,8 +445,8 @@ transition: slide-left
 </div>
 
 <div class="stat" v-click>
-  <div class="stat-value">2d</div>
-  <div class="stat-label">New capability to<br/>all services deployed</div>
+  <div class="stat-value">100%</div>
+  <div class="stat-label">CFR compliance<br/>across all services</div>
 </div>
 
 </div>
@@ -480,7 +489,7 @@ transition: slide-left
 
 <div class="card" v-click>
   <p class="font-bold !text-sm !text-cyan-400 mb-2">Platform Team</p>
-  <p class="!text-xs opacity-80">"We need every service across 10 teams to have auth, audit, DLQ, policy, logging built in. Violations structurally impossible. Review only extension points."</p>
+  <p class="!text-xs opacity-80">"We need every service across 10 teams to have auth, audit, events, policy, logging built in. Violations structurally impossible. Review only extension points."</p>
   <p class="!text-xs opacity-80 mt-2">"We spend all day answering CFR questions. We want to encode once and be done."</p>
   <p class="!text-xs !text-green-400 mt-2"><strong>CFR enforcement.</strong> Enterprise, $1-20k/mo.</p>
 </div>
@@ -621,7 +630,7 @@ transition: slide-left
 <div class="card" v-click>
   <p class="badge badge-cyan mb-2">Platform Team</p>
   <p class="!text-sm font-semibold">CFR enforcement</p>
-  <p class="!text-xs opacity-80 mt-1">Encode auth, audit, logging, events, DLQ, policy into schemas. Every service gets every CFR from day zero. Violations structurally impossible.</p>
+  <p class="!text-xs opacity-80 mt-1">Encode auth, audit, logging, events, policy into schemas. Every service gets every CFR from day zero. Violations structurally impossible.</p>
   <p class="!text-xs !text-green-400 mt-2"><strong>Revenue:</strong> Enterprise license. $1-5k/mo.</p>
 </div>
 
