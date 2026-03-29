@@ -4,52 +4,47 @@ import { motion } from "framer-motion";
 
 const bundles = [
   {
-    schema: "Domain-Driven",
+    category: "Domain Services",
     stack: "Spring Kotlin",
-    files: "~47 files",
-    available: true,
-    colors: "from-purple-500/20 to-blue-500/20",
-    borderColor: "border-purple-500/20",
+    description: "Full DDD service with auth, audit, events, persistence, tests",
+    color: "from-purple-500/20 to-blue-500/20",
+    border: "border-purple-500/20",
   },
   {
-    schema: "Domain-Driven",
-    stack: "Go gRPC",
-    files: null,
-    available: false,
-    colors: "from-purple-500/10 to-blue-500/10",
-    borderColor: "border-border",
-  },
-  {
-    schema: "REST / CRUD",
-    stack: "Express TypeScript",
-    files: "~32 files",
-    available: true,
-    colors: "from-blue-500/20 to-cyan-500/20",
-    borderColor: "border-blue-500/20",
-  },
-  {
-    schema: "REST / CRUD",
+    category: "REST API",
     stack: "FastAPI Python",
-    files: "~28 files",
-    available: true,
-    colors: "from-blue-500/20 to-cyan-500/20",
-    borderColor: "border-blue-500/20",
+    description: "API service with validation, pagination, OpenAPI spec",
+    color: "from-blue-500/20 to-cyan-500/20",
+    border: "border-blue-500/20",
   },
   {
-    schema: "Event-Driven",
-    stack: "Node.js",
-    files: null,
-    available: false,
-    colors: "from-cyan-500/10 to-purple-500/10",
-    borderColor: "border-border",
+    category: "AI Agent",
+    stack: "Python FastAPI",
+    description: "Autonomous agent with tools, middleware, auth, structured output",
+    color: "from-purple-500/20 to-pink-500/20",
+    border: "border-purple-500/20",
   },
   {
-    schema: "Infrastructure",
-    stack: "Terraform",
-    files: null,
-    available: false,
-    colors: "from-cyan-500/10 to-purple-500/10",
-    borderColor: "border-border",
+    category: "MCP Server",
+    stack: "Python",
+    description: "Model Context Protocol server exposing tools to AI coding agents",
+    color: "from-cyan-500/20 to-blue-500/20",
+    border: "border-cyan-500/20",
+  },
+  {
+    category: "Agent Orchestrator",
+    stack: "Python",
+    description: "Multi-agent pipeline with sequential, parallel, or LLM routing",
+    color: "from-purple-500/20 to-cyan-500/20",
+    border: "border-purple-500/20",
+  },
+  {
+    category: "Your Pattern",
+    stack: "Any Stack",
+    description: "Define a spec format, build a template bundle, generate whatever your org needs",
+    color: "from-gray-500/10 to-gray-500/10",
+    border: "border-border border-dashed",
+    isCustom: true,
   },
 ];
 
@@ -65,61 +60,37 @@ export default function Bundles() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Pluggable <span className="text-gradient">stack bundles</span>
+            Example <span className="text-gradient">bundles</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Templates tied to schema + stack. Pick your architecture, pick your language.
+            Bundles are templates tied to a spec format and a target stack. AI helps build them. You own them. These are examples — your org would create bundles for your patterns.
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {bundles.map((bundle, i) => (
             <motion.div
-              key={`${bundle.schema}-${bundle.stack}`}
+              key={`${bundle.category}-${bundle.stack}`}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
-              className={`relative rounded-xl border p-6 transition-all ${
-                bundle.available
-                  ? `bg-gradient-to-br ${bundle.colors} ${bundle.borderColor} hover:border-gray-600`
-                  : "bg-surface/50 border-border/50"
-              }`}
+              className={`relative rounded-xl border p-6 transition-all bg-gradient-to-br ${bundle.color} ${bundle.border} hover:border-gray-600`}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div
-                    className={`text-xs font-semibold uppercase tracking-wider mb-1 ${
-                      bundle.available ? "text-gray-300" : "text-gray-600"
-                    }`}
-                  >
-                    {bundle.schema}
-                  </div>
-                  <h3
-                    className={`text-lg font-bold ${
-                      bundle.available ? "text-white" : "text-gray-500"
-                    }`}
-                  >
-                    {bundle.stack}
-                  </h3>
+              <div className="mb-4">
+                <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
+                  {bundle.category}
                 </div>
-                {!bundle.available && (
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500 uppercase tracking-wider">
-                    Coming Soon
-                  </span>
-                )}
+                <h3 className={`text-lg font-bold ${bundle.isCustom ? "text-gradient" : "text-white"}`}>
+                  {bundle.stack}
+                </h3>
               </div>
-
-              {bundle.files ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-mono text-gradient font-semibold">
-                    {bundle.files}
-                  </span>
-                  <span className="text-xs text-gray-500">generated</span>
-                </div>
-              ) : (
-                <div className="text-sm text-gray-600">
-                  In development
+              <p className={`text-sm leading-relaxed ${bundle.isCustom ? "text-gray-400" : "text-gray-400"}`}>
+                {bundle.description}
+              </p>
+              {bundle.isCustom && (
+                <div className="mt-4 text-xs text-purple-400">
+                  Same engine. Different spec + templates.
                 </div>
               )}
             </motion.div>
