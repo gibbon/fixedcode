@@ -1,0 +1,29 @@
+import { Router, Request, Response } from 'express';
+import { {{names.pascal}}Model } from '../models/{{names.pascal}}';
+
+export const {{names.camel}}Router = Router();
+
+{{names.pascal}}Router.get('/', async (req: Request, res: Response) => {
+  const result = await {{names.pascal}}Model.findAll();
+  res.json(result);
+});
+
+{{names.pascal}}Router.get('/:id', async (req: Request, res: Response) => {
+  const result = await {{names.pascal}}Model.findById(req.params.id);
+  res.json(result);
+});
+
+{{names.pascal}}Router.post('/', async (req: Request, res: Response) => {
+  const result = await {{names.pascal}}Model.create(req.body);
+  res.status(201).json(result);
+});
+
+{{names.pascal}}Router.put('/:id', async (req: Request, res: Response) => {
+  const result = await {{names.pascal}}Model.update(req.params.id, req.body);
+  res.json(result);
+});
+
+{{names.pascal}}Router.delete('/:id', async (req: Request, res: Response) => {
+  await {{names.pascal}}Model.delete(req.params.id);
+  res.status(204).send();
+});
