@@ -1,0 +1,59 @@
+package {{package}}.api
+
+{{#each imports}}
+import {{this}}
+{{/each}}
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+
+@RestController
+@RequestMapping("{{endpoint}}")
+class {{names.pascal}}Controller(
+{{#if hasCommands}}
+    private val {{names.camel}}CommandService: {{names.pascal}}CommandService,
+{{/if}}
+{{#if hasQueries}}
+    private val {{names.camel}}QueryService: {{names.pascal}}QueryService,
+{{/if}}
+) {
+{{#each commands}}
+
+    @{{httpMethod}}Mapping{{#if httpPath}}("{{httpPath}}"){{/if}}
+    fun {{names.camel}}(
+{{#unless isCreate}}
+        @PathVariable {{../identity.names.camel}}: {{../identity.type.kotlinDecl}},
+{{/unless}}
+{{#each params}}
+        @RequestBody {{names.camel}}: {{type.kotlinDecl}}{{#unless @last}},{{/unless}}
+{{/each}}
+    ): ResponseEntity<{{#if isCreate}}{{../names.pascal}}{{else}}Void{{/if}}> {
+{{#if isCreate}}
+        val result = {{../names.camel}}CommandService.{{names.camel}}({{#each params}}{{names.camel}}{{#unless @last}}, {{/unless}}{{/each}})
+        return ResponseEntity.status(HttpStatus.CREATED).body(result)
+{{else}}
+        {{../names.camel}}CommandService.{{names.camel}}({{../identity.names.camel}}{{#each params}}, {{names.camel}}{{/each}})
+        return ResponseEntity.noContent().build()
+{{/if}}
+    }
+{{/each}}
+{{#each queries}}
+
+    @GetMapping{{#if httpPath}}("{{httpPath}}"){{/if}}
+    fun {{names.camel}}(
+{{#if isList}}
+{{#each filters}}
+        @RequestParam(required = false) {{names.camel}}: {{type.kotlinDecl}}{{#unless @last}},{{/unless}}
+{{/each}}
+{{else}}
+        @PathVariable {{../identity.names.camel}}: {{../identity.type.kotlinDecl}}
+{{/if}}
+    ): ResponseEntity<{{#if isList}}List<{{../names.pascal}}>{{else}}{{../names.pascal}}{{/if}}> {
+{{#if isList}}
+        return ResponseEntity.ok({{../names.camel}}QueryService.{{names.camel}}({{#each filters}}{{names.camel}}{{#unless @last}}, {{/unless}}{{/each}}))
+{{else}}
+        return ResponseEntity.ok({{../names.camel}}QueryService.{{names.camel}}({{../identity.names.camel}}))
+{{/if}}
+    }
+{{/each}}
+}

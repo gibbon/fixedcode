@@ -1,0 +1,34 @@
+import { Command } from 'commander';
+import { generate } from '../engine/pipeline.js';
+import { resolveSpecPath } from './spec-resolver.js';
+
+export function createInitCommand() {
+  return new Command('init')
+    .description('Scaffold a new spec or bundle')
+    .option('-k, --kind <kind>', 'Bundle kind to use (e.g., ddd-domain, crud-api)')
+    .option('-n, --name <name>', 'Name for the spec')
+    .option('-o, --output <dir>', 'Output directory', '.')
+    .action(async (opts) => {
+      const { writeFileSync, mkdirSync, existsSync } = await import('node:fs');
+      const { join } = await import('node:path');
+      
+      const kind = opts.kind || 'ddd-domain';
+      const name = opts.name || 'my-service';
+      const output = opts.output;
+      
+      const specContent = `apiVersion: "1.0"
+kind: ${kind}
+metadata:
+  name: ${name}
+  description: "${name} domain"
+
+spec:
+  package: com.example.${name.replace(/-/g, '')}
+  aggregates: []
+`;
+
+      const specPath = join(output || '.', `${name}.yaml`);
+      writeFileSync(specPath, specContent, 'utf-8');
+      console.log(`Created ${specPath}`);
+    });
+}

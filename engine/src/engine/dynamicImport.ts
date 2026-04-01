@@ -1,0 +1,28 @@
+import { resolve, isAbsolute, join } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+
+export async function dynamicImport(bundlePath: string, configDir: string): Promise<unknown> {
+  let resolvedPath: string;
+
+  if (bundlePath.startsWith('@')) {
+    resolvedPath = bundlePath;
+  } else if (isAbsolute(bundlePath)) {
+    resolvedPath = bundlePath;
+  } else {
+    resolvedPath = resolve(configDir, bundlePath);
+  }
+
+  if (existsSync(join(resolvedPath, 'package.json'))) {
+    const pkg = JSON.parse(readFileSync(join(resolvedPath, 'package.json'), 'utf-8'));
+    const entry = pkg.main ?? pkg.exports ?? 'src/index.js';
+    if (entry.startsWith('.')) {
+      resolvedPath = resolve(resolvedPath, entry);
+    } else {
+      resolvedPath = join(resolvedPath, entry);
+    }
+  } else if (existsSync(resolve(resolvedPath, 'src/index.js'))) {
+    resolvedPath = resolve(resolvedPath, 'src/index.js');
+  }
+
+  return import(resolvedPath);
+}

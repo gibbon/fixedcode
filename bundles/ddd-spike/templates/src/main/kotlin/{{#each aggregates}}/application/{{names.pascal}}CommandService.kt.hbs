@@ -1,0 +1,35 @@
+package {{package}}.application
+
+{{#each imports}}
+import {{this}}
+{{/each}}
+import {{package}}.domain.{{names.pascal}}
+import {{package}}.infrastructure.{{names.pascal}}Repository
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+@Service
+@Transactional
+class {{names.pascal}}CommandService(
+    private val {{names.camel}}Repository: {{names.pascal}}Repository,
+) {
+{{#each commands}}
+
+    fun {{names.camel}}({{#unless isCreate}}{{../identity.names.camel}}: {{../identity.type.kotlinDecl}}, {{/unless}}{{#each params}}{{names.camel}}: {{type.kotlinDecl}}{{#unless @last}}, {{/unless}}{{/each}}): {{#if isCreate}}{{../names.pascal}}{{else}}Unit{{/if}} {
+{{#if isCreate}}
+        val {{../names.camel}} = {{../names.pascal}}(
+            {{../identity.names.camel}} = {{../identity.type.kotlin}}.randomUUID(),
+{{#each params}}
+            {{names.camel}} = {{names.camel}},
+{{/each}}
+        )
+        return {{../names.camel}}Repository.save({{../names.camel}})
+{{else}}
+        val {{../names.camel}} = {{../names.camel}}Repository.findById({{../identity.names.camel}})
+            ?: throw NoSuchElementException("{{../names.pascal}} not found: ${{../identity.names.camel}}")
+        val updated = {{../names.camel}}.copy({{#each params}}{{names.camel}} = {{names.camel}}{{#unless @last}}, {{/unless}}{{/each}})
+        {{../names.camel}}Repository.save(updated)
+{{/if}}
+    }
+{{/each}}
+}

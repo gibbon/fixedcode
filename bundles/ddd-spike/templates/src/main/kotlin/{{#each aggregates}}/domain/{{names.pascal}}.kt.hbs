@@ -1,0 +1,12 @@
+package {{package}}.domain
+
+{{#each imports}}
+import {{this}}
+{{/each}}
+
+data class {{names.pascal}}(
+    val {{identity.names.camel}}: {{identity.type.kotlinDecl}},
+{{#each attributes}}
+    val {{names.camel}}: {{type.kotlinDecl}}{{kotlinDefault}}{{#unless @last}},{{/unless}}
+{{/each}}
+)
