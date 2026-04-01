@@ -1,2 +1,3 @@
 bundles:
   ddd-domain: "./bundles/ddd-spike"
+  crud-api: "./bundles/crud-api"

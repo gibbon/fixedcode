@@ -1,0 +1,8 @@
+export interface {{names.pascal}} {
+{{#each fields}}
+  {{names.camel}}: {{type.typescript}}{{#unless required}}?{{/unless}};
+{{/each}}
+}
+
+export type {{names.pascal}}Create = Omit<{{names.pascal}}, '{{names.camel}}'>;
+export type {{names.pascal}}Update = Partial<{{names.pascal}}>;
