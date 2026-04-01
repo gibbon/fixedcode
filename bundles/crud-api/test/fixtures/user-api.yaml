@@ -1,0 +1,14 @@
+apiVersion: "1.0"
+kind: crud-api
+metadata:
+  name: user-service
+
+spec:
+  name: user-service
+  resources:
+    - name: User
+      fields:
+        - { name: userId, type: uuid, required: true, isId: true }
+        - { name: email, type: string, required: true }
+        - { name: name, type: string, required: true }
+        - { name: age, type: number }
