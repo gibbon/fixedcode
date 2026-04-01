@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "cp -r ../slides-org/dist out/slides",
     "start": "next start",
     "lint": "next lint"
   },
