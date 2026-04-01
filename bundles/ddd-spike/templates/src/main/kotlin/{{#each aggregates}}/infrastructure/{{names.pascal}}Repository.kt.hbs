@@ -1,0 +1,11 @@
+package {{package}}.infrastructure
+
+{{#each imports}}
+import {{this}}
+{{/each}}
+import {{package}}.domain.{{names.pascal}}
+import org.springframework.data.repository.CrudRepository
+import org.springframework.stereotype.Repository
+
+@Repository
+interface {{names.pascal}}Repository : CrudRepository<{{names.pascal}}, {{identity.type.kotlinDecl}}>

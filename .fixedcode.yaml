@@ -1,0 +1,2 @@
+bundles:
+  ddd-domain: "./bundles/ddd-spike"

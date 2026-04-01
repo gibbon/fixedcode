@@ -1,0 +1,47 @@
+apiVersion: "1.0"
+kind: ddd-domain
+metadata:
+  name: order-service
+  description: "Order management domain"
+
+spec:
+  package: com.example.order
+
+  aggregates:
+    - name: Order
+      attributes:
+        - { name: orderId, type: uuid, required: true, identity: true }
+        - { name: customerId, type: uuid, required: true }
+        - { name: status, type: string, default: "CREATED" }
+        - { name: totalAmount, type: decimal }
+
+      commands:
+        - name: CreateOrder
+          params:
+            - { name: customerId, type: uuid, required: true }
+          emits: OrderCreated
+
+        - name: UpdateStatus
+          params:
+            - { name: status, type: string, required: true }
+          emits: OrderStatusUpdated
+
+      queries:
+        - name: GetOrder
+          returns: single
+
+        - name: SearchOrders
+          returns: list
+          filters:
+            - { name: status, type: string }
+
+      events:
+        - name: OrderCreated
+          fields:
+            - { name: orderId, type: uuid }
+            - { name: customerId, type: uuid }
+
+        - name: OrderStatusUpdated
+          fields:
+            - { name: orderId, type: uuid }
+            - { name: status, type: string }
