@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { createGenerateCommand } from './generate.js';
 import { createValidateCommand } from './validate-cmd.js';
 import { createInitCommand } from './init.js';
+import { createBundleInitCommand } from './bundle-init.js';
 
 export function createProgram() {
   const program = new Command();
@@ -14,6 +15,7 @@ export function createProgram() {
   program.addCommand(createGenerateCommand());
   program.addCommand(createValidateCommand());
   program.addCommand(createInitCommand());
+  program.addCommand(createBundleInitCommand());
 
   return program;
 }
