@@ -1,0 +1,27 @@
+package {{package}}.application
+
+{{#each imports}}
+import {{this}}
+{{/each}}
+import {{package}}.domain.{{names.pascal}}
+import {{package}}.infrastructure.{{names.pascal}}Repository
+import org.springframework.stereotype.Service
+
+@Service
+class {{names.pascal}}QueryService(
+    private val {{names.camel}}Repository: {{names.pascal}}Repository,
+) {
+{{#each queries}}
+
+{{#if isList}}
+    fun {{names.camel}}({{#each filters}}{{names.camel}}: {{type.kotlinDecl}}{{#unless @last}}, {{/unless}}{{/each}}): List<{{../names.pascal}}> {
+        return {{../names.camel}}Repository.findAll()
+    }
+{{else}}
+    fun {{names.camel}}({{../identity.names.camel}}: {{../identity.type.kotlinDecl}}): {{../names.pascal}} {
+        return {{../names.camel}}Repository.findById({{../identity.names.camel}})
+            ?: throw NoSuchElementException("{{../names.pascal}} not found: ${{../identity.names.camel}}")
+    }
+{{/if}}
+{{/each}}
+}

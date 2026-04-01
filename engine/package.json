@@ -1,0 +1,28 @@
+{
+  "name": "@fixedcode/engine",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "fixedcode": "./bin/fixedcode.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "ajv": "^8.17.0",
+    "commander": "^13.0.0",
+    "fast-glob": "^3.3.0",
+    "handlebars": "^4.7.0",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}
