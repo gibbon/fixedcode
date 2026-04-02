@@ -4,8 +4,8 @@ import { parseSpec, validateEnvelope } from './parse.js';
 import { loadConfig } from './config.js';
 import { resolveBundle } from './resolve.js';
 import { validateBody } from './validate.js';
-import { renderTemplates } from './render.js';
-import { writeFiles, type WriteOptions } from './write.js';
+import { renderTemplates, renderFile } from './render.js';
+import { writeFiles, writeSingleFile, type WriteOptions } from './write.js';
 
 export interface GenerateOptions {
   outputDir?: string;
@@ -43,15 +43,32 @@ export async function generate(
 
   const bundleDir = resolve(config.configDir, config.bundles[bundle.kind]);
   const templatesDir = resolve(bundleDir, bundle.templates);
-  
-  const rendered = await renderTemplates(templatesDir, context, {
-    noEscape: true,
-    helpers: bundle.helpers,
-    partials: bundle.partials,
-  });
-
   const outputDir = options.outputDir ?? resolve(specDir, 'build');
-  writeFiles(rendered, outputDir, { dryRun: options.dryRun, diff: options.diff });
+
+  if (bundle.generateFiles) {
+    const entries = bundle.generateFiles(context);
+    for (const entry of entries) {
+      const absTemplatePath = resolve(bundleDir, bundle.templates, entry.template);
+      const content = renderFile(absTemplatePath, entry.ctx, {
+        noEscape: true,
+        helpers: bundle.helpers,
+        partials: bundle.partials,
+      });
+      if (content.trim() !== '') {
+        writeSingleFile(resolve(outputDir, entry.output), content, {
+          dryRun: options.dryRun,
+          diff: options.diff,
+        });
+      }
+    }
+  } else {
+    const rendered = await renderTemplates(templatesDir, context, {
+      noEscape: true,
+      helpers: bundle.helpers,
+      partials: bundle.partials,
+    });
+    writeFiles(rendered, outputDir, { dryRun: options.dryRun, diff: options.diff });
+  }
 }
 
 export async function validate(specPath: string): Promise<void> {

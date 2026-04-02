@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import type { RenderedFile } from '../types.js';
 import { WriteError } from '../errors.js';
@@ -50,7 +50,30 @@ export function writeFiles(
   console.log(`Wrote ${files.length} files to ${outputDir}`);
 }
 
-function readFileSync(path: string, encoding: BufferEncoding): string {
-  const { readFileSync: _read } = require('node:fs');
-  return _read(path, encoding);
+export function writeSingleFile(
+  absPath: string,
+  content: string,
+  options: WriteOptions = {}
+): void {
+  if (options.dryRun) {
+    console.log(`[DRY RUN] Would write: ${absPath}`);
+    return;
+  }
+  const dir = dirname(absPath);
+  try {
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    if (options.diff && existsSync(absPath)) {
+      const existing = readFileSync(absPath, 'utf-8');
+      if (existing !== content) {
+        console.log(`[DIFF] ${absPath}`);
+        console.log(existing);
+        console.log('--- vs ---');
+        console.log(content);
+      }
+    }
+    writeFileSync(absPath, content, 'utf-8');
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    throw new WriteError(absPath, message);
+  }
 }
