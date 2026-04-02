@@ -58,8 +58,8 @@ export function renderFile(
     }
   }
 
-  const content = readFileSync(absTemplatePath, 'utf-8');
   try {
+    const content = readFileSync(absTemplatePath, 'utf-8');
     return hb.compile(content)(ctx);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
