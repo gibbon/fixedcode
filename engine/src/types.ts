@@ -20,6 +20,13 @@ export interface Bundle {
 
   /** Optional named Handlebars partial templates */
   partials?: Record<string, string>;
+
+  /**
+   * Optional alternative to the directory-walk render path.
+   * If present, the engine calls this instead of renderTemplates().
+   * Returns an explicit list of files to generate with per-file contexts.
+   */
+  generateFiles?: (ctx: Context) => FileEntry[];
 }
 
 export interface SpecMetadata {
@@ -46,6 +53,18 @@ export interface RenderedFile {
   path: string;
   /** Rendered content */
   content: string;
+}
+
+/**
+ * A single file to generate, returned by a bundle's generateFiles() function.
+ * template: path relative to the bundle's templates/ directory
+ * output: path relative to the generation output directory
+ * ctx: context for rendering this specific file
+ */
+export interface FileEntry {
+  template: string;
+  output: string;
+  ctx: Record<string, unknown>;
 }
 
 export interface FixedCodeConfig {
