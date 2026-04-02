@@ -32,6 +32,41 @@ export async function renderTemplates(
   return renderDirectory(hb, templatesDir, '', context, '');
 }
 
+/**
+ * Render a single Handlebars template file to a string.
+ * Used by the generateFiles pipeline branch.
+ *
+ * @param absTemplatePath - Absolute path to the .hbs file
+ * @param ctx - Context for rendering
+ * @param options - Handlebars options (helpers, partials)
+ */
+export function renderFile(
+  absTemplatePath: string,
+  ctx: Record<string, unknown>,
+  options: TemplateOptions = {}
+): string {
+  const hb = Handlebars.create();
+
+  if (options.helpers) {
+    for (const [name, fn] of Object.entries(options.helpers)) {
+      hb.registerHelper(name, fn);
+    }
+  }
+  if (options.partials) {
+    for (const [name, source] of Object.entries(options.partials)) {
+      hb.registerPartial(name, source);
+    }
+  }
+
+  const content = readFileSync(absTemplatePath, 'utf-8');
+  try {
+    return hb.compile(content)(ctx);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    throw new RenderError(absTemplatePath, msg);
+  }
+}
+
 function renderDirectory(
   hb: typeof Handlebars,
   baseDir: string,
@@ -54,6 +89,7 @@ function renderDirectory(
     const stat = statSync(entryPath);
 
     if (stat.isDirectory()) {
+      // Handle {{#each}} iteration directories
       if (entry.startsWith('{{#each ') && entry.includes('}}')) {
         const match = entry.match(/\{\{#each\s+(\w+)\}\}(.*)/);
         if (match) {
@@ -83,6 +119,18 @@ function renderDirectory(
             const innerResults = renderDirectory(hb, baseDir, templateReadDir, itemContext, outputWriteDir);
             results.push(...innerResults);
           }
+        }
+      } else if (entry.includes('{{') && entry.includes('}}')) {
+        // Handle simple variable substitution in directory names like {{ .VariableName }}
+        try {
+          const renderedDir = hb.compile(entry)(context);
+          const cleanDir = renderedDir.replace(/\n/g, '').trim();
+          if (cleanDir && cleanDir !== entry) {
+            const innerResults = renderDirectory(hb, baseDir, join(relDir, entry), context, outputRelDir ? join(outputRelDir, cleanDir) : cleanDir);
+            results.push(...innerResults);
+          }
+        } catch {
+          // Skip directories that fail to render
         }
       } else {
         const innerResults = renderDirectory(hb, baseDir, join(relDir, entry), context, outputRelDir ? join(outputRelDir, entry) : entry);
