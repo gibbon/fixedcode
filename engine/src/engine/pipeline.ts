@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 import type { RawSpec, FixedCodeConfig, Context, RenderedFile } from '../types.js';
 import { parseSpec, validateEnvelope } from './parse.js';
 import { loadConfig } from './config.js';
@@ -6,6 +7,7 @@ import { resolveBundle, resolveGenerators } from './resolve.js';
 import { validateBody } from './validate.js';
 import { renderTemplates, renderFile } from './render.js';
 import { writeFiles, writeSingleFile, type WriteOptions } from './write.js';
+import { readManifest, writeManifest, hashContent, shouldWrite, loadIgnorePatterns, isIgnored, type Manifest, type ManifestEntry } from './manifest.js';
 
 export interface GenerateOptions {
   outputDir?: string;
@@ -45,6 +47,41 @@ export async function generate(
   const templatesDir = resolve(bundleDir, bundle.templates);
   const outputDir = options.outputDir ?? resolve(specDir, 'build');
 
+  // Load existing manifest and ignore patterns for regeneration awareness
+  const existingManifest = readManifest(outputDir);
+  const ignorePatterns = loadIgnorePatterns(specDir);
+  const newManifestFiles: Record<string, ManifestEntry> = {};
+  let skipped = 0;
+  let warned = 0;
+
+  const writeWithManifest = (relPath: string, content: string, overwrite: boolean, bundleKind: string) => {
+    if (isIgnored(relPath, ignorePatterns)) {
+      skipped++;
+      return;
+    }
+
+    const action = shouldWrite(relPath, overwrite, outputDir, existingManifest);
+    if (action === 'skip') {
+      skipped++;
+      return;
+    }
+    if (action === 'warn-overwrite') {
+      console.warn(`  Warning: overwriting user-modified file: ${relPath}`);
+      warned++;
+    }
+
+    writeSingleFile(resolve(outputDir, relPath), content, {
+      dryRun: options.dryRun,
+      diff: options.diff,
+    });
+
+    newManifestFiles[relPath] = {
+      hash: hashContent(content),
+      bundle: bundleKind,
+      overwrite,
+    };
+  };
+
   if (bundle.generateFiles) {
     const entries = bundle.generateFiles(context);
     for (const entry of entries) {
@@ -55,10 +92,7 @@ export async function generate(
         partials: bundle.partials,
       });
       if (content.trim() !== '') {
-        writeSingleFile(resolve(outputDir, entry.output), content, {
-          dryRun: options.dryRun,
-          diff: options.diff,
-        });
+        writeWithManifest(entry.output, content, entry.overwrite !== false, rawSpec.kind);
       }
     }
   } else {
@@ -67,7 +101,9 @@ export async function generate(
       helpers: bundle.helpers,
       partials: bundle.partials,
     });
-    writeFiles(rendered, outputDir, { dryRun: options.dryRun, diff: options.diff });
+    for (const file of rendered) {
+      writeWithManifest(file.path, file.content, true, rawSpec.kind);
+    }
   }
 
   // Run generators that have matching adapters on this bundle
@@ -79,12 +115,28 @@ export async function generate(
     try {
       const input = adapter(context);
       const files = gen.generate(input);
-      writeFiles(files, outputDir, { dryRun: options.dryRun, diff: options.diff });
+      for (const file of files) {
+        writeWithManifest(file.path, file.content, true, `generator:${gen.name}`);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       console.warn(`Generator '${gen.name}' failed: ${message}`);
     }
   }
+
+  // Merge new manifest entries with existing (preserves entries from other bundle runs)
+  const mergedFiles = { ...(existingManifest?.files ?? {}), ...newManifestFiles };
+  if (!options.dryRun) {
+    writeManifest(outputDir, {
+      generatedAt: new Date().toISOString(),
+      engine: '0.1.0',
+      bundles: { [rawSpec.kind]: '0.1.0' },
+      files: mergedFiles,
+    });
+  }
+
+  if (skipped > 0) console.log(`  Skipped ${skipped} files (extension points or ignored)`);
+  if (warned > 0) console.log(`  Warning: ${warned} user-modified files were overwritten`);
 }
 
 export async function validate(specPath: string): Promise<void> {
