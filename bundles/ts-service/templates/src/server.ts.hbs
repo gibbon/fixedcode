@@ -1,0 +1,25 @@
+import express from 'express';
+import { healthRouter } from './routes/health.js';
+import { customRoutes } from './defaults/custom-routes.js';
+import { logger } from './logger.js';
+
+export function createServer(): express.Express {
+  const app = express();
+
+  app.use(express.json());
+
+  app.use((req, _res, next) => {
+    logger.info({ method: req.method, path: req.path }, 'request');
+    next();
+  });
+
+  app.use(healthRouter);
+  app.use(customRoutes);
+
+  app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    logger.error({ err }, 'unhandled error');
+    res.status(500).json({ error: 'Internal server error' });
+  });
+
+  return app;
+}
