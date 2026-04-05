@@ -1,0 +1,59 @@
+import Anthropic from '@anthropic-ai/sdk';
+import { logger } from './logger.js';
+{{#each tools}}
+import { handle as handle{{this.name.pascal}} } from './tools/{{this.name.kebab}}.js';
+{{/each}}
+
+const client = new Anthropic();
+
+const MODEL_TIERS: Record<string, string> = {
+  fast: 'claude-haiku-4-5-20251001',
+  balanced: 'claude-sonnet-4-6',
+  quality: 'claude-opus-4-6',
+};
+
+const toolDefs = [
+{{#each tools}}
+  {
+    name: '{{this.name.kebab}}',
+    description: '{{this.name.pascal}} tool',
+    input_schema: { type: 'object' as const, properties: { input: { type: 'string' } }, required: ['input'] },
+  },
+{{/each}}
+];
+
+const handlers: Record<string, (input: Record<string, unknown>) => Promise<unknown>> = {
+{{#each tools}}
+  '{{this.name.kebab}}': handle{{this.name.pascal}},
+{{/each}}
+};
+
+export async function runAgent(input: string): Promise<string> {
+  const messages: Anthropic.MessageParam[] = [{ role: 'user', content: input }];
+  const model = MODEL_TIERS['{{modelTier}}'] ?? MODEL_TIERS.balanced;
+
+  let response = await client.messages.create({
+    model,
+    max_tokens: 4096,
+    system: `{{prompt}}`,
+    messages,
+    tools: toolDefs,
+  });
+
+  while (response.stop_reason === 'tool_use') {
+    const toolUse = response.content.find(b => b.type === 'tool_use');
+    if (!toolUse || toolUse.type !== 'tool_use') break;
+
+    const handler = handlers[toolUse.name];
+    const result = handler ? await handler(toolUse.input as Record<string, unknown>) : { error: 'unknown tool' };
+
+    messages.push({ role: 'assistant', content: response.content });
+    messages.push({ role: 'user', content: [{ type: 'tool_result', tool_use_id: toolUse.id, content: JSON.stringify(result) }] });
+
+    response = await client.messages.create({ model, max_tokens: 4096, system: `{{prompt}}`, messages, tools: toolDefs });
+  }
+
+  const textBlock = response.content.find(b => b.type === 'text');
+  logger.info({ usage: response.usage }, 'agent completed');
+  return textBlock?.type === 'text' ? textBlock.text : '';
+}

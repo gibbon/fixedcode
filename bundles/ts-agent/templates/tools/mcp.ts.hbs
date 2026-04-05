@@ -1,0 +1,17 @@
+import { logger } from '../logger.js';
+
+const MCP_SERVER = '{{tool.config.server}}';
+
+export async function handle(input: Record<string, unknown>): Promise<unknown> {
+  const { tool: toolName, args } = input;
+
+  logger.info({ tool: toolName, server: MCP_SERVER }, '{{tool.name.pascal}} MCP call');
+
+  const res = await fetch(`http://${MCP_SERVER}/tools/${toolName}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(args),
+  });
+
+  return res.json();
+}

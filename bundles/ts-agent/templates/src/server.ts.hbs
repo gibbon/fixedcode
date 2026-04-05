@@ -1,0 +1,29 @@
+import express from 'express';
+import { runAgent } from './agent.js';
+import { logger } from './logger.js';
+
+export function createServer(): express.Express {
+  const app = express();
+  app.use(express.json());
+
+  app.post('/invoke', async (req, res) => {
+    try {
+      const { input } = req.body;
+      if (!input) {
+        res.status(400).json({ error: 'input is required' });
+        return;
+      }
+      const result = await runAgent(input);
+      res.json({ result });
+    } catch (err) {
+      logger.error({ err }, 'agent invocation failed');
+      res.status(500).json({ error: 'Agent invocation failed' });
+    }
+  });
+
+  app.get('/health', (_req, res) => {
+    res.json({ status: 'ok', agent: '{{packageName}}' });
+  });
+
+  return app;
+}

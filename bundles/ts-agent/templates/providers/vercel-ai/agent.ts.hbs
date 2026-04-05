@@ -1,0 +1,40 @@
+import { generateText, tool } from 'ai';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { z } from 'zod';
+import { logger } from './logger.js';
+{{#each tools}}
+import { handle as handle{{this.name.pascal}} } from './tools/{{this.name.kebab}}.js';
+{{/each}}
+
+const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY });
+
+const MODEL_TIERS: Record<string, string> = {
+  fast: 'anthropic/claude-haiku-4-5-20251001',
+  balanced: 'anthropic/claude-sonnet-4-6',
+  quality: 'anthropic/claude-opus-4-6',
+};
+
+const tools = {
+{{#each tools}}
+  '{{this.name.kebab}}': tool({
+    description: '{{this.name.pascal}} tool',
+    parameters: z.object({ input: z.string() }),
+    execute: async ({ input }) => handle{{this.name.pascal}}({ input }),
+  }),
+{{/each}}
+};
+
+export async function runAgent(input: string): Promise<string> {
+  const model = openrouter(MODEL_TIERS['{{modelTier}}'] ?? MODEL_TIERS.balanced);
+
+  const result = await generateText({
+    model,
+    tools,
+    maxSteps: 20,
+    system: `{{prompt}}`,
+    prompt: input,
+  });
+
+  logger.info({ usage: result.usage }, 'agent completed');
+  return result.text;
+}

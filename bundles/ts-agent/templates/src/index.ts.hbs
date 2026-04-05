@@ -1,0 +1,9 @@
+import { createServer } from './server.js';
+import { config } from './config.js';
+import { logger } from './logger.js';
+
+const app = createServer();
+
+app.listen(config.port, () => {
+  logger.info({ port: config.port }, '{{serviceName.pascal}} agent started');
+});
