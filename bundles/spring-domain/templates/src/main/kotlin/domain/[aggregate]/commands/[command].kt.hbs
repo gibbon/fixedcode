@@ -1,0 +1,12 @@
+package {{packagePath}}.domain.{{names.kebab}}.commands
+
+import java.util.UUID
+
+data class {{cmd.names.pascal}}Command(
+{{#each cmd.params.path}}
+    val {{names.camel}}: UUID,
+{{/each}}
+{{#each cmd.params.body}}
+    val {{names.camel}}: String{{#unless required}}?{{/unless}}{{#unless @last}},{{/unless}}
+{{/each}}
+)
