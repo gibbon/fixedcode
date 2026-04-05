@@ -1,6 +1,4 @@
 import { Command } from 'commander';
-import { generate } from '../engine/pipeline.js';
-import { resolveSpecPath } from './spec-resolver.js';
 
 export function createInitCommand() {
   return new Command('init')
