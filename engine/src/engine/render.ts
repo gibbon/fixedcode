@@ -166,11 +166,23 @@ function renderTemplateFile(
   context: Context
 ): RenderedFile | null {
   if (!relPath.endsWith('.hbs')) {
-    return null;
+    // Pass through static (non-template) files as-is
+    // Skip binary files that can't be read as UTF-8 text
+    const binaryExts = ['.jar', '.png', '.jpg', '.gif', '.ico', '.zip', '.gz', '.tar', '.class'];
+    if (binaryExts.some(ext => relPath.endsWith(ext))) {
+      return null;
+    }
+    const fullPath = join(baseDir, relPath);
+    try {
+      const content = readFileSync(fullPath, 'utf-8');
+      return { path: relPath, content };
+    } catch {
+      return null;
+    }
   }
-  
+
   const fullPath = join(baseDir, relPath);
-  
+
   try {
     const content = readFileSync(fullPath, 'utf-8');
     const template = hb.compile(content);
