@@ -1,0 +1,20 @@
+package {{packagePath}}.infrastructure.{{names.kebab}}
+
+import {{packagePath}}.domain.{{names.kebab}}.{{names.pascal}}
+import org.springframework.stereotype.Repository
+import java.util.UUID
+
+@Repository
+class {{names.pascal}}WriteRepositoryImpl {
+    fun save(entity: {{names.pascal}}): {{names.pascal}} {
+        TODO("Implement save")
+    }
+
+    fun findById(id: UUID): {{names.pascal}}? {
+        TODO("Implement findById")
+    }
+
+    fun delete(id: UUID) {
+        TODO("Implement delete")
+    }
+}
