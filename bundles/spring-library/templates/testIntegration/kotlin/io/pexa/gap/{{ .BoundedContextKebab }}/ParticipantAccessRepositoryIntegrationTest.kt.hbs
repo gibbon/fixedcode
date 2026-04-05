@@ -1,0 +1,117 @@
+{{ if or .IsWorkspaceDomain .HasParticipantAccess }}
+package io.pexa.gap.{{LibraryName}}
+
+import io.pexa.gap.{{LibraryName}}.base.BaseIntegrationTest
+import io.pexa.gap.{{LibraryName}}.infrastructure.repository.ParticipantAccessRepository
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import java.util.UUID
+
+/**
+ * Integration tests for ParticipantAccessRepository.
+ * Tests participant-based access control queries.
+ */
+class ParticipantAccessRepositoryIntegrationTest : BaseIntegrationTest() {
+
+    @Autowired
+    private lateinit var participantAccessRepository: ParticipantAccessRepository
+
+    private val workspaceId1 = UUID.randomUUID()
+    private val workspaceId2 = UUID.randomUUID()
+    private val subscriberId1 = UUID.randomUUID()
+    private val subscriberId2 = UUID.randomUUID()
+
+    @BeforeEach
+    fun setUp() {
+        baseSetUp()
+        setupTestData()
+    }
+
+    private fun setupTestData() {
+{{#unless IsFeatureLibrary}}
+        // Create workspaces first (FK constraint)
+        jdbcTemplate.update("""
+            INSERT INTO workspaces (workspace_id, subscriber_id, transaction_type, jurisdiction, status, version)
+            VALUES (?, ?, 'PURCHASE', 'ENGLAND_AND_WALES', 'CREATED', 1)
+        """, workspaceId1, subscriberId1)
+
+        jdbcTemplate.update("""
+            INSERT INTO workspaces (workspace_id, subscriber_id, transaction_type, jurisdiction, status, version)
+            VALUES (?, ?, 'PURCHASE', 'ENGLAND_AND_WALES', 'CREATED', 1)
+        """, workspaceId2, subscriberId2)
+
+        // Insert participants
+        jdbcTemplate.update("""
+            INSERT INTO participants (participant_id, workspace_id, subscriber_id, role)
+            VALUES (?, ?, ?, 'BUYER_REPRESENTATIVE')
+        """, UUID.randomUUID(), workspaceId1, subscriberId1)
+
+        jdbcTemplate.update("""
+            INSERT INTO participants (participant_id, workspace_id, subscriber_id, role)
+            VALUES (?, ?, ?, 'SELLER_REPRESENTATIVE')
+        """, UUID.randomUUID(), workspaceId2, subscriberId2)
+{{else}}
+        // Remote aggregate domain: insert into remote_participants table
+        jdbcTemplate.update("""
+            INSERT INTO remote_participants (participant_id, workspace_id, subscriber_id, role, version)
+            VALUES (?, ?, ?, 'BUYER_REPRESENTATIVE', 1)
+            ON CONFLICT (participant_id) DO NOTHING
+        """, UUID.randomUUID(), workspaceId1, subscriberId1)
+
+        jdbcTemplate.update("""
+            INSERT INTO remote_participants (participant_id, workspace_id, subscriber_id, role, version)
+            VALUES (?, ?, ?, 'SELLER_REPRESENTATIVE', 1)
+            ON CONFLICT (participant_id) DO NOTHING
+        """, UUID.randomUUID(), workspaceId2, subscriberId2)
+{{/unless}}
+    }
+
+    @Nested
+    inner class IsParticipant {
+
+        @Test
+        fun `should return true when subscriber is participant in workspace`() {
+            val result = participantAccessRepository.isParticipant(workspaceId1, subscriberId1)
+            assertThat(result).isTrue()
+        }
+
+        @Test
+        fun `should return false when subscriber is not participant in workspace`() {
+            val result = participantAccessRepository.isParticipant(workspaceId2, subscriberId1)
+            assertThat(result).isFalse()
+        }
+
+        @Test
+        fun `should return false for non-existent workspace`() {
+            val result = participantAccessRepository.isParticipant(UUID.randomUUID(), subscriberId1)
+            assertThat(result).isFalse()
+        }
+
+        @Test
+        fun `should return false for non-existent subscriber`() {
+            val result = participantAccessRepository.isParticipant(workspaceId1, UUID.randomUUID())
+            assertThat(result).isFalse()
+        }
+    }
+
+    @Nested
+    inner class GetWorkspaceIdsForSubscriber {
+
+        @Test
+        fun `should return workspace IDs where subscriber is participant`() {
+            val result = participantAccessRepository.getWorkspaceIdsForSubscriber(subscriberId1)
+            assertThat(result).contains(workspaceId1)
+            assertThat(result).doesNotContain(workspaceId2)
+        }
+
+        @Test
+        fun `should return empty list for subscriber with no participations`() {
+            val result = participantAccessRepository.getWorkspaceIdsForSubscriber(UUID.randomUUID())
+            assertThat(result).isEmpty()
+        }
+    }
+}
+{{/unless}}

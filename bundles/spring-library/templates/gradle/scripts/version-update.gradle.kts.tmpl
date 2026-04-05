@@ -1,0 +1,147 @@
+import java.util.Properties
+
+/**
+ * Gradle script for managing semantic versioning.
+ * Provides tasks to increment major, minor, and patch versions,
+ * as well as setting and removing pre-release identifiers.
+ */
+
+val versionPropsFile = file("${rootProject.projectDir}/version.properties")
+
+// Load version properties
+fun loadVersionProps(): Properties {
+    val props = Properties()
+    if (versionPropsFile.exists()) {
+        versionPropsFile.inputStream().use { props.load(it) }
+    } else {
+        props.setProperty("major", "0")
+        props.setProperty("minor", "1")
+        props.setProperty("patch", "0")
+        props.setProperty("preRelease", "SNAPSHOT")
+    }
+    return props
+}
+
+// Save version properties
+fun saveVersionProps(props: Properties) {
+    versionPropsFile.outputStream().use { props.store(it, "Version properties") }
+}
+
+// Get current version string
+fun getCurrentVersion(): String {
+    val props = loadVersionProps()
+    val major = props.getProperty("major", "0")
+    val minor = props.getProperty("minor", "0")
+    val patch = props.getProperty("patch", "0")
+    val preRelease = props.getProperty("preRelease", "")
+    
+    return buildString {
+        append("$major.$minor.$patch")
+        if (preRelease.isNotEmpty()) {
+            append("-$preRelease")
+        }
+    }
+}
+
+// Register version tasks
+tasks.register("showVersion") {
+    group = "versioning"
+    description = "Shows the current version"
+    
+    doLast {
+        println("Current version: ${getCurrentVersion()}")
+    }
+}
+
+tasks.register("incrementMajor") {
+    group = "versioning"
+    description = "Increments the major version and resets minor and patch to 0"
+    
+    doLast {
+        val props = loadVersionProps()
+        val major = props.getProperty("major", "0").toInt() + 1
+        props.setProperty("major", major.toString())
+        props.setProperty("minor", "0")
+        props.setProperty("patch", "0")
+        saveVersionProps(props)
+        println("Version updated to ${getCurrentVersion()}")
+    }
+}
+
+tasks.register("incrementMinor") {
+    group = "versioning"
+    description = "Increments the minor version and resets patch to 0"
+    
+    doLast {
+        val props = loadVersionProps()
+        val minor = props.getProperty("minor", "0").toInt() + 1
+        props.setProperty("minor", minor.toString())
+        props.setProperty("patch", "0")
+        saveVersionProps(props)
+        println("Version updated to ${getCurrentVersion()}")
+    }
+}
+
+tasks.register("incrementPatch") {
+    group = "versioning"
+    description = "Increments the patch version"
+    
+    doLast {
+        val props = loadVersionProps()
+        val patch = props.getProperty("patch", "0").toInt() + 1
+        props.setProperty("patch", patch.toString())
+        saveVersionProps(props)
+        println("Version updated to ${getCurrentVersion()}")
+    }
+}
+
+tasks.register("setPreRelease") {
+    group = "versioning"
+    description = "Sets the pre-release identifier"
+    
+    doLast {
+        val preRelease = project.findProperty("preRelease") as String? ?: "SNAPSHOT"
+        val props = loadVersionProps()
+        props.setProperty("preRelease", preRelease)
+        saveVersionProps(props)
+        println("Version updated to ${getCurrentVersion()}")
+    }
+}
+
+tasks.register("removePreRelease") {
+    group = "versioning"
+    description = "Removes the pre-release identifier for a stable release"
+    
+    doLast {
+        val props = loadVersionProps()
+        props.remove("preRelease")
+        saveVersionProps(props)
+        println("Version updated to ${getCurrentVersion()}")
+    }
+}
+
+tasks.register("prepareRelease") {
+    group = "versioning"
+    description = "Prepares for a release by removing the pre-release identifier"
+    
+    doLast {
+        val props = loadVersionProps()
+        props.remove("preRelease")
+        saveVersionProps(props)
+        println("Version prepared for release: ${getCurrentVersion()}")
+    }
+}
+
+tasks.register("prepareNextDevelopment") {
+    group = "versioning"
+    description = "Prepares for next development cycle by incrementing patch and adding SNAPSHOT"
+    
+    doLast {
+        val props = loadVersionProps()
+        val patch = props.getProperty("patch", "0").toInt() + 1
+        props.setProperty("patch", patch.toString())
+        props.setProperty("preRelease", "SNAPSHOT")
+        saveVersionProps(props)
+        println("Version prepared for next development cycle: ${getCurrentVersion()}")
+    }
+}

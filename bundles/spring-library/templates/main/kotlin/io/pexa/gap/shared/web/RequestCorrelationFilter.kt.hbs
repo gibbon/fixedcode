@@ -1,0 +1,114 @@
+/*
+ * GENERATED CODE - DO NOT MODIFY DIRECTLY
+ * This file was generated from a template.
+ *
+ * Purpose: HTTP filter that extracts correlation ID from request headers and populates MDC
+ * Layer: Infrastructure/Web layer
+ * 
+ * Responsibilities:
+ * - Extract X-Correlation-ID header from incoming requests
+ * - Generate new correlation ID if header is missing
+ * - Set correlation ID in MDC for logging
+ * - Clear MDC after request completes
+ * - Propagate correlation ID to response headers
+ */
+package io.pexa.gap.shared.web
+
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequestWrapper
+import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.MDC
+import org.springframework.context.annotation.Primary
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
+import org.springframework.stereotype.Component
+import org.springframework.web.filter.OncePerRequestFilter
+import java.util.UUID
+import com.fasterxml.uuid.Generators
+
+/**
+ * Filter that manages correlation ID for distributed tracing.
+ * 
+ * Extracts X-Correlation-ID from request headers, or generates a new one if missing.
+ * Sets the correlation ID in MDC so it's automatically included in all log entries.
+ * Adds the correlation ID to response headers for client tracking.
+ * 
+ * Execution order: HIGHEST_PRECEDENCE to ensure MDC is set before any other filters/interceptors.
+ */
+@Component
+@Primary
+@Order(Ordered.HIGHEST_PRECEDENCE)
+class RequestCorrelationFilter : OncePerRequestFilter() {
+
+    companion object {
+        private const val CORRELATION_ID_HEADER = "X-Correlation-ID"
+        private const val MDC_KEY = "correlationId"
+    }
+
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain
+    ) {
+        val correlationId = extractOrGenerateCorrelationId(request)
+        
+        try {
+            // Set in MDC for logging
+            MDC.put(MDC_KEY, correlationId)
+            
+            // Add to response headers
+            response.setHeader(CORRELATION_ID_HEADER, correlationId)
+            
+            // Wrap request so Spring MVC @RequestHeader sees the correlation ID
+            val wrappedRequest = object : HttpServletRequestWrapper(request) {
+                override fun getHeader(name: String): String? =
+                    if (name.equals(CORRELATION_ID_HEADER, ignoreCase = true)) correlationId
+                    else super.getHeader(name)
+
+                override fun getHeaders(name: String): java.util.Enumeration<String> =
+                    if (name.equals(CORRELATION_ID_HEADER, ignoreCase = true))
+                        java.util.Collections.enumeration(listOf(correlationId))
+                    else super.getHeaders(name)
+            }
+
+            // Continue filter chain with wrapped request
+            filterChain.doFilter(wrappedRequest, response)
+        } finally {
+            // Always clear MDC to prevent memory leaks
+            MDC.remove(MDC_KEY)
+        }
+    }
+
+    /**
+     * Extract correlation ID from request header, or generate a new one.
+     * 
+     * @param request The HTTP request
+     * @return Correlation ID (existing or newly generated)
+     */
+    private fun extractOrGenerateCorrelationId(request: HttpServletRequest): String {
+        val headerValue = request.getHeader(CORRELATION_ID_HEADER)
+        
+        return if (!headerValue.isNullOrBlank() && isValidUuid(headerValue)) {
+            headerValue
+        } else {
+            Generators.timeBasedEpochGenerator().generate().toString()
+        }
+    }
+
+    /**
+     * Validate that a string is a valid UUID format.
+     * 
+     * @param value The string to validate
+     * @return true if valid UUID format, false otherwise
+     */
+    @Suppress("SwallowedException")
+    private fun isValidUuid(value: String): Boolean {
+        return try {
+            UUID.fromString(value)
+            true
+        } catch (e: IllegalArgumentException) {
+            false
+        }
+    }
+}

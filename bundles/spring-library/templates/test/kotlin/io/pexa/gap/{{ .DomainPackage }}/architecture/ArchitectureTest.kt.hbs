@@ -1,0 +1,244 @@
+package io.pexa.gap.{{LibraryName}}.architecture
+
+import com.tngtech.archunit.core.importer.ImportOption
+import com.tngtech.archunit.junit.AnalyzeClasses
+import com.tngtech.archunit.junit.ArchTest
+import com.tngtech.archunit.lang.ArchRule
+import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes
+import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods
+import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.RestController
+
+/**
+ * Architecture tests for {{LibraryName}} domain.
+ * 
+ * These tests enforce GAP's architectural rules:
+ * - Layer boundaries (API → Application → Domain → Infrastructure)
+ * - Package structure conventions
+ * - Naming conventions
+ * - Annotation requirements
+ * - Authorization patterns
+ * 
+ * ## Quick Reference for Code Generation
+ * 
+ * **Layer Dependencies:**
+ * - API layer: may access Application, Domain
+ * - Application layer: may access Domain, Infrastructure
+ * - Domain layer: may NOT access any other layer
+ * - Infrastructure layer: may access Domain only
+ * 
+ * **Package Structure:**
+ * - Controllers → ..api.. package
+ * - Services → ..application.. package
+ * - Repositories → ..infrastructure.. package
+ * - Entities → ..domain.. package
+ * 
+ * **Naming Conventions:**
+ * - Controllers must end with "Controller"
+ * - Services must end with "Service"
+ * - Repositories must end with "Repository"
+ * - Commands must end with "Command" or "Data"
+ * - Queries must end with "Query" or "Data"
+ * - Events must end with "Event" or "Handler"
+ * 
+ * **Required Annotations:**
+ * - Controllers: @RestController
+ * - Services: @Service
+ * - Repositories: @Repository
+ * - Event handlers: @Transactional
+ * 
+ * To disable a specific rule, comment out or remove the @ArchTest annotation.
+ */
+@AnalyzeClasses(
+    packages = ["io.pexa.gap.{{LibraryName}}"],
+    importOptions = [ImportOption.DoNotIncludeTests::class, ImportOption.DoNotIncludeJars::class]
+)
+class ArchitectureTest {
+
+    // Layer Dependency Rules - disabled until repository port interfaces are introduced
+    // (Domain layer currently depends on Infrastructure repositories directly)
+    
+    // @ArchTest
+    // val layerDependencies: ArchRule = layeredArchitecture()
+    //     .consideringOnlyDependenciesInLayers()
+    //     .layer("API").definedBy("..api..")
+    //     .layer("Application").definedBy("..application..")
+    //     .layer("Domain").definedBy("..domain..")
+    //     .layer("Infrastructure").definedBy("..infrastructure..")
+    //     .whereLayer("API").mayOnlyAccessLayers("Application", "Domain")
+    //     .whereLayer("Application").mayOnlyAccessLayers("Domain", "Infrastructure")
+    //     .whereLayer("Domain").mayNotAccessAnyLayer()
+    //     .whereLayer("Infrastructure").mayOnlyAccessLayers("Domain")
+    //     .because("Clean architecture: API→Application/Domain, Application→Domain/Infrastructure, Domain→(none), Infrastructure→Domain")
+
+    // Package Structure Rules
+    
+    @ArchTest
+    val controllersInApiPackage: ArchRule = classes()
+        .that().haveSimpleNameEndingWith("Controller")
+        .and().resideOutsideOfPackage("..config.testharness..")
+        .should().resideInAPackage("..api..")
+        .because("Controllers belong in the API layer")
+
+    @ArchTest
+    val servicesInApplicationPackage: ArchRule = classes()
+        .that().haveSimpleNameEndingWith("Service")
+        .and().areNotInterfaces()
+        .and().resideOutsideOfPackage("..domain..")  // Domain services are allowed
+        .and().resideOutsideOfPackage("..shared..")  // Shared utility services are allowed
+        .and().resideOutsideOfPackage("..infrastructure..")  // Infrastructure services are allowed
+        .and().resideOutsideOfPackage("..auth0..")  // External integration services are allowed
+        .and().resideOutsideOfPackage("..integration..")  // Integration services are allowed
+        .should().resideInAPackage("..application..")
+        .because("Application services belong in the Application layer (domain/shared/infrastructure/integration services are exempt)")
+
+    @ArchTest
+    val repositoriesInInfrastructurePackage: ArchRule = classes()
+        .that().haveSimpleNameEndingWith("Repository")
+        .and().areNotInterfaces()
+        .should().resideInAPackage("..infrastructure..")
+        .allowEmptyShould(true)  // GAP uses interfaces, implementations may not exist
+        .because("Repository implementations belong in the Infrastructure layer")
+
+    @ArchTest
+    val entitiesInDomainPackage: ArchRule = classes()
+        .that().resideInAPackage("..domain..")
+        .and().haveSimpleNameNotEndingWith("Repository")
+        .and().haveSimpleNameNotEndingWith("Service")
+        .and().haveSimpleNameNotEndingWith("Controller")
+        .should().resideInAPackage("..domain..")
+        .because("Domain entities belong in the Domain layer")
+
+    // Naming Convention Rules
+    
+    @ArchTest
+    val commandsEndWithCommand: ArchRule = classes()
+        .that().resideInAPackage("..commands..")
+        .and().areNotNestedClasses()
+        .should().haveSimpleNameEndingWith("Command")
+        .orShould().haveSimpleNameEndingWith("Data")
+        .allowEmptyShould(true)  // Not all domains have commands
+        .because("Command classes should follow naming convention")
+
+    @ArchTest
+    val queriesEndWithQuery: ArchRule = classes()
+        .that().resideInAPackage("..queries..")
+        .and().areNotNestedClasses()
+        .should().haveSimpleNameEndingWith("Query")
+        .orShould().haveSimpleNameEndingWith("Data")
+        .allowEmptyShould(true)  // Not all domains use query objects
+        .because("Query classes should follow naming convention")
+
+    @ArchTest
+    val eventsEndWithEvent: ArchRule = classes()
+        .that().resideInAPackage("..events..")
+        .and().areNotNestedClasses()
+        .and().areNotAnnotatedWith(Service::class.java)
+        .should().haveSimpleNameEndingWith("Event")
+        .orShould().haveSimpleNameEndingWith("Handler")
+        .allowEmptyShould(true)  // Not all domains have events
+        .because("Event classes should follow naming convention")
+
+    // Annotation Rules
+    
+    @ArchTest
+    val controllersHaveRestControllerAnnotation: ArchRule = classes()
+        .that().haveSimpleNameEndingWith("Controller")
+        .and().resideInAPackage("..api..")
+        // Exclude ..api.controller.. package: OpenAPI generator creates controller interfaces
+        // with @RestController on the interface. Spring applies the annotation from the interface,
+        // so implementation classes (ApiDelegateImpl) don't need the annotation directly.
+        .and().resideOutsideOfPackage("..api.controller..")
+        .should().beAnnotatedWith(RestController::class.java)
+        .allowEmptyShould(true)  // GAP uses OpenAPI generated controllers
+        .because(
+            "REST controllers must be annotated with @RestController " +
+            "(OpenAPI generated controllers in ..api.controller.. are exempt as Spring inherits the annotation from the interface)"
+        )
+
+    @ArchTest
+    val servicesHaveServiceAnnotation: ArchRule = classes()
+        .that().haveSimpleNameEndingWith("Service")
+        .and().resideInAPackage("..application..")
+        .and().areNotInterfaces()
+        .should().beAnnotatedWith(Service::class.java)
+        .because("Application services must be annotated with @Service")
+
+    @ArchTest
+    val repositoriesHaveRepositoryAnnotation: ArchRule = classes()
+        .that().haveSimpleNameEndingWith("Repository")
+        .and().resideInAPackage("..infrastructure..")
+        .and().areNotInterfaces()
+        .should().beAnnotatedWith(Repository::class.java)
+        .allowEmptyShould(true)  // GAP uses interfaces, implementations may not exist
+        .because("Repository implementations must be annotated with @Repository")
+
+    // Event Handler Rules
+    
+    @ArchTest
+    val eventHandlersAreTransactional: ArchRule = methods()
+        .that().areDeclaredInClassesThat().haveSimpleNameEndingWith("EventHandler")
+        .and().arePublic()
+        .and().haveNameMatching("handle.*")
+        .should().beAnnotatedWith(Transactional::class.java)
+        .allowEmptyShould(true)  // Not all services have event handlers
+        .because("Event handlers must be transactional to ensure consistency")
+
+    // Configuration Rules
+    
+    @ArchTest
+    val configurationsInConfigPackage: ArchRule = classes()
+        .that().areAnnotatedWith(org.springframework.context.annotation.Configuration::class.java)
+        .should().resideInAPackage("..config..")
+        .orShould().resideInAPackage("..autoconfigure..")
+        .because("Configuration classes belong in config or autoconfigure packages")
+
+    @ArchTest
+    val autoConfigurationsInAutoconfigurePackage: ArchRule = classes()
+        .that().haveSimpleNameEndingWith("AutoConfiguration")
+        .and().resideOutsideOfPackage("..config..")  // Main AutoConfiguration can be in config
+        .should().resideInAPackage("..autoconfigure..")
+        .allowEmptyShould(true)
+        .because("AutoConfiguration classes belong in autoconfigure package (except main AutoConfiguration)")
+
+    // Repository Rules
+    
+    // Note: Some repositories (like ParticipantAccessRepository) may not have @Repository
+    // Uncomment to enforce annotation on all repository interfaces:
+    // @ArchTest
+    // val repositoryInterfacesAreAnnotated: ArchRule = classes()
+    //     .that().areInterfaces()
+    //     .and().haveSimpleNameEndingWith("Repository")
+    //     .and().resideInAPackage("..infrastructure..")
+    //     .should().beAnnotatedWith(Repository::class.java)
+    //     .because("Repository interfaces should be annotated with @Repository")
+
+    // API Delegate Rules
+    
+    @ArchTest
+    val apiDelegatesInApiPackage: ArchRule = classes()
+        .that().haveSimpleNameEndingWith("ApiDelegateImpl")
+        .should().resideInAPackage("..api..")
+        .andShould().beAnnotatedWith(Service::class.java)
+        .because("API delegates belong in API package and must be Spring services")
+
+    // Dependency Injection Rules
+    
+    @ArchTest
+    val noFieldInjection: ArchRule = com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noFields()
+        .should().beAnnotatedWith(org.springframework.beans.factory.annotation.Autowired::class.java)
+        .because("Use constructor injection instead of field injection")
+
+    // Cyclic Dependency Rules
+    
+    // Note: Cyclic dependencies between API and Application are expected in GAP
+    // (API delegates call Application services, Application commands use API DTOs)
+    // Uncomment to enforce strict acyclic architecture:
+    // @ArchTest
+    // val noCyclicDependencies: ArchRule = com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices()
+    //     .matching("io.pexa.gap.{{LibraryName}}.(*)..")
+    //     .should().beFreeOfCycles()
+    //     .because("Cyclic dependencies make code harder to understand and maintain")
+}

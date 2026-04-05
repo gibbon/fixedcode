@@ -1,0 +1,42 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{.BoundedContextLower}}.domain.shared.util
+
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+import java.util.Calendar
+
+class ReferenceIdBuilderTest {
+
+    @Test
+    fun `should build reference with custom prefix`() {
+        val result = ReferenceIdBuilder.build("456", "TEST")
+        
+        val year = Calendar.getInstance()[Calendar.YEAR] % 100
+        assertTrue(result.startsWith("TEST$year"))
+        assertTrue(result.endsWith("0000456"))
+    }
+
+    @Test
+    fun `should pad sequence number to 7 digits`() {
+        val result = ReferenceIdBuilder.build("1", "REF")
+        
+        assertTrue(result.endsWith("0000001"))
+    }
+
+    @Test
+    fun `should not truncate sequence number longer than 7 digits`() {
+        val result = ReferenceIdBuilder.build("12345678", "REF")
+        
+        assertTrue(result.endsWith("12345678"))
+    }
+
+    @Test
+    fun `should include current year in reference`() {
+        val result = ReferenceIdBuilder.build("1", "TEST")
+        val expectedYear = Calendar.getInstance()[Calendar.YEAR] % 100
+        
+        assertEquals("TEST${expectedYear}0000001", result)
+    }
+}
+{{/unless}}

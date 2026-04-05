@@ -1,0 +1,104 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{LibraryName}}.config.testharness
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.postgresql.util.PGobject
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.http.ResponseEntity
+import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
+
+@Suppress("ALL")
+@RestController
+@RequestMapping("/test-harness/api")
+@ConditionalOnProperty("gap.test-harness.db-viewer.enabled", havingValue = "true", matchIfMissing = false)
+class TestHarnessDbController(
+    private val jdbcTemplate: JdbcTemplate,
+    private val objectMapper: ObjectMapper,
+) {
+
+    companion object {
+        private const val MAX_LIMIT = 200
+    }
+
+    private fun discoverTables(): List<String> =
+        jdbcTemplate.queryForList(
+            "SELECT tablename FROM pg_tables WHERE schemaname = current_schema() ORDER BY tablename",
+        ).mapNotNull { it["tablename"] as? String }
+
+    @GetMapping("/tables")
+    fun listTables(): List<String> = discoverTables()
+
+    @GetMapping("/tables/data")
+    fun getTableData(
+        @RequestParam table: String,
+        @RequestParam(defaultValue = "0") offset: Int,
+        @RequestParam(defaultValue = "50") limit: Int,
+        @RequestParam(required = false) sort: String?,
+        @RequestParam(defaultValue = "desc") order: String,
+    ): ResponseEntity<Any> {
+        val tables = discoverTables()
+        if (table !in tables) {
+            return ResponseEntity.badRequest().body(mapOf("error" to "Table not found: $table"))
+        }
+
+        val safeLimit = limit.coerceIn(1, MAX_LIMIT)
+        val safeOffset = offset.coerceAtLeast(0)
+        val safeOrder = if (order.lowercase() == "asc") "ASC" else "DESC"
+
+        val quotedTable = "\"$table\""
+        val columns = getColumnNames(quotedTable)
+        val safeSort = if (sort != null && sort in columns) "\"$sort\""
+            else columns.firstOrNull { it == "created_at" }?.let { "\"$it\"" }
+                ?: columns.firstOrNull()?.let { "\"$it\"" }
+                ?: "1"
+
+        val total = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM $quotedTable", Long::class.java) ?: 0
+        val rows = jdbcTemplate.queryForList(
+            "SELECT * FROM $quotedTable ORDER BY $safeSort $safeOrder LIMIT ? OFFSET ?",
+            safeLimit,
+            safeOffset,
+        ).map { row -> row.mapValues { (_, v) -> convertValue(v) } }
+
+        return ResponseEntity.ok(
+            TableDataResponse(
+                table = table,
+                columns = columns,
+                rows = rows,
+                total = total,
+                offset = safeOffset,
+                limit = safeLimit,
+            )
+        )
+    }
+
+    private fun getColumnNames(quotedTable: String): List<String> {
+        val sampleRows = jdbcTemplate.queryForList("SELECT * FROM $quotedTable LIMIT 1")
+        if (sampleRows.isNotEmpty()) return sampleRows.first().keys.toList()
+        return jdbcTemplate.queryForList(
+            "SELECT column_name FROM information_schema.columns WHERE table_name = ? ORDER BY ordinal_position",
+            quotedTable.replace("\"", ""),
+        ).mapNotNull { it["column_name"] as? String }
+    }
+
+    private fun convertValue(value: Any?): Any? = when (value) {
+        null -> null
+        is PGobject -> value.value?.let { runCatching { objectMapper.readTree(it) }.getOrDefault(it) }
+        is java.sql.Array -> runCatching { (value.array as? Array<*>)?.toList() ?: value.toString() }.getOrDefault(value.toString())
+        is ByteArray -> "(${value.size} bytes)"
+        else -> value
+    }
+
+    data class TableDataResponse(
+        val table: String,
+        val columns: List<String>,
+        val rows: List<Map<String, Any?>>,
+        val total: Long,
+        val offset: Int,
+        val limit: Int,
+    )
+}
+{{/unless}}

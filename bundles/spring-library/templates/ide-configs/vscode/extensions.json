@@ -1,0 +1,27 @@
+{
+  "recommendations": [
+    "vscjava.vscode-java-pack",
+    "fwcd.kotlin",
+    "vscjava.vscode-gradle",
+    "vscjava.vscode-spring-initializr",
+    "vmware.vscode-spring-boot",
+    "pivotal.vscode-boot-dev-pack",
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-json",
+    "ardenivanov.detekt",
+    "sonarsource.sonarlint-vscode",
+    "ms-vscode.test-adapter-converter",
+    "hbenl.vscode-test-explorer",
+    "formulahendry.docker-explorer",
+    "ms-vscode-remote.remote-containers",
+    "github.vscode-pull-request-github",
+    "eamodio.gitlens",
+    "streetsidesoftware.code-spell-checker",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-typescript"
+  ]
+}

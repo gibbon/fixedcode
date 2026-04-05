@@ -1,0 +1,18 @@
+{{#unless IsFeatureLibrary}}
+-- Initial schema for GAP Library Template
+
+-- Create outbox table for transactional outbox pattern
+CREATE TABLE IF NOT EXISTS outbox
+(
+    event_id       UUID NOT NULL CONSTRAINT outbox_pkey PRIMARY KEY,
+    event_type     VARCHAR,
+    trace_id       UUID NOT NULL,
+    aggregate_id   UUID,
+    aggregate_type VARCHAR,
+    topic          VARCHAR,
+    payload        JSONB,
+    created_by     VARCHAR,
+    created_at     TIMESTAMP,
+    status         VARCHAR
+);
+{{/unless}}

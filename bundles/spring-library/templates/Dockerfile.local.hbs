@@ -1,0 +1,42 @@
+{{#unless IsFeatureLibrary}}
+FROM amazoncorretto:25-alpine
+
+WORKDIR /app
+
+# Install curl and ca-certificates for health checks and SSL
+RUN apk add --no-cache curl ca-certificates
+
+# Copy certificates and import into Java truststore
+COPY certs/*.pem /tmp/certs/
+RUN for cert in /tmp/certs/*.pem; do \
+      keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -alias $(basename $cert .pem) -file $cert -noprompt; \
+    done
+
+# Copy the library project
+COPY build/{{LibraryName}}/ .
+
+# Make gradlew executable
+RUN chmod +x ./gradlew
+
+# Ensure Gradle distribution is available locally
+RUN if [ ! -f gradle/wrapper/gradle-8.14.4-bin.zip ]; then \
+      echo "ERROR: gradle-8.14.4-bin.zip not found. Run download-gradle.sh before building Docker image." && \
+      exit 1; \
+    fi
+
+# Pre-download Gradle dependencies to speed up runtime
+RUN ./gradlew dependencies --no-daemon || true
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# Expose port
+EXPOSE {{LibraryName}}
+
+# Set JVM options for faster startup
+ENV JAVA_OPTS="-Xmx1g -Xms512m -XX:+UseG1GC -XX:+UseStringDeduplication"
+
+# Run service with optimized settings
+ENTRYPOINT ["./gradlew", "bootRun", "-Dspring.profiles.active=docker", "--no-daemon", "--parallel"]
+{{/unless}}

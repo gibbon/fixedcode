@@ -1,0 +1,17 @@
+# Test profile configuration
+# Automatically activated by Spring Boot Test
+
+gap:
+  policy:
+    # Disable rate limiting for tests
+    api:
+      rate-limit:
+        enabled: false
+
+    # Test JWT validation disabled
+    jwt:
+      validation:
+        enabled: false
+
+    # Disable debug logging in tests (unless needed)
+    debug: false

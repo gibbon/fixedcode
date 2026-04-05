@@ -1,0 +1,39 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{LibraryName}}.config
+
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.jdbc.DataSourceBuilder
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
+import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
+import javax.sql.DataSource
+
+/**
+ * Database configuration for {{LibraryName}} domain.
+ * 
+ * Configures separate read and write datasources for CQRS pattern implementation.
+ * Write operations use the primary datasource, read operations use the read replica.
+ */
+@Configuration
+@EnableJdbcRepositories(basePackages = ["io.pexa.gap.{{LibraryName}}.infrastructure", "io.pexa.gap.events"])
+class DatabaseConfiguration {
+
+    /**
+     * Write datasource for mutations (INSERT, UPDATE, DELETE).
+     * Configured as Primary to be used by default for transactions.
+     */
+    @Bean("writeDataSource")
+    @Primary
+    @ConfigurationProperties("spring.datasource.write")
+    fun writeDataSource(): DataSource = DataSourceBuilder.create().build()
+
+    /**
+     * Read datasource for queries (SELECT).
+     * Typically points to read replica for better performance.
+     */
+    @Bean("readDataSource")
+    @ConfigurationProperties("spring.datasource.read")
+    fun readDataSource(): DataSource = DataSourceBuilder.create().build()
+}
+{{/unless}}

@@ -1,0 +1,152 @@
+# Integration Tests
+
+This directory contains integration tests for the GAP Library Template. Integration tests focus on testing component interactions, external system integration, and end-to-end functionality.
+
+## Purpose
+
+Integration tests verify that:
+- Spring Boot auto-configuration works correctly in realistic environments
+- Library components integrate properly with external systems (databases, message queues, etc.)
+- Configuration properties are correctly applied
+- Database connectivity and operations work as expected
+- The library functions correctly when used as a dependency in other Spring Boot applications
+
+## Test Structure
+
+```
+src/testIntegration/
+├── kotlin/io/pexa/gap/{{LibraryName}}/
+│   ├── {{LibraryName}}IntegrationTest.kt          # Main integration test with Testcontainers
+│   └── {{LibraryName}}TestApplication.kt     # Test Spring Boot application
+├── resources/
+│   └── application-integration-test.yml      # Integration test configuration
+└── README.md                                 # This file
+```
+
+## Running Integration Tests
+
+### Using Gradle
+
+```bash
+# Run integration tests only
+./gradlew testIntegration
+
+# Run all tests (unit + integration)
+./gradlew test testIntegration
+
+# Run integration tests with detailed output
+./gradlew testIntegration --info
+```
+
+### Using IDE
+
+Integration tests can be run directly from your IDE:
+- **IntelliJ IDEA**: Use the "Integration Tests" run configuration
+- **VS Code**: Use the "Integration Tests" task
+
+## Testcontainers Integration
+
+The integration tests use [Testcontainers](https://www.testcontainers.org/) to provide real database instances for testing:
+
+### Features
+- **PostgreSQL Container**: Provides a real PostgreSQL database for testing
+- **Dynamic Configuration**: Database connection details are automatically configured
+- **Container Reuse**: Containers can be reused across test runs for faster execution
+- **Isolation**: Each test run gets a clean database state
+
+### Requirements
+- **Docker**: Testcontainers requires Docker to be installed and running
+- **Network Access**: Tests need network access to pull Docker images
+
+### Configuration
+
+The integration tests are configured to:
+- Use PostgreSQL 15 container
+- Create a test database with appropriate credentials
+- Configure Spring Boot datasource properties dynamically
+- Enable SQL logging for debugging
+
+## Best Practices
+
+### What to Test in Integration Tests
+
+✅ **Do test:**
+- Spring Boot auto-configuration behavior
+- Database connectivity and operations
+- Component interactions
+- Configuration property binding
+- External system integration
+- End-to-end workflows
+
+❌ **Don't test:**
+- Pure business logic (use unit tests)
+- Individual method behavior (use unit tests)
+- Mock-heavy scenarios (use unit tests)
+
+### Writing Integration Tests
+
+1. **Use Realistic Scenarios**: Test with real databases and external systems
+2. **Focus on Integration**: Test how components work together
+3. **Keep Tests Independent**: Each test should be able to run in isolation
+4. **Use Testcontainers**: Prefer real systems over embedded alternatives
+5. **Clean Up Resources**: Ensure tests clean up after themselves
+
+### Performance Considerations
+
+- **Container Reuse**: Enable container reuse for faster test execution
+- **Parallel Execution**: Consider running tests in parallel where possible
+- **Resource Limits**: Be mindful of Docker resource usage
+- **Test Data**: Use minimal test data sets for faster execution
+
+## Troubleshooting
+
+### Common Issues
+
+**Docker Not Running:**
+```
+org.testcontainers.DockerClientException: Could not find a valid Docker environment
+```
+- Ensure Docker is installed and running
+- Check Docker daemon is accessible
+
+**Port Conflicts:**
+```
+org.testcontainers.containers.ContainerLaunchException: Container startup failed
+```
+- Check if required ports are already in use
+- Testcontainers will automatically find available ports
+
+**Slow Test Execution:**
+- Enable container reuse: `@Container(reuse = true)`
+- Use faster Docker images when possible
+- Consider using test slices for focused testing
+
+### Debugging
+
+Enable debug logging for troubleshooting:
+
+```yaml
+logging:
+  level:
+    org.testcontainers: DEBUG
+    io.pexa.gap: DEBUG
+```
+
+## Examples
+
+The `{{LibraryName}}IntegrationTest` demonstrates:
+- Setting up PostgreSQL with Testcontainers
+- Configuring Spring Boot with dynamic properties
+- Testing auto-configuration behavior
+- Verifying database connectivity
+- Testing library functionality end-to-end
+
+## Contributing
+
+When adding new integration tests:
+
+1. **Follow Naming Conventions**: Use `*IntegrationTest` suffix
+2. **Add Documentation**: Document what the test verifies
+3. **Use Appropriate Annotations**: `@SpringBootTest`, `@Testcontainers`, etc.
+4. **Consider Performance**: Keep tests fast and efficient
+5. **Update Documentation**: Update this README if adding new patterns

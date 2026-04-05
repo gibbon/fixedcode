@@ -1,0 +1,93 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{LibraryName}}.config
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.web.SecurityFilterChain
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+
+@ConfigurationProperties(prefix = "gap.library.security")
+data class SecurityProperties(
+    val enabled: Boolean = true,
+    val permitAllPaths: List<String> = listOf(
+        "/actuator/health",
+        "/test-harness/index.html",
+        "/test-harness/db-viewer.html",
+        "/_admin/health/readiness",
+        "/_admin/health/liveness"
+    )
+)
+
+@Configuration
+@EnableWebSecurity
+@EnableConfigurationProperties(SecurityProperties::class)
+class SecurityConfig(private val securityProperties: SecurityProperties) {
+
+    @Bean
+    @ConditionalOnProperty(
+        name = ["gap.library.security.enabled"],
+        havingValue = "true",
+        matchIfMissing = true
+    )
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        return http
+            .authorizeHttpRequests { authz ->
+                securityProperties.permitAllPaths.forEach { path ->
+                    authz.requestMatchers(path).permitAll()
+                }
+                authz.anyRequest().authenticated()
+            }
+            .oauth2ResourceServer { oauth2 ->
+                oauth2.jwt { }
+            }
+            .build()
+    }
+
+    @Bean
+    @ConditionalOnProperty(
+        name = ["gap.library.security.enabled"],
+        havingValue = "false"
+    )
+    fun disabledSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        return http
+            .cors { } // Enable CORS with default corsConfigurationSource bean
+            .authorizeHttpRequests { authz ->
+                authz.anyRequest().permitAll()
+            }
+            .csrf { it.disable() }
+            .build()
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration()
+        configuration.allowedOrigins = listOf(
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:8080"
+        )
+        configuration.allowedMethods = listOf(
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+            "OPTIONS"
+        )
+        configuration.allowedHeaders = listOf("*")
+        configuration.allowCredentials = true
+        configuration.maxAge = 3600L
+
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration)
+        return source
+    }
+}
+{{/unless}}

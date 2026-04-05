@@ -1,0 +1,38 @@
+package io.pexa.gap.shared.jsonfieldchange
+
+import java.util.UUID
+
+/**
+ * Represents a detected change in an object field at a specific path.
+ *
+ * @param T The type of the changed value (typically Map<String, Any?> for JSON objects)
+ * @property path The JSON path where the change occurred (e.g., "addresses", "addresses.0.street")
+ * @property oldValue The previous value at this path (null if newly added)
+ * @property newValue The new value at this path (null if removed)
+ * @property aggregateId The ID of the aggregate containing this change
+ * @property aggregateType The type name of the aggregate (e.g., "Workspace")
+ * @property fieldName The name of the watched field (e.g., "customAttributes")
+ */
+data class JsonFieldChange<T>(
+    val path: String,
+    val oldValue: T?,
+    val newValue: T?,
+    val aggregateId: UUID,
+    val aggregateType: String,
+    val fieldName: String
+) {
+    /**
+     * Returns true if this change represents a new value being added (oldValue was null).
+     */
+    val isAddition: Boolean get() = oldValue == null && newValue != null
+
+    /**
+     * Returns true if this change represents a value being removed (newValue is null).
+     */
+    val isRemoval: Boolean get() = oldValue != null && newValue == null
+
+    /**
+     * Returns true if this change represents a modification (both old and new values exist).
+     */
+    val isModification: Boolean get() = oldValue != null && newValue != null
+}

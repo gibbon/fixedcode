@@ -1,0 +1,28 @@
+/*
+ * GENERATED CODE - DO NOT MODIFY DIRECTLY
+ */
+package io.pexa.gap.{{LibraryName}}.config
+
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Configuration
+
+/**
+ * Configuration properties for optimistic locking behavior.
+ *
+ * Controls whether version is required for update operations.
+ * When require-version is true (default), updates without a version
+ * will return 428 Precondition Required.
+ */
+@Configuration
+@EnableConfigurationProperties(OptimisticLockingProperties::class)
+class OptimisticLockingConfiguration
+
+@ConfigurationProperties(prefix = "gap.optimistic-locking")
+data class OptimisticLockingProperties(
+    /**
+     * Whether version is required for update operations.
+     * Default: true (version required)
+     */
+    val requireVersion: Boolean = false
+)

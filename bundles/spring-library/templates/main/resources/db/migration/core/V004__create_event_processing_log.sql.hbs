@@ -1,0 +1,13 @@
+{{#unless IsFeatureLibrary}}
+-- Event processing log for idempotency tracking
+CREATE TABLE event_processing_log (
+    aggregate_id UUID NOT NULL,
+    version BIGINT NOT NULL,
+    event_type VARCHAR(255) NOT NULL,
+    processed_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (aggregate_id, version)
+);
+
+CREATE INDEX idx_event_processing_log_type ON event_processing_log(event_type);
+CREATE INDEX idx_event_processing_log_processed_at ON event_processing_log(processed_at);
+{{/unless}}

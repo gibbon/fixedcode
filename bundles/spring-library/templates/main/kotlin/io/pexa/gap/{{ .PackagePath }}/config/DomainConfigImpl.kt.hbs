@@ -1,0 +1,14 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{LibraryName}}.config
+
+import io.pexa.gap.shared.exception.DomainConfig
+import org.springframework.stereotype.Component
+
+/**
+ * Domain configuration for exception handling
+ */
+@Component
+class DomainConfigImpl : DomainConfig {
+    override fun getDomain(): String = "{{LibraryName}}"
+}
+{{/unless}}

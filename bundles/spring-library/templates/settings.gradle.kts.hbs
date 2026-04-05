@@ -1,0 +1,26 @@
+rootProject.name = "{{LibraryName}}"
+
+pluginManagement {
+    repositories {
+        mavenLocal()
+        maven {
+            name = "artifactory-plugins"
+            setUrl("https://pexaartifacts.jfrog.io/artifactory/plugins-release-local/")
+            credentials {
+                username = System.getenv("ARTIFACTORY_USERNAME")
+                password = System.getenv("ARTIFACTORY_TOKEN")
+            }
+        }
+        maven {
+            name = "artifactory-snapshot-plugins"
+            setUrl("https://pexaartifacts.jfrog.io/artifactory/plugins-snapshot-local/")
+            credentials {
+                username = System.getenv("ARTIFACTORY_USERNAME")
+                password = System.getenv("ARTIFACTORY_TOKEN")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+

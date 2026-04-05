@@ -1,0 +1,529 @@
+# GAP Library Template
+
+A comprehensive template for creating shared libraries within PEXA's Global Application Platform (GAP), featuring modern tooling, Spring Boot integration, and automated workflows.
+
+## Features
+
+- **Modern Technology Stack**: Kotlin 2.1+ with Java 21, Spring Boot 3.x, Gradle 8.14+
+- **Spring Boot Integration**: Auto-configuration, starter dependencies, and Spring ecosystem support
+- **OpenAPI Code Generation**: Automated API client/server code generation from OpenAPI specifications
+- **Quality Assurance**: Detekt static analysis, JaCoCo code coverage, SonarQube integration
+- **Testing Framework**: JUnit 5 with comprehensive test suites including integration tests
+- **CI/CD Ready**: PIDP workflow integration for automated building, testing, and publishing
+- **Professional Standards**: Code of conduct, contributing guidelines, and comprehensive documentation
+
+## Quick Start
+
+### 1. Create New Library from Template
+
+**Option A: Using Backstage (Recommended)**
+1. Navigate to the PEXA Backstage instance in Harness
+2. Go to "Self Service" → "Create a new GAP Library"
+3. Select "Execute"
+4. Fill in the required information (name, description, owner, etc.)
+5. Backstage will create the repository and configure it automatically
+
+**Option B: Using PIDP CLI**
+
+*** Coming Soon ***
+
+**Option C: Manual Setup (Not Recommended)**
+```bash
+# Clone the template repository
+git clone git@github.com:PEXA-AU/{{LibraryName}}.git my-new-library
+cd my-new-library
+
+# Manually update configuration files:
+# - Update pidp.yaml with your library details
+# - Modify build.gradle.kts group and artifact information
+# - Update package structure in src/main/kotlin/
+# - Update documentation
+
+# Build and test
+./gradlew build
+```
+
+### 2. Development Workflow
+
+```bash
+# Clean build with all quality checks
+./gradlew clean build
+
+# Run tests with coverage report
+./gradlew test jacocoTestReport
+
+# Run integration tests
+./gradlew testIntegration
+
+# Check code quality with Detekt
+./gradlew detekt
+
+# Generate OpenAPI code (if applicable)
+./gradlew openApiGenerate
+
+# Publish locally for testing
+./gradlew publishToMavenLocal
+
+# Publish to Artifactory (requires credentials)
+./gradlew publish
+```
+
+## Project Structure
+
+```
+{{LibraryName}}/
+├── src/
+│   ├── main/
+│   │   ├── kotlin/io/pexa/gap/{{LibraryName}}/
+│   │   │   ├── core/                    # Core library functionality
+│   │   │   ├── config/                  # Spring configuration classes
+│   │   │   └── autoconfigure/           # Spring Boot auto-configuration
+│   │   └── resources/
+│   │       ├── META-INF/spring/         # Spring Boot configuration metadata
+│   │       └── openapi/                 # OpenAPI specifications
+│   ├── test/kotlin/                     # Unit tests
+│   └── testIntegration/kotlin/          # Integration tests
+├── ide-configs/                         # Optional IDE configurations
+│   ├── intellij-idea/                   # IntelliJ IDEA settings
+│   ├── vscode/                          # VS Code settings
+│   └── README.md                        # IDE setup instructions
+├── build.gradle.kts                     # Build configuration
+├── settings.gradle.kts                  # Project settings
+├── version.txt                          # Version management (0.2)
+├── gradle/libs.versions.toml            # Dependency version catalog
+├── pidp.yaml                           # PIDP workflow configuration
+├── catalog-info.yaml                   # Backstage service catalog
+├── config/detekt.yml                   # Code quality rules
+├── docker-compose.yml                  # Local development services
+└── docs/                               # Documentation
+```
+
+## Spring Boot Integration
+
+This template is designed as a Spring Boot library that can be easily integrated into Spring applications:
+
+### Auto-Configuration
+
+The library provides Spring Boot auto-configuration for seamless integration:
+
+```kotlin
+// Auto-configuration is automatically applied when the library is on the classpath
+@SpringBootApplication
+class MyApplication
+
+fun main(args: Array<String>) {
+    runApplication<MyApplication>(*args)
+}
+```
+
+### Configuration Properties
+
+Configure the library through standard Spring Boot properties:
+
+```yaml
+# application.yml
+gap:
+  {{LibraryName}}:
+    enabled: true
+    # Additional configuration properties
+```
+
+### Starter Dependencies
+
+Include the library as a starter dependency:
+
+```kotlin
+dependencies {
+    implementation("io.pexa.gap:{{LibraryName}}:0.2.0-SNAPSHOT")
+}
+```
+
+## OpenAPI Integration
+
+The template includes OpenAPI code generation capabilities:
+
+### Generating Code from OpenAPI Specs
+
+```bash
+# Generate API code from OpenAPI specifications
+./gradlew openApiGenerate
+
+# Generated code will be available in build/generated/openapi/
+```
+
+### OpenAPI Configuration
+
+Configure OpenAPI generation in `build.gradle.kts`:
+
+```kotlin
+openApiGenerate {
+    generatorName.set("kotlin-spring")
+    inputSpec.set("$projectDir/src/main/resources/openapi/api.yaml")
+    outputDir.set("$buildDir/generated/openapi")
+    // Additional configuration...
+}
+```
+
+## Version Management
+
+The library uses semantic versioning managed by the GAP publishing plugin with the base version stored in `version.txt`:
+
+### Current Version Strategy
+
+- **Base Version**: `0.2` (from `version.txt`)
+- **Development**: `0.2.0-SNAPSHOT` (local builds)
+- **Release**: Set via CI/CD environment variables
+
+### Version Commands
+
+```bash
+# Show current version
+./gradlew properties | grep version
+
+# Build with specific version
+./gradlew build -Pversion=0.2.1
+
+# Check version in CI/CD
+echo $VERSION  # Set by CI/CD pipeline
+```
+
+## Testing Strategy
+
+### Test Structure
+
+- **Unit Tests**: `src/test/kotlin/` - Fast, isolated tests for individual components
+- **Integration Tests**: `src/testIntegration/kotlin/` - Component integration tests with Testcontainers
+
+### Running Tests
+
+```bash
+# Run unit tests only
+./gradlew test
+
+# Run integration tests only (requires Docker)
+./gradlew testIntegration
+
+# Run all tests with coverage
+./gradlew test testIntegration jacocoTestReport
+
+# View coverage report
+open build/reports/jacoco/test/html/index.html
+```
+
+### Integration Testing with Testcontainers
+
+The template includes integration tests that demonstrate:
+- **Real Database Testing**: PostgreSQL container for realistic testing
+- **Spring Boot Integration**: Full application context testing
+- **Auto-configuration Verification**: Testing library auto-configuration
+- **End-to-end Functionality**: Complete workflow testing
+
+**Requirements for Integration Tests:**
+- Docker installed and running
+- Network access for pulling container images
+
+### Test Configuration
+
+The template includes comprehensive test configuration:
+
+```kotlin
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+            dependencies {
+                implementation(platform("org.junit:junit-bom:5.10.1"))
+                implementation("org.springframework.boot:spring-boot-starter-test")
+                implementation("org.mockito:mockito-core")
+                implementation("org.assertj:assertj-core")
+            }
+        }
+        
+        val testIntegration by registering(JvmTestSuite::class) {
+            // Integration test configuration
+        }
+    }
+}
+```
+
+## Quality Assurance
+
+### Code Quality Tools
+
+- **Detekt**: Static code analysis with custom rules
+- **JaCoCo**: Code coverage reporting and enforcement
+- **SonarQube**: Comprehensive code quality analysis
+
+### Quality Gates
+
+```bash
+# Run all quality checks
+./gradlew check
+
+# Generate quality reports
+./gradlew detekt jacocoTestReport sonarqube
+
+# View reports
+open build/reports/detekt/detekt.html
+open build/reports/jacoco/test/html/index.html
+```
+
+### Configuration
+
+Quality tools are configured with professional standards:
+
+- **Minimum Coverage**: 80% (configurable in `pidp.yaml`)
+- **Detekt Rules**: Custom ruleset in `config/detekt.yml`
+- **SonarQube**: Integrated analysis for code quality metrics
+
+## Backstage Integration
+
+This template is fully integrated with PEXA's Backstage developer portal for streamlined library creation and management.
+
+### Backstage Features
+
+- **Template Catalog**: Available as a software template in Backstage
+- **Automated Setup**: Guided creation process with validation
+- **Service Catalog**: Automatic registration in the service catalog
+- **Documentation**: Integrated documentation and API references
+- **Ownership**: Clear team ownership and responsibility tracking
+- **Dependencies**: Automatic dependency tracking and visualization
+
+### Catalog Information
+
+The library is registered in Backstage through the `catalog-info.yaml` file, which provides:
+
+- **Metadata**: Library name, description, and tags
+- **Ownership**: Team and individual ownership information
+- **Lifecycle**: Development stage and maintenance status
+- **Dependencies**: Relationships with other services and libraries
+- **Links**: Documentation, repository, and monitoring links
+
+### Creating Libraries via Backstage
+
+1. **Access Backstage**: Navigate to your PEXA Backstage instance
+2. **Browse Templates**: Go to "Create" and browse available templates
+3. **Select Template**: Choose "GAP Library Template"
+4. **Configure Library**: Fill in the required information:
+   - Library name and description
+   - Team ownership
+   - Repository settings
+   - Initial configuration
+5. **Create**: Backstage will create the repository and set up CI/CD automatically
+6. **Start Development**: Begin implementing your library functionality
+
+## PIDP CLI Integration
+
+The PIDP CLI provides an alternative method for creating libraries from this template.
+
+### PIDP CLI Features
+
+- **Interactive Setup**: Guided prompts for library configuration
+- **Template Management**: Access to all available PIDP templates
+- **Automatic Configuration**: Updates build files and package structure
+- **Validation**: Ensures proper configuration and naming conventions
+- **Integration**: Sets up PIDP workflows and publishing automatically
+
+### Using PIDP CLI
+
+Coming Soon
+
+### PIDP CLI Configuration
+
+The CLI will automatically:
+- Update `pidp.yaml` with your library details
+- Modify `build.gradle.kts` with correct group and artifact information
+- Rename package structure in source code
+- Update `catalog-info.yaml` for Backstage integration
+- Generate appropriate documentation templates
+
+## CI/CD Integration
+
+### PIDP Workflow
+
+The template integrates with PEXA's PIDP (Platform Infrastructure Development Platform) workflows:
+
+```yaml
+# .github/workflows/CI.yaml
+jobs:
+  build:
+    uses: PEXA-AU/pidp-workflows/.github/workflows/build-jvm-library-gradle.yaml@v1
+    secrets: inherit
+    with:
+      yaml-path: "./pidp.yaml"
+      publish-library: ${{"{{"}}  github.ref == 'refs/heads/main'  {{"}}"}}
+```
+
+### PIDP Configuration
+
+The `pidp.yaml` file configures the build and publishing process:
+
+```yaml
+version: 1
+namespace: gap
+name: {{LibraryName}}
+type: library
+```
+
+### Publishing Strategy
+
+- **Pull Requests**: Build and test and publish SNAPSHOT versions
+- **Main Branch**: Build, test, and publish release versions to Artifactory
+
+## Local Development
+
+### Prerequisites
+
+- Java 21 (configured via Gradle toolchain)
+- Gradle 8.14+ (included via wrapper)
+- Docker (for integration tests and local services)
+
+### Development Services
+
+Use Docker Compose for local development dependencies:
+
+```bash
+# Start local services
+docker compose up -d
+
+# Stop services
+docker compose down
+```
+
+### IDE Configuration (Optional)
+
+The template includes pre-configured IDE settings that can be optionally copied to your project for an enhanced development experience:
+
+**Available Configurations:**
+- **IntelliJ IDEA**: Project settings, run configurations, code style, and inspection profiles
+- **VS Code**: Settings, tasks, launch configurations, and extension recommendations
+
+**Quick Setup:**
+```bash
+# For IntelliJ IDEA
+cp -r ide-configs/intellij-idea/* .idea/
+
+# For VS Code  
+cp -r ide-configs/vscode/* .vscode/
+
+# Then restart your IDE to apply the settings
+```
+
+**Features:**
+- Java 21 toolchain configuration
+- Kotlin compiler settings optimized for Spring Boot
+- Pre-configured build, test, and quality check tasks
+- Enhanced code inspections and formatting rules
+- Debug configurations for tests and Spring Boot applications
+- Recommended extensions and plugins
+
+**Documentation:**
+See `ide-configs/README.md` for detailed setup instructions and customization options.
+
+## Usage as a Library
+
+### Adding as Dependency
+
+```kotlin
+// In your application's build.gradle.kts
+dependencies {
+    implementation("io.pexa.gap:{{LibraryName}}:0.2.0-SNAPSHOT")
+}
+```
+
+### Spring Boot Integration
+
+The library automatically configures itself when added to a Spring Boot application:
+
+```kotlin
+@SpringBootApplication
+class MyApplication
+
+// Library components are automatically available
+@Autowired
+lateinit var libraryService: LibraryService
+```
+
+## Template Customization
+
+### Automated Setup (Recommended)
+
+**Using Backstage:**
+- Backstage automatically handles all template customization
+- Provides guided setup with validation
+- Creates properly configured repository with CI/CD
+- Sets up team ownership and access controls
+
+**Using PIDP CLI:**
+- Interactive prompts for library configuration
+- Automatic package structure updates
+- Generates appropriate build configuration
+- Sets up PIDP workflow integration
+
+### Manual Customization (If Required)
+
+If you need to manually customize the template:
+
+1. **Update Package Structure**: Rename packages in `src/main/kotlin/`
+2. **Modify Build Configuration**: Update `build.gradle.kts` with your library details:
+   ```kotlin
+   group = "io.pexa.gap"  // Update to your group
+   // Update dependencies and configurations as needed
+   ```
+3. **Update PIDP Configuration**: Modify `pidp.yaml` with your library information:
+   ```yaml
+   name: your-library-name
+   library:
+     group: "io.pexa.gap"
+     artifactId: "your-library-name"
+     description: "Your library description"
+   ```
+4. **Update Backstage Catalog**: Modify `catalog-info.yaml` with your library metadata
+5. **Replace Sample Code**: Implement your library functionality
+6. **Update Documentation**: Modify README, CHANGELOG, and other docs
+
+## Best Practices
+
+### Library Design
+
+- **Follow Spring Boot Conventions**: Use standard Spring Boot patterns and practices
+- **Provide Auto-Configuration**: Make integration seamless for consumers
+- **Document Configuration**: Clearly document all configuration options
+- **Version Compatibility**: Maintain backward compatibility within major versions
+
+### Code Quality
+
+- **Write Comprehensive Tests**: Aim for high test coverage with meaningful tests
+- **Follow Kotlin Conventions**: Use idiomatic Kotlin code
+- **Document Public APIs**: Provide clear documentation for public interfaces
+- **Handle Errors Gracefully**: Implement proper error handling and logging
+
+### Versioning
+
+- **Semantic Versioning**: Follow semantic versioning principles
+- **Document Changes**: Maintain a comprehensive CHANGELOG
+- **Test Compatibility**: Verify compatibility with supported versions
+- **Communicate Breaking Changes**: Clearly communicate any breaking changes
+
+## Support and Documentation
+
+### Documentation
+
+- **Template Usage**: See `TEMPLATE_USAGE.md` for detailed setup instructions
+- **Build Configuration**: See `docs/BUILD_CONFIGURATION.md` for build details
+- **Contributing**: See `CONTRIBUTING.md` for contribution guidelines
+
+### Getting Help
+
+- **GitHub Issues**: Report bugs and request features
+- **Documentation**: Comprehensive guides in the `docs/` directory
+- **PIDP Support**: Platform-specific support through PIDP channels
+- **Community**: Developer forums and discussion channels
+
+### Resources
+
+- **Spring Boot Documentation**: https://spring.io/projects/spring-boot
+- **Kotlin Documentation**: https://kotlinlang.org/docs/
+- **Gradle Documentation**: https://docs.gradle.org/
+- **PEXA Development Standards**: Internal development guidelines
+

@@ -1,0 +1,45 @@
+{
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-21",
+      "path": "/usr/lib/jvm/java-21-openjdk"
+    }
+  ],
+  "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m",
+  "kotlin.languageServer.enabled": true,
+  "kotlin.compiler.jvm.target": "21",
+  "files.exclude": {
+    "**/.gradle": true,
+    "**/build": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true
+  },
+  "files.watcherExclude": {
+    "**/.gradle/**": true,
+    "**/build/**": true,
+    "**/.DS_Store": true
+  },
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "editor.rulers": [120],
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "gradle.nestedProjects": true,
+  "spring-boot.ls.problem.application-properties.unknown-property": "WARNING",
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml",
+    "https://json.schemastore.org/dependabot-v2.json": ".github/dependabot.yml"
+  },
+  "detekt.enable": true,
+  "detekt.buildUponDefaultConfig": true,
+  "detekt.configPath": "./config/detekt.yml"
+}

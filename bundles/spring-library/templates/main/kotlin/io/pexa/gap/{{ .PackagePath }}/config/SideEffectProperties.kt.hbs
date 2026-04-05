@@ -1,0 +1,57 @@
+package io.pexa.gap.{{LibraryName}}.config
+
+import org.springframework.boot.context.properties.ConfigurationProperties
+
+/**
+ * Configuration properties for side effects
+ */
+@ConfigurationProperties(prefix = "gap.side-effect")
+data class SideEffectProperties(
+    val enabled: Boolean = true,
+    val scheduler: SchedulerProperties = SchedulerProperties(),
+    val cleanup: CleanupProperties = CleanupProperties(),
+    val types: Map<String, TypeProperties> = emptyMap()
+) {
+    
+    /**
+     * Scheduler configuration
+     */
+    data class SchedulerProperties(
+        val enabled: Boolean = true,
+        /** Polling interval in milliseconds */
+        val pollingIntervalMs: Long = 5000,
+        val batchSize: Int = 10,
+        val defaultMaxRetries: Int = 3,
+        /** Default max backoff delay in seconds */
+        val defaultMaxBackoffSeconds: Long = 300
+    )
+    
+    /**
+     * Cleanup job configuration
+     */
+    data class CleanupProperties(
+        val enabled: Boolean = true,
+        /** Retention period in hours for completed side effects (default: 24 hours) */
+        val completedRetentionHours: Int = 24,
+        /** Retention period in days for dead letter side effects (default: 30 days) */
+        val deadLetterRetentionDays: Int = 30,
+        /** Batch size for cleanup to avoid large transactions (default: 1000) */
+        val batchSize: Int = 1000,
+        /** Cron expression for cleanup schedule (default: every hour) */
+        val cron: String = "0 0 * * * ?"
+    )
+    
+    /**
+     * Per-type configuration overrides
+     */
+    data class TypeProperties(
+        val maxRetries: Int? = null,
+        val maxBackoffSeconds: Long? = null
+    )
+    
+    fun getMaxRetries(type: String): Int =
+        types[type]?.maxRetries ?: scheduler.defaultMaxRetries
+    
+    fun getMaxBackoffSeconds(type: String): Long =
+        types[type]?.maxBackoffSeconds ?: scheduler.defaultMaxBackoffSeconds
+}

@@ -1,0 +1,22 @@
+package io.pexa.gap.{{LibraryName}}
+
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+import org.springframework.boot.runApplication
+/**
+ * Application class for {{#if IsFeatureLibrary}}{{LibraryName}}{{else}}{{LibraryName}}{{/if}} domain library.
+ *
+ * Used for local development and testing. When used as a library dependency,
+ * the auto-configuration will be applied automatically.
+ * 
+ * Excludes DataSourceAutoConfiguration since we provide custom read/write datasources.
+ */
+@SpringBootApplication(
+    exclude = [DataSourceAutoConfiguration::class],
+    scanBasePackages = [{{#if IsFeatureLibrary}}"io.pexa.gap.{{LibraryName}}", {{/if}}"io.pexa.gap.{{LibraryName}}", "io.pexa.gap.policy", "io.pexa.gap.shared.exception", "io.pexa.gap.shared.web", "io.pexa.gap.shared.jsonfieldchange"]
+)
+class Application
+
+fun main(args: Array<String>) {
+    runApplication<Application>(*args)
+}

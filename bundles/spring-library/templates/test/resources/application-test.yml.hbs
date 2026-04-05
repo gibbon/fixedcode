@@ -1,0 +1,71 @@
+# Test profile configuration for Spring Boot tests
+spring:
+  application:
+    name: {{LibraryName}}-test
+    
+  # Disable auto-configuration for datasource in unit tests
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+    
+  # Message source configuration for test
+  messages:
+    basename: messages
+    
+  # OAuth2 Resource Server configuration for tests
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          custom-claims-path: "https://pexa.au.auth.com/customClaims"
+
+# GAP Library configuration for tests
+gap:
+  library:
+    name: GAP Library Template Test
+    version: test
+    environment: test
+    debug: true
+    validation:
+      maxLabels: 10  # Lower limit for testing
+      maxReferenceIdLength: 50
+      maxDescriptionLength: 200
+      allowedReferenceIdPattern: "^[A-Za-z0-9_-]+$"
+    bulk:
+      maxBatchSize: 5  # Lower limit for testing
+      timeoutSeconds: 10
+    events:
+      asyncProcessing: false  # Disable async for predictable tests
+      retryAttempts: 1
+      retryDelaySeconds: 1
+    audit:
+      enableAutoAuditing: true
+      defaultUser: "test-system"
+    features:
+      database: postgresql
+      flyway: false  # Disabled for unit tests
+      actuator: false
+      metrics: false
+      prometheus: false
+
+# Logging configuration for tests      
+logging:
+  level:
+    io.pexa.gap: ${LOG_LEVEL_GAP:DEBUG}
+    org.springframework.jdbc: ${LOG_LEVEL_SPRING_JDBC:DEBUG}
+    org.springframework.data.jdbc: ${LOG_LEVEL_SPRING_DATA_JDBC:DEBUG}
+    org.springframework.data.relational: ${LOG_LEVEL_SPRING_DATA_RELATIONAL:DEBUG}
+    org.flywaydb: ${LOG_LEVEL_FLYWAY:INFO}
+    org.springframework.jdbc.core.JdbcTemplate: ${LOG_LEVEL_JDBC_TEMPLATE:DEBUG}
+    org.springframework.jdbc.core.StatementCreatorUtils: ${LOG_LEVEL_JDBC_STATEMENT:TRACE}
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator configuration for tests (minimal)
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true

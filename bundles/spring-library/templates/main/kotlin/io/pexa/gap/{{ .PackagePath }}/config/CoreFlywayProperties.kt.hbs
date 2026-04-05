@@ -1,0 +1,16 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{LibraryName}}.config
+
+import org.springframework.boot.context.properties.ConfigurationProperties
+
+@ConfigurationProperties(prefix = "gap.{{LibraryName}}-core.flyway")
+data class CoreFlywayProperties(
+    val enabled: Boolean = true,
+    val locations: List<String> = listOf("classpath:db/migration/core"),
+    val table: String = "flyway_schema_history_core",
+    val defaultSchema: String = "",
+    val baselineOnMigrate: Boolean = true,
+    val baselineVersion: String = "0",
+    val validateOnMigrate: Boolean = true,
+)
+{{/unless}}

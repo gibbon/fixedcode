@@ -1,0 +1,15 @@
+{{#unless IsFeatureLibrary}}
+-- Migrate event_processing_log from aggregate_id+version to event_id
+-- This provides better idempotency tracking for child entity events
+
+-- Drop old primary key and columns
+ALTER TABLE event_processing_log DROP CONSTRAINT event_processing_log_pkey;
+ALTER TABLE event_processing_log DROP COLUMN aggregate_id;
+ALTER TABLE event_processing_log DROP COLUMN version;
+
+-- Add event_id as new primary key
+ALTER TABLE event_processing_log ADD COLUMN event_id UUID;
+UPDATE event_processing_log SET event_id = gen_random_uuid() WHERE event_id IS NULL;
+ALTER TABLE event_processing_log ALTER COLUMN event_id SET NOT NULL;
+ALTER TABLE event_processing_log ADD PRIMARY KEY (event_id);
+{{/unless}}

@@ -1,0 +1,134 @@
+[versions]
+kotlin = "2.3.20"
+java = "21"
+springBoot = "3.5.12"  # Updated to latest version
+springDependency = "1.1.7"
+detekt = "1.23.8"  # Updated to latest version
+sonarqube = "7.2.3.7755"  # SonarQube plugin for static analysis
+ktlint = "14.2.0"  # ktlint plugin for code formatting
+openApiGenerator = "7.21.0"  # Latest stable version
+postgresql = "42.7.10"
+jackson = "2.21.1"
+kotest = "6.1.9"
+mockk = "1.14.9"
+testcontainers = "1.21.4"
+uuid = "5.2.0"
+shedlock = "5.16.0"
+gapPluginPublish = "1.4.1"
+gapSharedBom = "1.0.2"
+gapLibraryPolicy = "0.3.10"
+gapLibraryEvents = "0.7.3"
+
+awsBom = "2.42.20"
+awsJdbcWrapper = "3.2.0"
+
+# Additional quality and tooling versions
+logstashEncoder = "9.0"
+springDocVersion = "2.8.16"
+springSecurityVersion = "7.0.4"
+springKafkaVersion = "3.3.14"
+awsMskVersion = "2.3.5"
+avroVersion = "1.12.0"
+unleashVersion = "12.2.0"
+
+[plugins]
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+kotlinAllOpen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
+kotlinNoArg = { id = "org.jetbrains.kotlin.plugin.noarg", version.ref = "kotlin" }
+springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
+springDependency = { id = "io.spring.dependency-management", version.ref = "springDependency" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+openApiGenerator = { id = "org.openapi.generator", version.ref = "openApiGenerator" }
+dependencyAnalysis = { id = "com.autonomousapps.dependency-analysis", version = "3.6.1" }
+pluginPublish = { id = "io.pexa.gap.plugin-publishing", version.ref = "gapPluginPublish" }
+
+[libraries]
+# GAP Shared Libraries BOM
+gapSharedBom = { group = "io.pexa", name = "gap-shared-bom", version.ref = "gapSharedBom" }
+
+# Spring Boot BOM for dependency management
+springBootBom = { group = "org.springframework.boot", name = "spring-boot-dependencies", version.ref = "springBoot" }
+
+# GAP Shared Libraries (individual libraries managed by BOM)
+gapSharedCommon = { group = "io.pexa", name = "gap-shared-common" }
+gapSharedDb = { group = "io.pexa", name = "gap-shared-db" }
+gapSharedEvent = { group = "io.pexa", name = "gap-shared-event" }
+gapSharedException = { group = "io.pexa", name = "gap-shared-exception" }
+gapSharedLogger = { group = "io.pexa", name = "gap-shared-logger" }
+gapSharedSecurity = { group = "io.pexa", name = "gap-shared-security" }
+
+# GAP Library - Policy Engine
+gapLibraryPolicy = { group = "io.pexa.gap", name = "gap-library-policy", version.ref = "gapLibraryPolicy" }
+
+# GAP Library - Events
+gapLibraryEvents = { group = "io.pexa.gap", name = "gap-library-events", version.ref = "gapLibraryEvents" }
+
+# Kotlin
+kotlinReflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
+kotlinStdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+
+# Spring Boot (versions managed by Spring Boot BOM)
+springBootStarterWeb = { group = "org.springframework.boot", name = "spring-boot-starter-web" }
+springBootStarterDataJdbc = { group = "org.springframework.boot", name = "spring-boot-starter-data-jdbc" }
+springBootStarterActuator = { group = "org.springframework.boot", name = "spring-boot-starter-actuator" }
+springBootStarterSecurity = { group = "org.springframework.boot", name = "spring-boot-starter-security" }
+springBootStarterOauth2ResourceServer = { group = "org.springframework.boot", name = "spring-boot-starter-oauth2-resource-server" }
+springBootStarterValidation = { group = "org.springframework.boot", name = "spring-boot-starter-validation" }
+springBootStarterTest = { group = "org.springframework.boot", name = "spring-boot-starter-test" }
+springBootStarterQuartz = { group = "org.springframework.boot", name = "spring-boot-starter-quartz" }
+
+# Spring Data Commons for pagination (Spring Data JDBC compatible)
+springDataCommons = { group = "org.springframework.data", name = "spring-data-commons" }
+springSecurityTest = { group = "org.springframework.security", name = "spring-security-test", version.ref = "springSecurityVersion" }
+
+# Database
+postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
+flywayCore = { group = "org.flywaydb", name = "flyway-core" }
+flywayDatabasePostgresql = { group = "org.flywaydb", name = "flyway-database-postgresql" }
+
+# AWS Dependencies (versions managed by AWS BOM)
+awsBom = { group = "software.amazon.awssdk", name = "bom", version.ref = "awsBom" }
+awsRds = { group = "software.amazon.awssdk", name = "rds" }
+awsRdsAuth = { group = "software.amazon.awssdk", name = "rdsdata" }
+awsSecretsManager = { group = "software.amazon.awssdk", name = "secretsmanager" }
+awsSts = { group = "software.amazon.awssdk", name = "sts" }
+awsAuth = { group = "software.amazon.awssdk", name = "auth" }
+awsJdbcWrapper = { group = "software.amazon.jdbc", name = "aws-advanced-jdbc-wrapper", version.ref = "awsJdbcWrapper" }
+awsMskIamAuth = { group = "software.amazon.msk", name = "aws-msk-iam-auth", version.ref = "awsMskVersion" }
+
+# Messaging (Kafka)
+springKafka = { group = "org.springframework.kafka", name = "spring-kafka", version.ref = "springKafkaVersion" }
+springKafkaTest = { group = "org.springframework.kafka", name = "spring-kafka-test", version.ref = "springKafkaVersion" }
+
+# Logging
+logstashEncoder = { group = "net.logstash.logback", name = "logstash-logback-encoder", version.ref = "logstashEncoder" }
+
+# OpenAPI/Documentation
+springDocOpenApiStarterWebmvcUi = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springDocVersion" }
+springDocOpenApiStarterCommon = { group = "org.springdoc", name = "springdoc-openapi-starter-common", version.ref = "springDocVersion" }
+
+# Feature Flags
+unleashClient = { group = "io.getunleash", name = "unleash-client-java", version.ref = "unleashVersion" }
+
+# JSON processing
+jacksonModuleKotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin" }
+
+# UUID generation
+uuidGenerator = { group = "com.fasterxml.uuid", name = "java-uuid-generator", version.ref = "uuid" }
+
+# ShedLock for distributed scheduling
+shedlockSpring = { group = "net.javacrumbs.shedlock", name = "shedlock-spring", version.ref = "shedlock" }
+shedlockProviderJdbc = { group = "net.javacrumbs.shedlock", name = "shedlock-provider-jdbc-template", version.ref = "shedlock" }
+
+# Testing
+testcontainersJunitJupiter = { group = "org.testcontainers", name = "junit-jupiter", version.ref = "testcontainers" }
+testcontainersPostgresql = { group = "org.testcontainers", name = "postgresql", version.ref = "testcontainers" }
+kotest = { group = "io.kotest", name = "kotest-runner-junit5-jvm", version.ref = "kotest" }
+kotestExtensionsSpring = { group = "io.kotest.extensions", name = "kotest-extensions-spring", version = "1.3.0" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+
+# Code Quality
+detektFormatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }

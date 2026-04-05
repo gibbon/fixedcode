@@ -1,0 +1,65 @@
+# SonarQube Configuration for GAP {{LibraryName}}
+# This file contains the SonarQube analysis configuration for the library.
+
+# === PROJECT IDENTIFICATION ===
+# Update these properties for your specific library
+sonar.projectKey={{LibraryName}}
+{{#if IsFeatureLibrary}}
+sonar.projectName=GAP {{LibraryName}} {{LibraryName}} Library
+{{else}}
+sonar.projectName=GAP {{LibraryName}} Core Library
+{{/if}}
+sonar.projectVersion=${VERSION}
+
+# === SONAR SERVER ===
+sonar.host.url=https://sonarqube.pexa.io/
+
+# === SOURCE CONFIGURATION ===
+sonar.sources=src/main/kotlin
+sonar.tests=src/test/kotlin,src/testIntegration/kotlin
+sonar.sourceEncoding=UTF-8
+sonar.java.source=21
+
+# === COVERAGE CONFIGURATION ===
+sonar.java.coveragePlugin=jacoco
+# Combined report includes both unit and integration test coverage
+sonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
+sonar.junit.reportPaths=build/test-results/test,build/test-results/testIntegration
+
+# === EXCLUSIONS ===
+# Files to exclude from analysis
+sonar.exclusions=**/generated/**,**/build/**
+
+# Files to exclude from coverage calculation (aligned with JaCoCo exclusions)
+# Generated code - marked with @Generated annotation
+# - ValidationExceptionHandler - generated error handling
+# - Default*ValidationService - generated validation logic
+# - Event handlers - remote aggregate sync handlers
+# - Remote entities - generated remote aggregate entities
+# - FilterParser - generated infrastructure utility
+# - OutboxEventListener - infrastructure event handling
+# - SideEffect* - side effect outbox infrastructure
+# ApiDelegateImpl excluded - thin delegation layer tested via integration tests
+# QueryService excluded - policy engine integration tested via integration tests
+# Repository implementations excluded - SQL building tested via integration tests
+sonar.coverage.exclusions=**/generated/**,**/api/controller/**,**/api/dto/**,**/api/*ApiDelegateImpl.kt,**/services/Default*QueryService.kt,**/infrastructure/repository/**,**/autoconfigure/**,**/config/**,**/buildconfig/**,**/domain/**/Default*ValidationService.kt,**/events/handlers/**,**/infrastructure/remote/**,**/infrastructure/util/FilterParser.kt,**/infrastructure/util/JoinConstraint.kt,**/application/shared/OutboxEventListener.kt,**/application/shared/SideEffect*.kt,**/domain/shared/SideEffect*.kt,**/shared/jsonfieldchange/**
+
+# === QUALITY GATE ===
+# Wait for quality gate result (set by CI/CD environment)
+# sonar.qualitygate.wait=true
+
+# === GRADLE INTEGRATION ===
+sonar.gradle.skipCompile=true
+
+# === PULL REQUEST ANALYSIS ===
+# These properties are set by CI/CD environment variables:
+# sonar.pullrequest.key=${PR_KEY}
+# sonar.pullrequest.branch=${PR_BRANCH}
+# sonar.pullrequest.base=${PR_BASE_BRANCH}
+
+# === TEMPLATE INSTRUCTIONS ===
+# Regional teams should:
+# 1. Update sonar.projectKey to match your library name
+# 2. Update sonar.projectName to your library's display name
+# 3. Adjust exclusions based on your project structure
+# 4. Remove this comment section before first release

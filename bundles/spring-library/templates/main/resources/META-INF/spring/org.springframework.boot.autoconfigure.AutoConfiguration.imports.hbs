@@ -1,0 +1,16 @@
+# GAP Library Auto-Configuration
+# This file enables auto-configuration when this library is used as a dependency
+# Auto-configuration classes are automatically discovered and loaded by Spring Boot
+
+{{#unless IsFeatureLibrary}}
+# Policy engine auto-configuration
+io.pexa.gap.policy.PolicyAutoConfiguration
+
+# Event processing auto-configuration provided by gap-library-events dependency
+
+# Object change detection auto-configuration
+io.pexa.gap.shared.jsonfieldchange.JsonFieldChangeConfiguration
+{{/unless}}
+
+# {{#if IsFeatureLibrary}}Feature{{else}}Main{{/if}} library auto-configuration
+io.pexa.gap.{{LibraryName}}.config.{{LibraryName}}AutoConfiguration

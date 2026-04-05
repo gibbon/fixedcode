@@ -1,0 +1,38 @@
+package io.pexa.gap.{{LibraryName}}.architecture
+
+import com.tngtech.archunit.junit.AnalyzeClasses
+
+/**
+ * Custom architecture tests for {{LibraryName}} domain.
+ * 
+ * This file is generated once and never overwritten by the generator.
+ * Add your team-specific architecture rules here.
+ * 
+ * Example rules:
+ * - Enforce specific naming patterns for your domain
+ * - Validate custom annotations
+ * - Check for specific dependencies
+ * - Enforce team conventions
+ * 
+ * To disable a rule, comment out or remove the @ArchTest annotation.
+ */
+@AnalyzeClasses(packages = ["io.pexa.gap.{{LibraryName}}"])
+class CustomArchitectureTest {
+
+    // Example: Enforce that all validators end with "Validator"
+    // @ArchTest
+    // val validatorsEndWithValidator: ArchRule = classes()
+    //     .that().resideInAPackage("..validators..")
+    //     .should().haveSimpleNameEndingWith("Validator")
+    //     .because("Validator classes should follow naming convention")
+
+    // Example: Ensure no direct database access from API layer
+    // @ArchTest
+    // val apiLayerDoesNotAccessDatabase: ArchRule = classes()
+    //     .that().resideInAPackage("..api..")
+    //     .should().onlyDependOnClassesThat()
+    //     .resideOutsideOfPackage("..infrastructure.repository..")
+    //     .because("API layer should not directly access repositories")
+
+    // Add your custom rules below
+}

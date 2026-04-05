@@ -1,0 +1,153 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["build"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": ["$gradle"]
+    },
+    {
+      "label": "Clean Build",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["clean", "build"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": ["$gradle"]
+    },
+    {
+      "label": "Test",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["test"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": ["$gradle"]
+    },
+    {
+      "label": "Integration Tests",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["testIntegration"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": ["$gradle"]
+    },
+    {
+      "label": "Quality Checks",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["detekt", "jacocoTestReport"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": ["$gradle"]
+    },
+    {
+      "label": "Publish to Maven Local",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["publishToMavenLocal"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": ["$gradle"]
+    },
+    {
+      "label": "Generate OpenAPI Code",
+      "type": "shell",
+      "command": "./gradlew",
+      "args": ["openApiGenerate"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": ["$gradle"]
+    },
+    {
+      "label": "Start Docker Services",
+      "type": "shell",
+      "command": "docker",
+      "args": ["compose", "up", "-d"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      }
+    },
+    {
+      "label": "Stop Docker Services",
+      "type": "shell",
+      "command": "docker",
+      "args": ["compose", "down"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      }
+    }
+  ]
+}

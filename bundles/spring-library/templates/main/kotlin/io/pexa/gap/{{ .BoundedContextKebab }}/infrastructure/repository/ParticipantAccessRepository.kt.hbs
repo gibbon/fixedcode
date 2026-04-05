@@ -1,0 +1,25 @@
+{{ if or .IsWorkspaceDomain .HasParticipantAccess }}
+package io.pexa.gap.{{LibraryName}}.infrastructure.repository
+
+import java.util.UUID
+
+/**
+ * Repository interface for checking participant access to workspaces.
+ * 
+ * Implemented differently depending on domain type:
+ * - Workspace domain: queries local `participants` table
+ * - Other domains: queries `remote_participants` table
+ */
+interface ParticipantAccessRepository {
+    
+    /**
+     * Check if a subscriber is a participant in a workspace.
+     */
+    fun isParticipant(workspaceId: UUID, subscriberId: UUID): Boolean
+    
+    /**
+     * Get all workspace IDs where a subscriber is a participant.
+     */
+    fun getWorkspaceIdsForSubscriber(subscriberId: UUID): List<UUID>
+}
+{{/if}}

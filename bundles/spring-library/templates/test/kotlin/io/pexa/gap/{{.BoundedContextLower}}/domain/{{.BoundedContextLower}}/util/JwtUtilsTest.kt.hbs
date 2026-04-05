@@ -1,0 +1,97 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{.BoundedContextLower}}.domain.{{.BoundedContextLower}}.util
+
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+
+class JwtUtilsTest {
+
+    private lateinit var jwtUtils: JwtUtils
+    private val customClaimsPath = "custom_claims"
+
+    @BeforeEach
+    fun setUp() {
+        jwtUtils = JwtUtils(customClaimsPath)
+        mockkStatic(SecurityContextHolder::class)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        unmockkStatic(SecurityContextHolder::class)
+    }
+
+    @Test
+    fun `should return custom claim value when JWT authentication exists`() {
+        val jwt = mockk<Jwt>(relaxed = true)
+        val customClaims = mapOf("userId" to "test-user-123", "role" to "admin")
+        every { jwt.getClaim<Map<String, Any>>(customClaimsPath) } returns customClaims
+
+        val jwtAuth = JwtAuthenticationToken(jwt)
+        val securityContext = mockk<SecurityContext>()
+        every { securityContext.authentication } returns jwtAuth
+        every { SecurityContextHolder.getContext() } returns securityContext
+
+        val result = jwtUtils.getCustomClaim("userId")
+
+        assertEquals("test-user-123", result)
+    }
+
+    @Test
+    fun `should throw error when custom claim not found`() {
+        val jwt = mockk<Jwt>(relaxed = true)
+        val customClaims = mapOf("otherClaim" to "value")
+        every { jwt.getClaim<Map<String, Any>>(customClaimsPath) } returns customClaims
+
+        val jwtAuth = JwtAuthenticationToken(jwt)
+        val securityContext = mockk<SecurityContext>()
+        every { securityContext.authentication } returns jwtAuth
+        every { SecurityContextHolder.getContext() } returns securityContext
+
+        val exception = assertThrows(IllegalStateException::class.java) {
+            jwtUtils.getCustomClaim("missingClaim")
+        }
+        assertEquals("Custom claim 'missingClaim' not found in JWT", exception.message)
+    }
+
+    @Test
+    fun `should throw error when custom claims map is null`() {
+        val jwt = mockk<Jwt>(relaxed = true)
+        every { jwt.getClaim<Map<String, Any>>(customClaimsPath) } returns null
+
+        val jwtAuth = JwtAuthenticationToken(jwt)
+        val securityContext = mockk<SecurityContext>()
+        every { securityContext.authentication } returns jwtAuth
+        every { SecurityContextHolder.getContext() } returns securityContext
+
+        val exception = assertThrows(IllegalStateException::class.java) {
+            jwtUtils.getCustomClaim("userId")
+        }
+        assertEquals("Custom claim 'userId' not found in JWT", exception.message)
+    }
+
+    @Test
+    fun `should throw error when no JWT authentication found`() {
+        val nonJwtAuth = mockk<Authentication>()
+        val securityContext = mockk<SecurityContext>()
+        every { securityContext.authentication } returns nonJwtAuth
+        every { SecurityContextHolder.getContext() } returns securityContext
+
+        val exception = assertThrows(IllegalStateException::class.java) {
+            jwtUtils.getCustomClaim("userId")
+        }
+        assertEquals("No JWT authentication found", exception.message)
+    }
+}
+{{/unless}}

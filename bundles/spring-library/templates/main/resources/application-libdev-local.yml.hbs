@@ -1,0 +1,22 @@
+{{#unless IsFeatureLibrary}}
+# Local development with default roles
+# Activate with: --spring.profiles.active=libdev,local
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+gap:
+  policy:
+    local:
+      # Default roles when X-Debug-Roles header is not provided
+      # Change these to test different role combinations
+      default-roles: ADMIN,USER
+      default-subscriber-id: 550e8400-e29b-41d4-a716-446655440000
+    debug: true  # Enable debug logging to see roles in action
+
+logging:
+  level:
+    io.pexa.gap.policy: DEBUG
+{{/unless}}

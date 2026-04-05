@@ -1,0 +1,58 @@
+package io.pexa.gap.shared.jsonfieldchange
+
+/**
+ * Interface for handling detected changes in object fields.
+ *
+ * Handlers are registered with the [JsonFieldChangeRegistry] and invoked when changes
+ * are detected at paths matching their [watchPath] pattern.
+ *
+ * ## Important: Side Effects
+ * Handlers are invoked within the same transaction as the command that triggered the change.
+ * For any I/O operations (external API calls, sending emails, etc.), use the SideEffectScheduler
+ * to ensure reliable execution with retry logic.
+ *
+ * ## Example Implementation
+ * ```kotlin
+ * @Component
+ * class AddressChangeHandler(
+ *     private val sideEffectService: SideEffectService
+ * ) : JsonFieldChangeHandler<Map<String, Any?>> {
+ *     override val watchPath = "addresses.*"
+ *
+ *     override fun handle(change: JsonFieldChange<Map<String, Any?>>) {
+ *         // Validate the change (can throw to veto/rollback)
+ *         val newAddress = change.newValue ?: return
+ *         if (newAddress["postcode"] == null) {
+ *             throw IllegalArgumentException("Address must have a postcode")
+ *         }
+ *
+ *         // Schedule async side effect for geocoding
+ *         sideEffectService.schedule(GeocodeAddressSideEffect(newAddress))
+ *     }
+ * }
+ * ```
+ *
+ * @param T The type of value at the watched path
+ */
+interface JsonFieldChangeHandler<T> {
+    /**
+     * The path pattern to watch for changes.
+     *
+     * Supports exact paths and wildcards:
+     * - `"addresses"` - matches only the root "addresses" path
+     * - `"addresses.*"` - matches any direct child of addresses (e.g., "addresses.0", "addresses.home")
+     * - `"addresses.*.street"` - matches street field of any address
+     */
+    val watchPath: String
+
+    /**
+     * Handle a detected change.
+     *
+     * This method is called within the same transaction as the triggering command.
+     * Throwing an exception will cause the transaction to roll back.
+     *
+     * @param change The detected change with old and new values
+     * @throws Exception to veto the change and roll back the transaction
+     */
+    fun handle(change: JsonFieldChange<T>)
+}

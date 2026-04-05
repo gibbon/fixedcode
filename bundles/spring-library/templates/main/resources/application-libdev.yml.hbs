@@ -1,0 +1,228 @@
+{{#unless IsFeatureLibrary}}
+# Library Development profile configuration (libdev)
+# This profile is used when running the library as a standalone application for development/testing
+# Uses 'libdev' profile name to avoid conflicts with consuming applications' 'dev' profiles
+
+---
+spring:
+  config:
+    activate:
+      on-profile: libdev
+
+  application:
+    name: {{LibraryName}}
+
+  # CORS configuration for local development
+  web:
+    cors:
+      allowed-origins:
+        - http://localhost:3000
+        - http://localhost:3001
+        - http://localhost:8080
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      allowed-headers:
+        - "*"
+      allow-credentials: true
+      max-age: 3600
+
+  # Jackson configuration to preserve empty collections
+  jackson:
+    default-property-inclusion: always
+    deserialization:
+      ACCEPT_EMPTY_STRING_AS_NULL_OBJECT: false
+
+  # Read/Write datasource split configuration for development
+  datasource:
+    write:
+      jdbc-url: jdbc:postgresql://localhost:5432/gap_db?currentSchema={{LibraryName}}
+      username: gap_user
+      password: gap_password
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        maximum-pool-size: 10
+        minimum-idle: 2
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+    read:
+      jdbc-url: jdbc:postgresql://localhost:5432/gap_db?currentSchema={{LibraryName}}
+      username: gap_user
+      password: gap_password
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        maximum-pool-size: 5
+        minimum-idle: 1
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+      
+  # Flyway configuration for development
+  flyway:
+    enabled: true
+    locations: classpath:db/migration/core
+    table: flyway_schema_history_core
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    
+  # Spring Data JDBC configuration (for development only)
+  sql:
+    init:
+      mode: never  # Let Flyway handle schema
+
+  # OAuth2 Resource Server configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://pexa-eba.au.auth0.com/
+          jwk-set-uri: https://pexa-eba.au.auth0.com/.well-known/jwks.json
+          custom-claims-path: https://eba-dev.pexalabs.com.au/customClaims
+
+
+  # Kafka configuration for local development (single broker)
+  kafka:
+    bootstrap-servers: localhost:9092
+    properties:
+      security.protocol: PLAINTEXT
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      properties:
+        linger.ms: 10
+        batch.size: 16384
+        compression.type: lz4
+        request.timeout.ms: 20000
+        delivery.timeout.ms: 30000
+        max.block.ms: 10000
+        enable.idempotence: true
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: {{LibraryName}}.consumer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        # Consumer tuning for production resilience
+        max.poll.interval.ms: 600000  # 10 minutes - prevent rebalance during slow processing
+        max.poll.records: 10          # Small batches for predictable latency
+        session.timeout.ms: 60000     # 1 minute - detect failed consumers
+        heartbeat.interval.ms: 10000  # 10 seconds - keep session alive
+        partition.assignment.strategy: org.apache.kafka.clients.consumer.CooperativeStickyAssignor
+    listener:
+      ack-mode: manual
+
+# Server configuration for development
+# Uses 9xxx ports (e.g., 8081 -> 9081) to avoid conflicts with Docker containers
+server:
+  port: {{ add 1000 .ServerPort }}
+
+# Management endpoints for development
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,configprops
+  endpoint:
+    health:
+      show-details: always
+
+# GAP Library configuration for development
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %clr(%-5level) %clr([%thread]){faint} %clr(%logger{36}){cyan} - %msg%n"
+  level:
+    root: INFO
+    io.pexa.gap: DEBUG
+    {{LibraryName}}: DEBUG
+    {{LibraryName}}.application.shared.SideEffectScheduler: WARN
+    org.springframework.kafka: WARN
+    org.apache.kafka: WARN
+    org.springframework.jdbc: INFO
+    org.springframework.data.jdbc: INFO
+    org.springframework.data.relational: INFO
+    org.flywaydb: INFO
+
+gap:
+  {{LibraryName}}-core:
+    flyway:
+      default-schema: {{LibraryName}}
+  test-harness:
+    db-viewer:
+      enabled: true
+  object-change:
+    enabled: true   # Enable JSON field change detection and handler registration
+  policy:
+    enabled: false   # Enable policy for development (set to false to disable)
+    debug: true     # Enable debug headers
+    verbose: true    # Enable verbose logging
+    local:
+      default-roles: "TEST_USER"  # Default roles for test harness
+      default-subscriber-id: "00000000-0000-0000-0000-000000000000"
+    field-filtering:
+      allow-all-system-fields: true  # Allow audit fields for development/testing
+    api:
+      rate-limit:
+        enabled: false  # Disable rate limiting for development
+  events:
+    topic-prefix: ""  # e.g., "gap-au-aml-workspace" for environment-specific topics
+    topic-suffix: ""  # e.g., "dev" for environment-specific topics
+    topics: {{#each RemoteAggregates}}{{#unless @first}},{{/unless}}{{this.Topic}}{{else}}workspace-events{{/each}}
+    dlq-suffix: .DLQ
+    consumer:
+      concurrency: 2  # Max concurrent event processing threads per pod
+    retry:
+      max-attempts: 5  # Max retry attempts before sending to DLQ
+    backpressure:
+      max-concurrent: 10  # Max concurrent event processing across all threads
+  library:
+    name: GAP Library Template Development
+    version: dev
+    environment: development
+    debug: true
+    startup-logging-enabled: true
+    security:
+      enabled: false  # Set to false to disable OAuth2 security
+      permit-all-paths:
+        - "/actuator/health"
+        - "/test-harness/index.html"
+        - "/test-harness/db-viewer.html"
+        - "/test-harness/api/**"
+        - "/_admin/health/readiness"
+        - "/_admin/health/liveness"
+        # Add custom paths as needed:
+        # - "/api/public/**"
+        # - "/swagger-ui/**"
+    validation:
+      maxLabels: 50
+      maxReferenceIdLength: 100
+      maxDescriptionLength: 500
+      allowedReferenceIdPattern: "^[A-Za-z0-9_-]+$"
+    bulk:
+      maxBatchSize: 100
+      timeoutSeconds: 30
+    events:
+      asyncProcessing: true
+      retryAttempts: 3
+      retryDelaySeconds: 5
+    audit:
+      enableAutoAuditing: true
+      defaultUser: "dev-system"
+    features:
+      database: postgresql
+      flyway: true
+      kafka: true
+      actuator: true
+      metrics: true
+      prometheus: false
+
+{{/unless}}

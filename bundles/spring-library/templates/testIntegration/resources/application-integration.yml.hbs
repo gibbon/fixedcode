@@ -1,0 +1,72 @@
+# Integration test configuration for GAP Library Template
+# This configuration is used specifically for integration tests with Testcontainers
+
+spring:
+  application:
+    name: {{LibraryName}}-integration-test
+  
+  main:
+    allow-bean-definition-overriding: true
+    
+  # Database configuration (will be overridden by Testcontainers)
+  datasource:
+    write:
+      # These values will be dynamically set by @DynamicPropertySource
+      jdbc-url: jdbc:postgresql://localhost:5432/gap_integration_test
+      driver-class-name: org.postgresql.Driver
+      username: gap_test_user
+      password: gap_test_password
+    read:
+      # These values will be dynamically set by @DynamicPropertySource
+      jdbc-url: jdbc:postgresql://localhost:5432/gap_integration_test
+      driver-class-name: org.postgresql.Driver
+      username: gap_test_user
+      password: gap_test_password
+    
+  # Spring Data JDBC configuration for integration tests
+  sql:
+    init:
+      mode: never  # Let Flyway handle schema
+  
+  # Disable default Spring Flyway - CoreFlywayAutoConfiguration handles migrations
+  flyway:
+    enabled: false
+
+  # Disable Spring Boot's default Flyway to avoid conflicts with CoreFlywayAutoConfiguration
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+      
+  # OAuth2 Resource Server configuration for integration tests
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          custom-claims-path: "https://pexa.au.auth.com/customClaims"
+
+# GAP Library configuration for integration tests
+gap:
+  library:
+    name: GAP Library Integration Test
+    version: integration-test
+    description: Spring Boot library template for GAP services
+
+# Logging configuration for integration tests
+logging:
+  level:
+    io.pexa.gap: DEBUG
+    org.springframework.jdbc: INFO
+    org.springframework.data.jdbc: INFO
+    org.testcontainers: INFO
+    com.github.dockerjava: WARN
+    org.postgresql: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Disable unnecessary features for integration tests
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true

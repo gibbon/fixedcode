@@ -1,0 +1,52 @@
+{
+  "properties": [
+    {
+      "name": "gap.{{ .NameSnake }}.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Controls whether the GAP {{ .Name }} library is enabled. When disabled, auto-configuration will not be applied.",
+      "defaultValue": true
+    },
+    {
+      "name": "gap.{{ .NameSnake }}.startup-logging-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Controls whether the {{ .Name }} library logs startup information. Useful for reducing log noise in production or when library is used in many microservices.",
+      "defaultValue": true
+    },
+    {
+      "name": "gap.{{ .NameKebab }}-core.flyway.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Controls whether Flyway database migrations are enabled for {{ .Name }} core schema.",
+      "defaultValue": true
+    },
+    {
+      "name": "gap.{{ .NameKebab }}-core.flyway.locations",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Locations of database migration scripts for {{ .Name }} core schema.",
+      "defaultValue": ["classpath:db/migration/core"]
+    },
+    {
+      "name": "gap.{{ .NameKebab }}-core.flyway.table",
+      "type": "java.lang.String",
+      "description": "Name of the Flyway schema history table for {{ .Name }} core migrations.",
+      "defaultValue": "flyway_schema_history_core"
+    },
+    {
+      "name": "gap.{{ .NameKebab }}-core.flyway.baseline-on-migrate",
+      "type": "java.lang.Boolean",
+      "description": "Whether to automatically call baseline when migrate is executed against a non-empty schema.",
+      "defaultValue": true
+    },
+    {
+      "name": "gap.{{ .NameKebab }}-core.flyway.validate-on-migrate",
+      "type": "java.lang.Boolean",
+      "description": "Whether to automatically call validate when running migrate.",
+      "defaultValue": true
+    },
+    {
+      "name": "gap.remote-aggregate.max-retries",
+      "type": "java.lang.Integer",
+      "description": "Maximum number of retries for remote aggregate event processing when aggregate is not found. After max retries, event is sent to DLQ. Prevents infinite retries when CREATED event is lost.",
+      "defaultValue": 10
+    }
+  ]
+}

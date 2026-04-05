@@ -1,0 +1,35 @@
+{{#unless IsFeatureLibrary}}
+# Local development profile configuration
+# Activate with: --spring.profiles.active=local
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %clr(%-5level) %clr([%thread]){faint} %clr(%logger{36}){cyan} - %msg%n"
+  level:
+    root: INFO
+    io.pexa.gap: DEBUG
+    {{LibraryName}}: DEBUG
+    {{LibraryName}}.application.shared.SideEffectScheduler: WARN
+    org.springframework.kafka: WARN
+    org.apache.kafka: WARN
+    org.springframework.jdbc: INFO
+    org.springframework.data.jdbc: INFO
+    org.springframework.data.relational: INFO
+    org.flywaydb: INFO
+
+gap:
+  policy:
+    # Disable rate limiting for local development
+    api:
+      rate-limit:
+        enabled: false
+
+    # Default roles for local testing (override with X-Debug-Roles header)
+    local:
+      default-roles: "TEST_USER"
+      default-subscriber-id: "00000000-0000-0000-0000-000000000000"
+
+    # Enable debug and verbose logging for local development
+    debug: true
+    verbose: true
+{{/unless}}

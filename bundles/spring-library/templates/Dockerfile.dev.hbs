@@ -1,0 +1,56 @@
+{{#unless IsFeatureLibrary}}
+FROM amazoncorretto:25-alpine
+
+WORKDIR /app
+
+# Install curl and ca-certificates for health checks and SSL
+RUN apk add --no-cache curl ca-certificates
+
+# Copy certificates and import into Java truststore
+COPY certs/*.pem /tmp/certs/
+RUN for cert in /tmp/certs/*.pem; do \
+      keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -alias $(basename $cert .pem) -file $cert -noprompt; \
+    done
+
+# Copy only gradle wrapper and dependencies configuration
+# This layer will be cached unless gradle wrapper or dependencies change
+COPY build/{{LibraryName}}/gradle/ ./gradle/
+COPY build/{{LibraryName}}/gradlew ./
+COPY build/{{LibraryName}}/gradlew.bat ./
+COPY build/{{LibraryName}}/build.gradle.kts ./
+COPY build/{{LibraryName}}/settings.gradle.kts ./
+COPY build/{{LibraryName}}/gradle.properties ./
+
+# Make gradlew executable
+RUN chmod +x ./gradlew
+
+# Comment out the plugin-publishing plugin for dev mode (not needed for development)
+RUN sed -i 's/alias(libs.plugins.pluginPublish)/\/\/ alias(libs.plugins.pluginPublish)/' build.gradle.kts
+
+# Comment out PEXA internal dependencies that require Artifactory (gap-shared-* libraries)
+# These are only available in the internal Artifactory, not in mavenCentral
+RUN sed -i 's/implementation(platform(libs.gapSharedBom))/\/\/ implementation(platform(libs.gapSharedBom))/' build.gradle.kts && \
+    sed -i 's/implementation(libs.gapShared/\/\/ implementation(libs.gapShared/g' build.gradle.kts
+
+# Note: We leave the Artifactory repositories in place. Gradle will try them (and fail due to no credentials),
+# but then fall back to mavenCentral for standard dependencies.
+
+# Note: We skip pre-downloading dependencies here because:
+# 1. The gradle cache volume is mounted at runtime, not during build
+# 2. Dependencies will be downloaded once when container starts
+# 3. The volume persists them across container restarts
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# Expose port
+EXPOSE {{LibraryName}}
+
+# Set JVM options for faster startup and enable debugging
+ENV JAVA_OPTS="-Xmx1g -Xms512m -XX:+UseG1GC -XX:+UseStringDeduplication"
+
+# Run with continuous build - watches for file changes and auto-recompiles
+# Note: Source code will be mounted as a volume, not copied
+ENTRYPOINT ["./gradlew", "bootRun", "--continuous", "-Dspring.profiles.active=docker", "--no-daemon"]
+{{/unless}}

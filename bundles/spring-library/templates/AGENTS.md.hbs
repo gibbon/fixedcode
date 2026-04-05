@@ -1,0 +1,41 @@
+# {{ DomainNamePascal }} - GAP Global Core Library
+
+Published to Artifactory, consumed by regional services. Regional services override defaults by providing their own `@Bean` — no `@Profile` needed.
+
+## Architecture Rules (ArchUnit-enforced)
+
+Layer dependencies — violations fail the build:
+- **API** → Application, Domain
+- **Application** → Domain, Infrastructure
+- **Domain** → nothing
+- **Infrastructure** → Domain
+
+| Class Type | Package | Suffix | Annotation |
+|------------|---------|--------|------------|
+| Controllers | `..api..` | `Controller` | `@RestController` |
+| Services | `..application..` | `Service` | `@Service` |
+| Repositories | `..infrastructure..` | `Repository` | `@Repository` |
+| Commands | `..application.commands..` | `Command` / `Data` | — |
+| Queries | `..application.queries..` | `Query` / `Data` | — |
+| Events | `..domain.events..` | `Event` / `Handler` | `@Transactional` on handle methods |
+
+## Critical Rules
+
+- **Database migrations**: V001–V099 are GAP-generated (do NOT modify). V100+ for custom migrations.
+- **Override pattern**: This library uses `@ConditionalOnMissingBean` — regional services override by simply providing the bean.
+- **No region-specific logic** in this library — business rules belong in regional services.
+- **Don't skip layers** — controllers must go through services, not directly to repositories.
+
+## Key Commands
+
+```bash
+./gradlew build                              # full build + test
+./gradlew test --tests "*ArchitectureTest"   # verify architecture rules
+./gradlew testIntegration                    # integration tests
+```
+
+## Documentation
+
+- **`docs/context/ARCHITECTURE_RULES.md`** — Complete architecture rules
+- **`docs/DEVELOPMENT.md`** — Development guide
+- **`docs/BUILD_CONFIGURATION.md`** — Build and dependency details

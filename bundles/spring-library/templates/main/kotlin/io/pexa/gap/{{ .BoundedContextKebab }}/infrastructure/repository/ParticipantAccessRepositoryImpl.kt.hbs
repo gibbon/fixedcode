@@ -1,0 +1,61 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{LibraryName}}.infrastructure.repository
+
+import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.stereotype.Repository
+import java.util.UUID
+
+/**
+ * Workspace domain implementation - queries local participants table.
+ */
+@Repository
+class ParticipantAccessRepositoryImpl(
+    private val jdbcTemplate: JdbcTemplate
+) : ParticipantAccessRepository {
+    
+    override fun isParticipant(workspaceId: UUID, subscriberId: UUID): Boolean {
+        val sql = """
+            SELECT EXISTS(
+                SELECT 1 FROM participants 
+                WHERE workspace_id = ? AND subscriber_id = ?
+            )
+        """.trimIndent()
+        return jdbcTemplate.queryForObject(sql, Boolean::class.java, workspaceId, subscriberId) ?: false
+    }
+    
+    override fun getWorkspaceIdsForSubscriber(subscriberId: UUID): List<UUID> {
+        val sql = "SELECT DISTINCT workspace_id FROM participants WHERE subscriber_id = ?"
+        return jdbcTemplate.queryForList(sql, UUID::class.java, subscriberId)
+    }
+}
+{{ else if .HasParticipantAccess }}
+package io.pexa.gap.{{LibraryName}}.infrastructure.repository
+
+import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.stereotype.Repository
+import java.util.UUID
+
+/**
+ * Remote aggregate domain implementation - queries remote_participants table.
+ */
+@Repository
+class ParticipantAccessRepositoryImpl(
+    private val jdbcTemplate: JdbcTemplate
+) : ParticipantAccessRepository {
+    
+    override fun isParticipant(workspaceId: UUID, subscriberId: UUID): Boolean {
+        val sql = """
+            SELECT EXISTS(
+                SELECT 1 FROM remote_participants 
+                WHERE workspace_id = ? AND subscriber_id = ?
+            )
+        """.trimIndent()
+        return jdbcTemplate.queryForObject(sql, Boolean::class.java, workspaceId, subscriberId) ?: false
+    }
+    
+    override fun getWorkspaceIdsForSubscriber(subscriberId: UUID): List<UUID> {
+        val sql = "SELECT DISTINCT workspace_id FROM remote_participants WHERE subscriber_id = ?"
+        return jdbcTemplate.queryForList(sql, UUID::class.java, subscriberId)
+    }
+}
+{{/unless}}

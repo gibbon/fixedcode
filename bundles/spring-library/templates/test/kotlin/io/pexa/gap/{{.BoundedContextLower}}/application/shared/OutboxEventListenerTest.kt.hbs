@@ -1,0 +1,190 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{.BoundedContextLower}}.application.shared
+
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import io.pexa.gap.events.repository.OutboxRepository
+import io.pexa.gap.{{.BoundedContextLower}}.domain.shared.DomainEvent
+import io.pexa.gap.{{.BoundedContextLower}}.domain.shared.JwtService
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.slf4j.MDC
+import java.util.UUID
+
+class OutboxEventListenerTest {
+
+    private lateinit var outboxRepository: OutboxRepository
+    private lateinit var jwtService: JwtService
+    private lateinit var topicNameResolver: TopicNameResolver
+    private lateinit var listener: OutboxEventListener
+
+    @BeforeEach
+    fun setUp() {
+        outboxRepository = mockk(relaxed = true)
+        jwtService = mockk(relaxed = true)
+        topicNameResolver = mockk(relaxed = true)
+        
+        // Mock JWT service to return test user ID
+        every { jwtService.getCurrentUserId() } returns "test-user-id"
+        
+        // Mock topic resolver to return the base topic unchanged by default
+        every { topicNameResolver.resolveTopicName(any()) } answers { firstArg() }
+        
+        listener = OutboxEventListener(outboxRepository, jwtService, topicNameResolver)
+        
+        // Clear MDC before each test
+        MDC.clear()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        MDC.clear()
+    }
+
+    @Test
+    fun `should save event with correlationId from MDC`() {
+        // Given
+        val correlationId = UUID.randomUUID()
+        MDC.put("correlationId", correlationId.toString())
+        
+        val eventId = UUID.randomUUID()
+        val aggregateId = UUID.randomUUID()
+        val event = mockk<DomainEvent>(relaxed = true)
+        every { event.eventId } returns eventId
+        every { event.eventType } returns "TestEvent"
+        every { event.getTopicName() } returns "test_topic"
+        every { event.getRootAggregateId() } returns aggregateId
+        
+        // When
+        listener.handleDomainEvent(event)
+        
+        // Then
+        verify {
+            outboxRepository.insertEvent(
+                eventId = eventId,
+                eventType = "TestEvent",
+                traceId = correlationId,
+                causationId = null,  // No causation in MDC
+                aggregateId = aggregateId,
+                aggregateType = any(),
+                topic = "test_topic",
+                payload = any(),
+                createdBy = any(),
+                createdAt = any(),
+                status = "PENDING",
+                version = any(),
+            )
+        }
+    }
+
+    @Test
+    fun `should save event with causationId from MDC`() {
+        // Given
+        val correlationId = UUID.randomUUID()
+        val causationId = UUID.randomUUID()
+        MDC.put("correlationId", correlationId.toString())
+        MDC.put("causationId", causationId.toString())
+        
+        val eventId = UUID.randomUUID()
+        val aggregateId = UUID.randomUUID()
+        val event = mockk<DomainEvent>(relaxed = true)
+        every { event.eventId } returns eventId
+        every { event.eventType } returns "TestEvent"
+        every { event.getTopicName() } returns "test_topic"
+        every { event.getRootAggregateId() } returns aggregateId
+        
+        // When
+        listener.handleDomainEvent(event)
+        
+        // Then
+        verify {
+            outboxRepository.insertEvent(
+                eventId = eventId,
+                eventType = "TestEvent",
+                traceId = correlationId,
+                causationId = causationId,  // Causation from MDC
+                aggregateId = aggregateId,
+                aggregateType = any(),
+                topic = "test_topic",
+                payload = any(),
+                createdBy = any(),
+                createdAt = any(),
+                status = "PENDING",
+                version = any(),
+            )
+        }
+    }
+
+    @Test
+    fun `should generate new correlationId when MDC is empty`() {
+        // Given - No MDC values set
+        val eventId = UUID.randomUUID()
+        val aggregateId = UUID.randomUUID()
+        val event = mockk<DomainEvent>(relaxed = true)
+        every { event.eventId } returns eventId
+        every { event.eventType } returns "TestEvent"
+        every { event.getTopicName() } returns "test_topic"
+        every { event.getRootAggregateId() } returns aggregateId
+        
+        // When
+        listener.handleDomainEvent(event)
+        
+        // Then
+        verify {
+            outboxRepository.insertEvent(
+                eventId = eventId,
+                eventType = "TestEvent",
+                traceId = match { it != null },  // Generated UUID
+                causationId = null,  // No causation
+                aggregateId = aggregateId,
+                aggregateType = any(),
+                topic = "test_topic",
+                payload = any(),
+                createdBy = any(),
+                createdAt = any(),
+                status = "PENDING",
+                version = any(),
+            )
+        }
+    }
+
+    @Test
+    fun `should handle null causationId when only correlationId present`() {
+        // Given
+        val correlationId = UUID.randomUUID()
+        MDC.put("correlationId", correlationId.toString())
+        // No causationId in MDC
+        
+        val eventId = UUID.randomUUID()
+        val aggregateId = UUID.randomUUID()
+        val event = mockk<DomainEvent>(relaxed = true)
+        every { event.eventId } returns eventId
+        every { event.eventType } returns "TestEvent"
+        every { event.getTopicName() } returns "test_topic"
+        every { event.getRootAggregateId() } returns aggregateId
+        
+        // When
+        listener.handleDomainEvent(event)
+        
+        // Then
+        verify {
+            outboxRepository.insertEvent(
+                eventId = eventId,
+                eventType = "TestEvent",
+                traceId = correlationId,
+                causationId = null,  // Should be null, not throw exception
+                aggregateId = aggregateId,
+                aggregateType = any(),
+                topic = "test_topic",
+                payload = any(),
+                createdBy = any(),
+                createdAt = any(),
+                status = "PENDING",
+                version = any(),
+            )
+        }
+    }
+}
+{{/unless}}

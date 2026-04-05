@@ -1,0 +1,119 @@
+# Dependabot configuration for GAP Library Template
+# Automatically updates dependencies to maintain security and compatibility
+# See: https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  # GitHub Actions workflow dependencies
+  - package-ecosystem: "github-actions"
+    registries: "*"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "02:00"
+      timezone: "Australia/Melbourne"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Gradle dependencies (build.gradle.kts, gradle/libs.versions.toml)
+  - package-ecosystem: "gradle"
+    registries: "*"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "02:00"
+      timezone: "Australia/Melbourne"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "gradle"
+      - "automated"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Group related updates together
+    groups:
+      kotlin:
+        patterns:
+          - "org.jetbrains.kotlin*"
+          - "kotlin*"
+        update-types:
+          - "minor"
+          - "patch"
+      testing:
+        patterns:
+          - "org.junit*"
+          - "junit*"
+          - "org.mockito*"
+          - "mockito*"
+          - "org.assertj*"
+          - "assertj*"
+        update-types:
+          - "minor"
+          - "patch"
+      jackson:
+        patterns:
+          - "com.fasterxml.jackson*"
+          - "jackson*"
+        update-types:
+          - "minor"
+          - "patch"
+      gradle-plugins:
+        patterns:
+          - "org.jetbrains.dokka*"
+          - "io.gitlab.arturbosch.detekt*"
+          - "org.gradle*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Ignore specific dependencies that require manual updates
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+      # Ignore BOM-managed transitive dependencies - these are managed by Spring Boot BOM
+      - dependency-name: "org.springframework:spring-webmvc"
+      - dependency-name: "org.springframework:spring-*"
+      - dependency-name: "org.apache.tomcat.embed:*"
+
+      # Ignore AWS SDK BOM-managed dependencies
+      - dependency-name: "org.apache.commons:commons-compress"
+      - dependency-name: "org.apache.commons:commons-lang3"
+      - dependency-name: "io.netty:*"
+      - dependency-name: "software.amazon.awssdk:*"
+
+  # Docker dependencies (if Dockerfile exists)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "02:00"
+      timezone: "Australia/Melbourne"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
+      - "automated"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+registries:
+  artifactory-plugins:
+    type: maven-repository
+    url: https://pexaartifacts.jfrog.io/artifactory/plugins-release-local
+    username: ${{"{{"}} secrets.ARTIFACTORY_USERNAME {{"}}"}}
+    password: ${{"{{"}} secrets.ARTIFACTORY_TOKEN {{"}}"}}
+  artifactory-libs:
+    type: maven-repository
+    url: https://pexaartifacts.jfrog.io/artifactory/libs-release
+    username: ${{"{{"}} secrets.ARTIFACTORY_USERNAME {{"}}"}}
+    password: ${{"{{"}} secrets.ARTIFACTORY_TOKEN {{"}}"}}

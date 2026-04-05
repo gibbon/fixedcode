@@ -1,0 +1,44 @@
+{{#unless IsFeatureLibrary}}
+-- Side Effect Outbox Migration
+-- Creates table for reliable side effect execution with retry logic
+
+CREATE TABLE IF NOT EXISTS side_effect_outbox
+(
+    side_effect_id   UUID NOT NULL CONSTRAINT side_effect_outbox_pkey PRIMARY KEY,
+    side_effect_type VARCHAR(255) NOT NULL,
+    trace_id         UUID NOT NULL,
+    payload          JSONB NOT NULL,
+    status           VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    retry_attempts   INTEGER NOT NULL DEFAULT 0,
+    max_retries      INTEGER NOT NULL DEFAULT 3,
+    next_retry_at    TIMESTAMPTZ,
+    last_error       TEXT,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    completed_at     TIMESTAMPTZ
+);
+
+-- Index for efficient polling of pending side effects
+CREATE INDEX IF NOT EXISTS idx_side_effect_outbox_pending 
+ON side_effect_outbox (created_at) 
+WHERE status = 'PENDING';
+
+-- Index for retry processing
+CREATE INDEX IF NOT EXISTS idx_side_effect_outbox_retry 
+ON side_effect_outbox (next_retry_at) 
+WHERE status = 'PENDING' AND next_retry_at IS NOT NULL;
+
+-- Index for cleanup of completed side effects
+CREATE INDEX IF NOT EXISTS idx_side_effect_outbox_completed_cleanup
+ON side_effect_outbox (completed_at)
+WHERE status = 'COMPLETED';
+
+-- Index for cleanup of dead letter side effects
+CREATE INDEX IF NOT EXISTS idx_side_effect_outbox_dead_letter_cleanup
+ON side_effect_outbox (updated_at)
+WHERE status = 'DEAD_LETTER';
+
+-- Index for trace_id lookups (debugging/correlation)
+CREATE INDEX IF NOT EXISTS idx_side_effect_outbox_trace_id 
+ON side_effect_outbox (trace_id);
+{{/unless}}

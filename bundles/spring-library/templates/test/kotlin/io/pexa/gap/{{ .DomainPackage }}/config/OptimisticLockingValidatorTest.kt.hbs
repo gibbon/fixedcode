@@ -1,0 +1,54 @@
+package {{LibraryName}}.config
+
+import io.pexa.gap.{{LibraryName}}.config.OptimisticLockingProperties
+import io.pexa.gap.{{LibraryName}}.config.OptimisticLockingValidator
+import io.pexa.gap.{{LibraryName}}.config.PreconditionRequiredException
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.dao.OptimisticLockingFailureException
+import org.junit.jupiter.api.Assertions.assertTrue
+
+class OptimisticLockingValidatorTest {
+
+    private val properties = OptimisticLockingProperties(requireVersion = true)
+    private val validator = OptimisticLockingValidator(properties)
+
+    @Test
+    fun `should pass when versions match`() {
+        validator.validate(clientVersion = 5L, entityVersion = 5L, entityName = "TestEntity")
+    }
+
+    @Test
+    fun `should pass when version not required and client version is null`() {
+        val lenientValidator = OptimisticLockingValidator(
+            OptimisticLockingProperties(requireVersion = false)
+        )
+        lenientValidator.validate(clientVersion = null, entityVersion = 5L, entityName = "TestEntity")
+    }
+
+    @Test
+    fun `should throw when versions mismatch`() {
+        val exception = assertThrows<OptimisticLockingFailureException> {
+            validator.validate(clientVersion = 1L, entityVersion = 5L, entityName = "TestEntity")
+        }
+        assertTrue(exception.message!!.contains("TestEntity was modified"))
+        assertTrue(exception.message!!.contains("Expected version 1"))
+        assertTrue(exception.message!!.contains("current version 5"))
+    }
+
+    @Test
+    fun `should throw when client version is null and version required`() {
+        val exception = assertThrows<PreconditionRequiredException> {
+            validator.validate(clientVersion = null, entityVersion = 5L, entityName = "TestEntity")
+        }
+        assertTrue(exception.message!!.contains("Version required for TestEntity updates"))
+    }
+
+    @Test
+    fun `should pass when both versions are null and version not required`() {
+        val lenientValidator = OptimisticLockingValidator(
+            OptimisticLockingProperties(requireVersion = false)
+        )
+        lenientValidator.validate(clientVersion = null, entityVersion = null, entityName = "TestEntity")
+    }
+}

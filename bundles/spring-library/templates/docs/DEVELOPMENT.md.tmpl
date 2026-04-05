@@ -1,0 +1,363 @@
+# Library Development Guide
+
+This document provides guidelines for developing and maintaining GAP libraries using this template.
+
+## Development Environment Setup
+
+### Prerequisites
+
+- **Java 21** (configured via Gradle toolchain)
+- **Git** with access to PEXA repositories
+- **Docker** (for integration tests with Testcontainers)
+- **IDE** (IntelliJ IDEA recommended, VS Code supported)
+
+### Initial Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone git@github.com:PEXA-AU/[your-library-name].git
+   cd [your-library-name]
+   ```
+
+2. **Verify setup**
+   ```bash
+   ./gradlew build
+   ```
+
+3. **Optional: Copy IDE configurations**
+   ```bash
+   # For IntelliJ IDEA
+   cp -r ide-configs/intellij-idea/* .idea/
+   
+   # For VS Code
+   cp -r ide-configs/vscode/* .vscode/
+   ```
+
+## Project Structure
+
+```
+├── src/
+│   ├── main/kotlin/io/pexa/gap/[domain]/
+│   │   ├── autoconfigure/        # Spring Boot auto-configuration
+│   │   ├── config/              # Configuration properties
+│   │   └── [domain-packages]/   # Your domain logic
+│   ├── test/kotlin/             # Unit tests
+│   └── testIntegration/kotlin/  # Integration tests
+├── build.gradle.kts             # Gradle build configuration
+├── settings.gradle.kts          # Gradle settings
+├── version.txt                  # Base version (MAJOR.MINOR)
+├── pidp.yaml                   # PIDP workflow configuration
+├── catalog-info.yaml           # Backstage service catalog
+└── docs/                       # Documentation
+```
+
+## Coding Standards
+
+### Kotlin Conventions
+
+Follow [Kotlin Coding Conventions](https://kotlinlang.org/docs/coding-conventions.html) with these additions:
+
+- **Line Length**: Maximum 120 characters
+- **Indentation**: 4 spaces (no tabs)
+- **Public APIs**: Use explicit types and comprehensive KDoc
+- **Naming**: Use descriptive names, avoid abbreviations
+
+### Spring Boot Patterns
+
+- **Auto-Configuration**: Use `@AutoConfiguration` with proper conditionals
+- **Configuration Properties**: Use `@ConfigurationProperties` with data classes
+- **Testing**: Use `ApplicationContextRunner` for auto-configuration tests
+- **Documentation**: Include usage examples in KDoc
+
+### Example Code Style
+
+```kotlin
+/**
+ * Service for managing user authentication in the GAP platform.
+ *
+ * This service provides secure authentication mechanisms following
+ * PEXA security standards.
+ *
+ * @param authProperties Configuration properties for authentication
+ * @param tokenService Service for JWT token management
+ */
+@Service
+class AuthenticationService(
+    private val authProperties: AuthProperties,
+    private val tokenService: TokenService
+) {
+    
+    /**
+     * Authenticates a user with the provided credentials.
+     *
+     * @param credentials User credentials containing username and password
+     * @return Authentication result with user details and token
+     * @throws AuthenticationException if credentials are invalid
+     */
+    fun authenticate(credentials: UserCredentials): AuthenticationResult {
+        // Implementation
+    }
+}
+```
+
+## Testing Strategy
+
+### Test Categories
+
+1. **Unit Tests** (`src/test/kotlin/`)
+   - Fast, isolated tests (< 100ms each)
+   - Mock external dependencies
+   - Test individual components and business logic
+   - Target: 80%+ coverage
+
+2. **Integration Tests** (`src/testIntegration/kotlin/`)
+   - Test component interactions
+   - Use Testcontainers for real dependencies
+   - Test Spring Boot auto-configuration
+   - Test end-to-end scenarios
+
+### Running Tests
+
+```bash
+# Unit tests only
+./gradlew test
+
+# Integration tests only (requires Docker)
+./gradlew testIntegration
+
+# All tests with coverage
+./gradlew check jacocoTestReport
+
+# View coverage report
+open build/reports/jacoco/test/html/index.html
+```
+
+### Test Examples
+
+**Unit Test:**
+```kotlin
+@ExtendWith(MockitoExtension::class)
+class UserServiceTest {
+    
+    @Mock
+    lateinit var userRepository: UserRepository
+    
+    @InjectMocks
+    lateinit var userService: UserService
+    
+    @Test
+    fun `should create user successfully`() {
+        // Given
+        val userData = UserData("john.doe", "john@example.com")
+        val expectedUser = User(1L, "john.doe", "john@example.com")
+        
+        whenever(userRepository.save(any())).thenReturn(expectedUser)
+        
+        // When
+        val result = userService.createUser(userData)
+        
+        // Then
+        assertThat(result).isEqualTo(expectedUser)
+        verify(userRepository).save(any())
+    }
+}
+```
+
+**Integration Test:**
+```kotlin
+@SpringBootTest
+@Testcontainers
+class UserServiceIntegrationTest {
+    
+    @Container
+    @JvmStatic
+    val postgres = PostgreSQLContainer("postgres:15-alpine")
+    
+    @Autowired
+    lateinit var userService: UserService
+    
+    @Test
+    fun `should persist user to database`() {
+        // Given
+        val userData = UserData("jane.doe", "jane@example.com")
+        
+        // When
+        val result = userService.createUser(userData)
+        
+        // Then
+        assertThat(result.id).isNotNull()
+        assertThat(result.username).isEqualTo("jane.doe")
+    }
+}
+```
+
+## Code Quality
+
+### Static Analysis
+
+All code must pass static analysis:
+
+```bash
+# Run Detekt analysis
+./gradlew detekt
+
+# View report
+open build/reports/detekt/detekt.html
+```
+
+### Code Coverage
+
+Maintain minimum 80% test coverage:
+
+```bash
+# Generate coverage report
+./gradlew jacocoTestReport
+
+# View coverage report
+open build/reports/jacoco/test/html/index.html
+```
+
+### Quality Gates
+
+Before committing, ensure:
+- [ ] All tests pass
+- [ ] Detekt analysis passes
+- [ ] Code coverage ≥ 80%
+- [ ] Build succeeds
+- [ ] Documentation updated
+
+## Versioning and Release
+
+### Version Management
+
+Use the GAP Versioning Plugin:
+
+```bash
+# View current version
+./gradlew showVersion
+
+# Increment minor version (1.0 → 1.1)
+./gradlew incrementMinor
+
+# Increment major version (1.0 → 2.0)
+./gradlew incrementMajor
+```
+
+### Release Process
+
+1. **Update Documentation**
+   - Update CHANGELOG.md
+   - Update README.md if needed
+   - Update API documentation
+
+2. **Version Bump**
+   ```bash
+   ./gradlew incrementMinor  # or incrementMajor for breaking changes
+   ```
+
+3. **Create Release**
+   - Push changes to main branch
+   - PIDP workflow automatically builds and publishes
+   - Create GitHub release with tag
+
+### Semantic Versioning
+
+Follow [Semantic Versioning](https://semver.org/):
+
+- **MAJOR**: Breaking changes to public API
+- **MINOR**: New features, backward compatible
+- **PATCH**: Bug fixes, backward compatible
+
+## Documentation Standards
+
+### KDoc Requirements
+
+Document all public APIs:
+
+```kotlin
+/**
+ * Brief description of the class/method.
+ *
+ * Detailed description explaining the purpose, behavior,
+ * and any important considerations.
+ *
+ * @param paramName Description of the parameter
+ * @return Description of the return value
+ * @throws ExceptionType When this exception is thrown
+ * @since 1.2.0
+ * @see RelatedClass
+ */
+```
+
+### Documentation Files
+
+Keep these files updated:
+
+- **README.md**: Library overview, quick start, examples
+- **CHANGELOG.md**: Version history and changes
+- **docs/**: Detailed guides and architecture decisions
+- **API Documentation**: Generated from KDoc comments
+
+## Best Practices
+
+### Spring Boot Libraries
+
+- Use `@ConditionalOnProperty` for feature toggles
+- Provide configuration metadata for IDE support
+- Include auto-configuration tests
+- Follow Spring Boot naming conventions
+- Support both imperative and reactive patterns where applicable
+
+### Performance
+
+- Lazy initialization where possible
+- Efficient database queries
+- Proper connection pooling
+- Caching for expensive operations
+- Monitor memory usage in tests
+
+### Security
+
+- Validate all inputs
+- Use parameterized queries
+- Follow OWASP guidelines
+- Regular dependency updates
+- Security-focused code reviews
+
+## Troubleshooting
+
+### Common Issues
+
+**Build Failures:**
+```bash
+# Clean and rebuild
+./gradlew clean build --refresh-dependencies
+
+# Check Java version
+java -version  # Should be Java 21
+```
+
+**Test Failures:**
+```bash
+# Run specific test
+./gradlew test --tests "UserServiceTest"
+
+# Debug with logging
+./gradlew test --debug-jvm
+```
+
+**Integration Test Issues:**
+```bash
+# Ensure Docker is running
+docker --version
+
+# Clean up containers
+docker system prune -f
+```
+
+### Getting Help
+
+- **Documentation**: Check `docs/` directory
+- **Examples**: Review test files for usage patterns
+- **Team Support**: Create GitHub issue or discussion
+- **Architecture**: Review ADRs in `adr/` directory

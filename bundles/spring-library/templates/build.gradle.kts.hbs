@@ -1,0 +1,754 @@
+import java.time.Duration
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
+plugins {
+    alias(libs.plugins.springDependency)
+    alias(libs.plugins.springBoot)
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
+    alias(libs.plugins.kotlinAllOpen)
+    alias(libs.plugins.kotlinNoArg)
+    alias(libs.plugins.openApiGenerator)
+    alias(libs.plugins.sonarqube)
+    alias(libs.plugins.ktlint)
+    id("com.diffplug.spotless") version "8.3.0"
+    alias(libs.plugins.detekt)
+    id("java-library")
+    id("jacoco")
+    alias(libs.plugins.pluginPublish)
+}
+
+// Configure ktlint with minimal disabled rules - let Spotless handle formatting
+// Configure ktlint for linting only - let Spotless handle formatting
+ktlint {
+    filter {
+        exclude("**/build/generated/**")
+        exclude("build/generated/**")
+        exclude { element -> element.file.path.contains("build/generated") }
+    }
+    additionalEditorconfig.set(
+        mapOf(
+            "max_line_length" to "180",
+            // Disable ALL formatting rules - let Spotless handle formatting
+            "ktlint_standard_no-empty-first-line-in-class-body" to "disabled",
+            "ktlint_standard_multiline-expression-wrapping" to "disabled",
+            "ktlint_standard_function-signature" to "disabled",
+            "ktlint_standard_class-signature" to "disabled",
+            "ktlint_standard_chain-method-continuation" to "disabled",
+            "ktlint_standard_no-blank-line-in-list" to "disabled",
+            "ktlint_standard_parameter-list-wrapping" to "disabled",
+            "ktlint_standard_blank-line-before-declaration" to "disabled",
+            "ktlint_standard_condition-wrapping" to "disabled",
+            "ktlint_standard_argument-list-wrapping" to "disabled",
+            "ktlint_standard_string-template-indent" to "disabled",
+            "ktlint_standard_trailing-comma-on-call-site" to "disabled",
+            "ktlint_standard_trailing-comma-on-declaration-site" to "disabled",
+            "ktlint_standard_wrapping" to "disabled",
+            "ktlint_standard_indent" to "disabled",
+            // Keep important non-formatting rules active
+            // "ktlint_standard_filename" - KEEP for consistency
+            // "ktlint_standard_class-naming" - KEEP for standards
+        ),
+    )
+}
+
+// Configure Spotless for formatting
+spotless {
+    kotlin {
+        target("src/**/*.kt")
+        ktlint().editorConfigOverride(
+            mapOf(
+                "max_line_length" to "180",
+                // Only disable formatting rules, keep naming rules active
+                "ktlint_standard_no-empty-first-line-in-class-body" to "disabled",
+                "ktlint_standard_multiline-expression-wrapping" to "disabled",
+                "ktlint_standard_parameter-list-wrapping" to "disabled",
+                "ktlint_standard_argument-list-wrapping" to "disabled",
+            ),
+        )
+        leadingTabsToSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint().editorConfigOverride(
+            mapOf(
+                "max_line_length" to "180",
+            ),
+        )
+        leadingTabsToSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+// Configure Detekt for static code analysis (disabled due to Kotlin 2.2 compatibility)
+// detekt {
+//     buildUponDefaultConfig = true
+//     allRules = false
+//     config.setFrom("$projectDir/config/detekt.yml")
+//     baseline = file("$projectDir/config/baseline.xml")
+// }
+
+// Detekt configuration resolution strategy
+configurations {
+    // Force logback version to avoid compatibility issues
+    all {
+        resolutionStrategy {
+            force("ch.qos.logback:logback-classic:1.5.25")
+            force("ch.qos.logback:logback-core:1.5.25")
+        }
+    }
+    matching { it.name == "detekt" }.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.kotlin") {
+                useVersion("2.0.21")
+                because("required until detekt supporting our kotlin version is available")
+            }
+        }
+    }
+}
+
+// Configure Detekt for static code analysis
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom("$projectDir/config/detekt.yml")
+    baseline = file("$projectDir/config/baseline.xml")
+}
+
+// Fix ktlint task dependencies - ktlint tasks must run after OpenAPI generation and Spotless
+tasks.matching { it.name.startsWith("runKtlint") }.configureEach {
+    mustRunAfter("openApiGenerate")
+    mustRunAfter("spotlessApply")
+}
+
+group = "io.pexa.gap"
+
+kotlin {
+    compilerOptions {
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xjsr305=strict",
+            "-Xannotation-default-target=param-property",
+            "-Xwarning-level=PARAMETER_NAME_CHANGED_ON_OVERRIDE:disabled",
+            "-Xwarning-level=UNCHECKED_CAST:disabled"
+        )
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    // For library usage expose sources/javadoc via java-library
+    withSourcesJar()
+    withJavadocJar()
+}
+
+// Integration tests are now managed by Gradle test suites (see testing block below)
+
+// Library jar configuration - ensure plain jar is published as the main artifact
+tasks.jar {
+    enabled = true
+    archiveClassifier = ""
+}
+
+// Boot jar configuration
+
+repositories {
+    mavenLocal()
+    maven {
+        setUrl("https://pexaartifacts.jfrog.io/artifactory/libs-release/")
+        credentials {
+            username = System.getenv("ARTIFACTORY_USERNAME")
+            password = System.getenv("ARTIFACTORY_TOKEN")
+        }
+    }
+    maven {
+        setUrl("https://pexaartifacts.jfrog.io/artifactory/libs-release-local/")
+        credentials {
+            username = System.getenv("ARTIFACTORY_USERNAME")
+            password = System.getenv("ARTIFACTORY_TOKEN")
+        }
+    }
+    maven {
+        setUrl("https://pexaartifacts.jfrog.io/artifactory/libs-snapshot/")
+        credentials {
+            username = System.getenv("ARTIFACTORY_USERNAME")
+            password = System.getenv("ARTIFACTORY_TOKEN")
+        }
+    }
+    maven {
+        setUrl("https://pexaartifacts.jfrog.io/artifactory/international-common-gradle-prod/")
+        credentials {
+            username = System.getenv("ARTIFACTORY_USERNAME")
+            password = System.getenv("ARTIFACTORY_TOKEN")
+        }
+    }
+    mavenCentral()
+}
+
+// Modern test suites configuration
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            dependencies {
+                implementation(project())
+                implementation(platform(libs.springBootBom))
+                implementation(libs.springBootStarterTest)
+                implementation(libs.springBootStarterWeb)
+                implementation(libs.springBootStarterSecurity)
+                implementation(libs.springBootStarterOauth2ResourceServer)
+                implementation(libs.mockk)
+                implementation(libs.kotest)
+                implementation(libs.kotestExtensionsSpring)
+                implementation("org.reflections:reflections:0.10.2")
+                implementation("com.tngtech.archunit:archunit-junit5:1.4.1")
+            }
+        }
+        
+        val testIntegration by registering(JvmTestSuite::class) {
+            sources {
+                kotlin {
+                    setSrcDirs(listOf("src/testIntegration/kotlin"))
+                }
+                resources {
+                    setSrcDirs(listOf("src/testIntegration/resources"))
+                }
+            }
+            
+            dependencies {
+                implementation(project())
+                implementation(platform(libs.springBootBom))
+                implementation(libs.springBootStarterTest)
+                implementation(libs.springBootStarterSecurity)
+                implementation(libs.springBootStarterOauth2ResourceServer)
+                implementation(libs.testcontainersJunitJupiter)
+                implementation(libs.testcontainersPostgresql)
+                implementation(libs.mockk)
+                implementation(libs.kotest)
+                implementation(libs.kotestExtensionsSpring)
+                // Flyway for database migrations in tests
+                implementation(libs.flywayCore)
+                implementation(libs.flywayDatabasePostgresql)
+                // H2 database for integration tests
+                implementation("com.h2database:h2")
+            }
+            
+            targets {
+                all {
+                    testTask.configure {
+                        description = "Runs integration tests for the library"
+                        group = "verification"
+                        
+                        // Ensure bootJar is built before integration tests
+                        dependsOn(tasks.bootJar)
+                        
+                        // Performance optimizations
+                        jvmArgs(
+                            "--add-opens=java.base/java.util=ALL-UNNAMED",
+                            "-XX:+UseParallelGC",
+                            "-Xmx2g",
+                            "-Xms1g"
+                        )
+                        
+                        // Reduce Spring context caching overhead
+                        systemProperty("spring.test.context.cache.maxSize", "1")
+                        systemProperty("spring.main.lazy-initialization", "true")
+                        systemProperty("spring.main.web-application-type", "none")
+                        
+                        // Performance settings
+                        maxParallelForks = Runtime.getRuntime().availableProcessors().div(2).coerceAtLeast(1)
+                        timeout.set(Duration.ofMinutes(10))
+
+                        testLogging {
+                            events("failed", "skipped")
+                            showStackTraces = true
+                            exceptionFormat = TestExceptionFormat.FULL
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+// Configuration inheritance is now handled automatically by test suites
+
+// testIntegration task is now automatically created by the test suite above
+
+dependencies {
+    // GAP Shared Libraries BOM for version management
+    implementation(platform(libs.gapSharedBom))  // Disabled for local testing
+
+    // Spring Boot BOM for dependency management
+    implementation(platform(libs.springBootBom))
+
+    // Custom project modules (add gap:keep/gap:end blocks below for custom dependencies)
+    
+{{#if IsFeatureLibrary}}
+    // Core library dependency - provides shared infrastructure (database, security, events)
+    // In production, version is typically managed via BOM or version catalog
+    // For local development, publish core library first: ./gradlew publishToMavenLocal
+    api("{{LibraryName}}:{{LibraryName}}") {
+        version {
+            // Use same version as this library, or specify explicit version
+            strictly(project.version.toString())
+        }
+    }
+{{/if}}
+
+    // --- Public API surface dependencies (exposed to consumers) ---
+    api(libs.springBootStarterDataJdbc)
+    api(libs.springDataCommons)
+    api(libs.jacksonModuleKotlin)
+    api(libs.uuidGenerator)
+
+    // Note: AWS-specific dependencies (RDS, Secrets Manager, STS, etc.) should be 
+    // added by consuming services, not in the library. This keeps the library 
+    // infrastructure-agnostic and allows services to choose their deployment model.
+
+    // Core Spring Framework dependencies
+    implementation("org.springframework:spring-context")
+    implementation("org.springframework:spring-web")
+    implementation("org.springframework:spring-webmvc")
+    implementation("org.springframework.boot:spring-boot-autoconfigure")
+    implementation("org.springframework.boot:spring-boot")
+    
+    // Web starter for dev mode - allows running library standalone with bootRun
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    
+    // Servlet API for OpenAPI generated code
+    implementation("jakarta.servlet:jakarta.servlet-api")
+    
+    // Jakarta Annotations for @Generated marker
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    
+    // Validation support
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    
+    // Actuator support for health checks and metrics
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    
+    // Coroutines support for side effect scheduler
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
+{{#unless IsFeatureLibrary}}
+    // Database migration support (core library handles migrations)
+    implementation(libs.flywayCore)
+    implementation(libs.flywayDatabasePostgresql)
+{{/unless}}
+
+    // Structured logging
+    implementation(libs.logstashEncoder)
+
+    // OpenAPI/Swagger for API documentation and generated code
+    implementation(libs.springDocOpenApiStarterCommon)
+
+    // Optional: GAP shared libraries
+    // Database utilities - connection management, transaction helpers, audit fields
+    // implementation(libs.gapSharedDb)
+    // Event handling - domain events, event publishing, event sourcing utilities
+    // implementation(libs.gapSharedEvent)
+    // Exception handling - standardized exceptions, error responses, exception mapping
+    implementation(libs.gapSharedException)
+    // Logging utilities - structured logging, correlation IDs, audit logging
+    implementation(libs.gapSharedLogger)
+    // Security utilities - authentication, authorization, JWT handling
+    // implementation(libs.gapSharedSecurity)
+    // Web utilities - REST controllers, error handlers, request/response utilities
+    // implementation(libs.gapSharedWeb)
+    // Legacy International GAP common library (prefer gap-shared-* libraries above)
+    // implementation(libs.gapCommon)
+
+    // Optional: Security dependencies
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+
+    // GAP Policy Library (ABAC authorization engine)
+    api(libs.gapLibraryPolicy)
+
+    // GAP Events Library (domain events)
+    api(libs.gapLibraryEvents)
+
+{{#unless IsFeatureLibrary}}
+    // Optional: Messaging dependencies (enabled for local development)
+    implementation(libs.springKafka)
+    // implementation(libs.awsMskIamAuth)  // Only needed for AWS MSK in production
+{{/unless}}
+
+    // Optional: Feature flags
+    // implementation(libs.unleashClient)
+
+    // ShedLock for distributed scheduling
+    implementation(libs.shedlockSpring)
+    implementation(libs.shedlockProviderJdbc)
+
+    // PostgreSQL driver (implementation for PGobject access in converters)
+    implementation(libs.postgresql)
+
+    // Spring Boot annotation processing for configuration metadata and auto-configuration
+    // Use explicit BOM-managed versions for annotation processors
+    compileOnly(platform(libs.springBootBom))
+    compileOnly("org.springframework.boot:spring-boot-configuration-processor")
+    compileOnly("org.springframework.boot:spring-boot-autoconfigure-processor")
+    annotationProcessor(platform(libs.springBootBom))
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    annotationProcessor("org.springframework.boot:spring-boot-autoconfigure-processor")
+
+    // Testing dependencies are now managed by test suites above
+    // No need to declare them here as they're handled by the testing block
+}
+
+// Enhanced test configuration from workspace-core
+tasks.withType<Test> {
+    useJUnitPlatform()
+    
+    // Performance optimizations
+    jvmArgs(
+        "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "-XX:+UseParallelGC",
+        "-Xmx2g",
+        "-Xms1g"
+    )
+    
+    // Reduce Spring context caching overhead
+    systemProperty("spring.test.context.cache.maxSize", "1")
+    systemProperty("spring.main.lazy-initialization", "true")
+    systemProperty("spring.main.web-application-type", "none")
+    
+    // Disable parallel test execution to fix static mock issues
+    maxParallelForks = 1
+    
+    // Timeout to prevent hanging
+    timeout.set(Duration.ofMinutes(5))
+    
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStackTraces = true
+        exceptionFormat = TestExceptionFormat.FULL
+    }
+}
+
+// Enhanced Jacoco configuration
+jacoco {
+    toolVersion = "0.8.13"
+    reportsDirectory.set(layout.buildDirectory.dir("reports/jacoco"))
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test, tasks.named("testIntegration"))
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+
+    // Include both unit and integration test results
+    executionData.setFrom(
+        layout.buildDirectory.file("jacoco/test.exec"),
+        layout.buildDirectory.file("jacoco/testIntegration.exec")
+    )
+
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it).apply {
+                // Exclude generated code from coverage
+                exclude("**/generated/**")
+                exclude("**/build/generated/**")
+                exclude("**/buildconfig/**")
+                exclude("**/BuildConfig*")
+                
+                // Exclude OpenAPI generated code (compiled from build/generated/)
+                exclude("**/api/controller/**")
+                exclude("**/api/dto/**")
+                exclude("**/SpringDocConfiguration*")
+                exclude("**/ApiUtil*")
+                
+                // Exclude Spring configuration
+                exclude("**/autoconfigure/**")
+                exclude("**/config/**")
+
+                // Exclude utility classes without business logic
+                exclude("**/ValidationExceptionHandler*")
+                exclude("**/DomainConfigImpl*")
+                
+                // Exclude DTOs and API models (generated)
+                exclude("**/*Dto*")
+                exclude("**/*Request*")
+                exclude("**/*Response*")
+                exclude("**/*Model*")
+                
+                // Exclude command data classes (simple value objects)
+                exclude("**/commands/*Data.class")
+                
+                // Exclude test applications and main application class
+                exclude("**/SkeletonTestApplication*")
+                exclude("**/{{LibraryName}}Application*")
+                exclude("**/{{LibraryName}}ApplicationKt*")
+                exclude("**/*Application.class")
+                exclude("**/*ApplicationKt.class")
+
+                // Exclude Side Effect Outbox infrastructure (tested via SideEffectOutboxIntegrationTest)
+                exclude("**/application/shared/SideEffect*")
+                exclude("**/application/shared/SideEffect*\$*")
+                exclude("**/domain/shared/SideEffect*")
+                exclude("**/infrastructure/sideeffect/**")
+                exclude("**/config/SideEffectProperties*")
+
+                // Exclude Object Change Detection infrastructure
+                exclude("**/shared/jsonfieldchange/**")
+
+                // Exclude companion objects and loggers
+                exclude("**/*\$Companion*.*")
+                exclude("**/*\$\$serializer*.*")
+                exclude("**/*\$logger*.*")
+            }
+        })
+    )
+}
+
+tasks.named("jacocoTestCoverageVerification") {
+    dependsOn(tasks.jacocoTestReport)
+}
+
+// Enhanced Jacoco coverage verification
+tasks.jacocoTestCoverageVerification {
+    val minimumThresholdValue = 0.10.toBigDecimal() // 10% threshold for domain/application code
+    
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it).apply {
+                // Exclude generated code from coverage
+                exclude("**/generated/**")
+                exclude("**/build/generated/**")
+                exclude("**/buildconfig/**")
+                exclude("**/BuildConfig*")
+                
+                // Exclude OpenAPI generated code (compiled from build/generated/)
+                exclude("**/api/controller/**")
+                exclude("**/api/dto/**")
+                exclude("**/SpringDocConfiguration*")
+                exclude("**/ApiUtil*")
+                
+                // Exclude API delegate implementations (thin wrappers around services)
+                exclude("**/api/*ApiDelegateImpl*")
+                
+                // Exclude Spring configuration
+                exclude("**/autoconfigure/**")
+                exclude("**/config/**")
+
+                // Exclude utility classes without business logic
+                exclude("**/ValidationExceptionHandler*")
+                exclude("**/DomainConfigImpl*")
+
+                // Exclude interface default implementations (Kotlin generates these)
+                exclude("**/*\$DefaultImpls*")
+                
+                // Exclude enums (simple data classes)
+                exclude("**/enums/**")
+                
+                // Exclude shared domain utilities
+                exclude("**/domain/shared/**")
+                
+                // Exclude repository interfaces (delegate to Spring Data, Impl classes are tested)
+                exclude("**/infrastructure/repository/*Repository.class")
+                
+                // Exclude outbox event listener (tested via integration tests)
+                exclude("**/OutboxEventListener*")
+                
+                // Exclude Side Effect Outbox infrastructure (scheduled jobs, tested via integration tests)
+                // Exclude Side Effect Outbox infrastructure (tested via SideEffectOutboxIntegrationTest)
+                exclude("**/application/shared/SideEffect*")
+                exclude("**/domain/shared/SideEffect*")
+                exclude("**/infrastructure/sideeffect/**")
+                exclude("**/config/SideEffectProperties*")
+
+                // Exclude Object Change Detection infrastructure
+                exclude("**/shared/jsonfieldchange/**")
+                
+                // Exclude remote aggregate infrastructure (event handlers, repositories)
+                exclude("**/events/handlers/**")
+                exclude("**/infrastructure/remote/**")
+                
+                // Exclude FilterParser utility (tested via FilterParserTest)
+                exclude("**/infrastructure/util/FilterParser*")
+                
+                // Exclude JoinConstraint data class (simple value object)
+                exclude("**/infrastructure/util/JoinConstraint*")
+                
+                // Exclude domain validation services (tested via ValidationServiceTest)
+                exclude("**/domain/**/Default*ValidationService*")
+
+                // Exclude ParticipantAccessRepository (tested via integration tests, not unit tests)
+                exclude("**/infrastructure/repository/ParticipantAccessRepository*")
+
+                // Exclude QueryService interfaces and entity-level implementations (tested via integration tests)
+                exclude("**/services/*QueryService.class")
+                exclude("**/entities/**/services/Default*QueryService*")
+
+                // Exclude DTOs and API models (generated)
+                exclude("**/*Dto*")
+                exclude("**/*Request*")
+                exclude("**/*Response*")
+                exclude("**/*Model*")
+                
+                // Exclude command data classes (simple value objects)
+                exclude("**/commands/*Data.class")
+                
+                // Exclude minimal tier entity events (simple data classes for join tables)
+                exclude("**/events/AssetParticipant*Event*")
+                exclude("**/events/AssetParty*Event*")
+                
+                // Exclude application classes
+                exclude("**/SkeletonTestApplication*")
+                exclude("**/{{LibraryName}}Application*")
+                exclude("**/{{LibraryName}}ApplicationKt*")
+                exclude("**/*Application.class")
+                exclude("**/*ApplicationKt.class")
+                
+                // Exclude Kotlin generated classes
+                exclude("**/*\$Companion*.*")
+                exclude("**/*\$\$serializer*.*")
+                exclude("**/*\$logger*.*")
+            }
+        })
+    )
+    
+    violationRules {
+        rule {
+            element = "CLASS"
+            limit {
+                counter = "LINE"
+                minimum = minimumThresholdValue
+            }
+            limit {
+                counter = "BRANCH"
+                minimum = minimumThresholdValue
+            }
+            limit {
+                counter = "METHOD"
+                minimum = minimumThresholdValue
+            }
+            limit {
+                counter = "CLASS"
+                minimum = minimumThresholdValue
+            }
+            limit {
+                counter = "COMPLEXITY"
+                minimum = minimumThresholdValue
+            }
+        }
+    }
+}
+
+// Make test task depend on coverage verification
+tasks.test {
+    // Fix implicit dependency on bootJar output
+    mustRunAfter(tasks.bootJar)
+    finalizedBy(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification)
+}
+
+// Make build task run integration tests at the end
+tasks.build {
+    finalizedBy(tasks.named("testIntegration"))
+}
+
+// Spring Boot configuration
+springBoot {
+    mainClass.set("io.pexa.gap.{{LibraryName}}.ApplicationKt")
+}
+
+// OpenAPI Generator Configuration
+openApiGenerate {
+    generatorName.set("kotlin-spring")
+    // Find the unified OpenAPI spec (generated by domain command)
+    val apiCoreDir = file("$rootDir/src/main/resources/static/api-core")
+    val openApiFile = apiCoreDir.listFiles()?.find { it.name.endsWith("-unified-openapi.yaml") }
+        ?: file("$rootDir/src/main/resources/static/api-core/{{LibraryName}}-unified-openapi.yaml")
+    inputSpec.set(openApiFile.absolutePath)
+    outputDir.set("${layout.buildDirectory.get().asFile}/generated/openapi")
+
+    apiPackage.set("io.pexa.gap.{{LibraryName}}.api.controller")
+    modelPackage.set("io.pexa.gap.{{LibraryName}}.api.dto")
+    invokerPackage.set("io.pexa.gap.{{LibraryName}}.api")
+
+    configOptions.set(mapOf(
+        "dateLibrary" to "java8",
+        "interfaceOnly" to "false",
+        "delegatePattern" to "true",
+        "useTags" to "true",
+        "gradleBuildFile" to "false",
+        "useSpringBoot3" to "true",
+        "exceptionHandler" to "false",
+        "useBeanValidation" to "true",
+        "performBeanValidation" to "true",
+        "serializationLibrary" to "jackson",
+        "enumPropertyNaming" to "UPPERCASE",
+        "generateApis" to "true",
+        "generateModels" to "true",
+        "generateSupportingFiles" to "false"
+    ))
+
+    globalProperties.set(mapOf(
+        "models" to "",
+        "apis" to "",
+        "supportingFiles" to "ApiUtil.kt"
+    ))
+}
+
+// Add generated sources to compilation
+sourceSets {
+    main {
+        kotlin {
+            srcDir("${layout.buildDirectory.get().asFile}/generated/openapi/src/main/kotlin")
+        }
+    }
+}
+
+// Ensure OpenAPI generation runs before compilation
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    dependsOn("openApiGenerate")
+    compilerOptions {
+        freeCompilerArgs.add("-Xjsr305=strict")
+    }
+}
+
+// Ensure sourcesJar depends on openApiGenerate
+tasks.named("sourcesJar") {
+    dependsOn("openApiGenerate")
+}
+
+// Copy duplicates strategy
+tasks.withType<Copy> { 
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE 
+}
+
+// API Specification Validation Task
+tasks.register("validateApiSpecs") {
+    description = "Validates OpenAPI specifications"
+    group = "verification"
+
+    doLast {
+        fileTree("src/main/resources/static/core-api").matching {
+            include("**/*.yaml", "**/*.yml")
+        }.forEach { file ->
+            println("Validating API specification: ${file.name}")
+            // The openApiGenerate task will validate the spec during generation
+        }
+    }
+
+    dependsOn("openApiGenerate")
+}
+
+// Include API validation in build process
+tasks.build {
+    dependsOn("validateApiSpecs")
+}

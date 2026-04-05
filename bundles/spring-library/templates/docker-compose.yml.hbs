@@ -1,0 +1,48 @@
+{{#unless IsFeatureLibrary}}
+services:
+  # Library service connecting to shared infrastructure
+  {{LibraryName}}-core:
+    build:
+      context: ..
+      dockerfile: build/{{LibraryName}}/Dockerfile.local
+    container_name: {{LibraryName}}-core
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/gap_db?currentSchema={{LibraryName}}
+      - SPRING_DATASOURCE_READ_URL=jdbc:postgresql://postgresql:5434/gap_db?currentSchema={{LibraryName}}
+      - SPRING_DATASOURCE_USERNAME=gap_user
+      - SPRING_DATASOURCE_PASSWORD=gap_password
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - ARTIFACTORY_USERNAME=${ARTIFACTORY_USERNAME}
+      - ARTIFACTORY_TOKEN=${ARTIFACTORY_TOKEN}
+      - ARTIFACTORY_URL=${ARTIFACTORY_URL}
+      - JAVA_OPTS=-Xmx1g -Xms512m
+      - GRADLE_OPTS=-Xmx1g -Dorg.gradle.daemon=false
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+        reservations:
+          memory: 1.5G
+    volumes:
+      - ../remote-AUMELSBS-CA.pem:/etc/ssl/certs/ca-certificates.crt
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - gap-network
+    ports:
+      - "{{LibraryName}}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  gap-network:
+    external: true
+{{/unless}}

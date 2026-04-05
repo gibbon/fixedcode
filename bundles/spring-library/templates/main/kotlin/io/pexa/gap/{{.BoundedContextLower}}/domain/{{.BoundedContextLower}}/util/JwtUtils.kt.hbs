@@ -1,0 +1,25 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{.BoundedContextLower}}.domain.{{.BoundedContextLower}}.util
+
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+import org.springframework.stereotype.Component
+
+@Component
+class JwtUtils(
+    @Value("\${spring.security.oauth2.resourceserver.jwt.custom-claims-path}")
+    private val customClaimsPath: String
+) {
+    
+    fun getCustomClaim(claimName: String): String {
+        val authentication = SecurityContextHolder.getContext().authentication
+        if (authentication is JwtAuthenticationToken) {
+            val customClaims = authentication.token.getClaim<Map<String, Any>>(customClaimsPath)
+            return customClaims?.get(claimName)?.toString() 
+                ?: error("Custom claim '$claimName' not found in JWT")
+        }
+        error("No JWT authentication found")
+    }
+}
+{{/unless}}

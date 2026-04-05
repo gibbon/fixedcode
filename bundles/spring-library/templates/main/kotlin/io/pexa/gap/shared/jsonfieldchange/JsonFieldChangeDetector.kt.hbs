@@ -1,0 +1,217 @@
+package io.pexa.gap.shared.jsonfieldchange
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import java.util.UUID
+
+/**
+ * Detects changes in object fields by comparing old and new values at specified paths.
+ */
+class JsonFieldChangeDetector(
+    private val objectMapper: ObjectMapper
+) {
+    /**
+     * Detect changes between old and new object values at the specified paths.
+     *
+     * @param oldValue The previous object value (can be null)
+     * @param newValue The new object value (can be null)
+     * @param watchPaths List of paths to check for changes
+     * @param aggregateId The ID of the aggregate being updated
+     * @param aggregateType The type name of the aggregate
+     * @param fieldName The name of the field being watched
+     * @return List of detected changes
+     */
+    fun detect(
+        oldValue: Map<String, Any?>?,
+        newValue: Map<String, Any?>?,
+        watchPaths: List<String>,
+        aggregateId: UUID,
+        aggregateType: String,
+        fieldName: String
+    ): List<JsonFieldChange<Any?>> {
+        return watchPaths.flatMap { path ->
+            detectChangesForPath(path, oldValue, newValue, aggregateId, aggregateType, fieldName)
+        }
+    }
+
+    private fun detectChangesForPath(
+        path: String,
+        oldValue: Map<String, Any?>?,
+        newValue: Map<String, Any?>?,
+        aggregateId: UUID,
+        aggregateType: String,
+        fieldName: String
+    ): List<JsonFieldChange<Any?>> {
+        return if (path.contains("*")) {
+            detectWildcardChanges(path, oldValue, newValue, aggregateId, aggregateType, fieldName)
+        } else {
+            detectExactPathChange(path, oldValue, newValue, aggregateId, aggregateType, fieldName)
+        }
+    }
+
+    private fun detectWildcardChanges(
+        path: String,
+        oldValue: Map<String, Any?>?,
+        newValue: Map<String, Any?>?,
+        aggregateId: UUID,
+        aggregateType: String,
+        fieldName: String
+    ): List<JsonFieldChange<Any?>> {
+        val expandedPaths = expandWildcardPath(path, oldValue, newValue)
+        return expandedPaths.mapNotNull { expandedPath ->
+            createChangeIfDifferent(expandedPath, oldValue, newValue, aggregateId, aggregateType, fieldName)
+        }
+    }
+
+    private fun detectExactPathChange(
+        path: String,
+        oldValue: Map<String, Any?>?,
+        newValue: Map<String, Any?>?,
+        aggregateId: UUID,
+        aggregateType: String,
+        fieldName: String
+    ): List<JsonFieldChange<Any?>> {
+        val change = createChangeIfDifferent(path, oldValue, newValue, aggregateId, aggregateType, fieldName)
+        return listOfNotNull(change)
+    }
+
+    private fun createChangeIfDifferent(
+        path: String,
+        oldValue: Map<String, Any?>?,
+        newValue: Map<String, Any?>?,
+        aggregateId: UUID,
+        aggregateType: String,
+        fieldName: String
+    ): JsonFieldChange<Any?>? {
+        val oldVal = extractValue(oldValue, path)
+        val newVal = extractValue(newValue, path)
+        return if (!valuesEqual(oldVal, newVal)) {
+            JsonFieldChange(path, oldVal, newVal, aggregateId, aggregateType, fieldName)
+        } else {
+            null
+        }
+    }
+
+    /**
+     * Extract a value from a nested map using dot-notation path.
+     */
+    @Suppress("UNCHECKED_CAST")
+    internal fun extractValue(obj: Map<String, Any?>?, path: String): Any? {
+        if (obj == null) return null
+
+        val parts = path.split(".")
+        var current: Any? = obj
+
+        for (part in parts) {
+            current = when (current) {
+                is Map<*, *> -> (current as Map<String, Any?>)[part]
+                is List<*> -> extractFromList(current, part)
+                else -> null
+            }
+            if (current == null) break
+        }
+
+        return current
+    }
+
+    private fun extractFromList(list: List<*>, part: String): Any? {
+        val index = part.toIntOrNull()
+        return if (index != null && index >= 0 && index < list.size) {
+            list[index]
+        } else {
+            null
+        }
+    }
+
+    /**
+     * Expand a wildcard path to all matching concrete paths.
+     */
+    @Suppress("UNCHECKED_CAST")
+    private fun expandWildcardPath(
+        pattern: String,
+        oldValue: Map<String, Any?>?,
+        newValue: Map<String, Any?>?
+    ): Set<String> {
+        val parts = pattern.split(".")
+        val wildcardIndex = parts.indexOfFirst { it == "*" }
+
+        if (wildcardIndex == -1) {
+            return setOf(pattern)
+        }
+
+        val prefix = parts.take(wildcardIndex).joinToString(".")
+        val suffix = parts.drop(wildcardIndex + 1).joinToString(".")
+
+        val keys = extractKeysFromContainers(prefix, oldValue, newValue)
+        return buildExpandedPaths(prefix, suffix, keys, oldValue, newValue)
+    }
+
+    private fun extractKeysFromContainers(
+        prefix: String,
+        oldValue: Map<String, Any?>?,
+        newValue: Map<String, Any?>?
+    ): Set<String> {
+        val oldContainer = if (prefix.isEmpty()) oldValue else extractValue(oldValue, prefix)
+        val newContainer = if (prefix.isEmpty()) newValue else extractValue(newValue, prefix)
+
+        val keys = mutableSetOf<String>()
+        keys.addAll(extractKeysFromContainer(oldContainer))
+        keys.addAll(extractKeysFromContainer(newContainer))
+        return keys
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun extractKeysFromContainer(container: Any?): Set<String> = when (container) {
+        is Map<*, *> -> (container as Map<String, Any?>).keys
+        is List<*> -> container.indices.map { it.toString() }.toSet()
+        else -> emptySet()
+    }
+
+    private fun buildExpandedPaths(
+        prefix: String,
+        suffix: String,
+        keys: Set<String>,
+        oldValue: Map<String, Any?>?,
+        newValue: Map<String, Any?>?
+    ): Set<String> {
+        val paths = mutableSetOf<String>()
+
+        for (key in keys) {
+            val expandedPath = buildPath(prefix, key, suffix)
+
+            if (suffix.contains("*")) {
+                paths.addAll(expandWildcardPath(expandedPath, oldValue, newValue))
+            } else {
+                paths.add(expandedPath)
+            }
+        }
+
+        return paths
+    }
+
+    private fun buildPath(prefix: String, key: String, suffix: String): String = when {
+        prefix.isEmpty() && suffix.isEmpty() -> key
+        prefix.isEmpty() -> "$key.$suffix"
+        suffix.isEmpty() -> "$prefix.$key"
+        else -> "$prefix.$key.$suffix"
+    }
+
+    /**
+     * Compare two values for equality using JSON serialization for complex objects.
+     */
+    private fun valuesEqual(a: Any?, b: Any?): Boolean {
+        return when {
+            a == null && b == null -> true
+            a == null || b == null -> false
+            a == b -> true
+            else -> compareAsJson(a, b)
+        }
+    }
+
+    private fun compareAsJson(a: Any, b: Any): Boolean {
+        return try {
+            objectMapper.writeValueAsString(a) == objectMapper.writeValueAsString(b)
+        } catch (_: Exception) {
+            a == b
+        }
+    }
+}

@@ -1,0 +1,140 @@
+# Versioning Guidelines
+
+This library follows [Semantic Versioning 2.0.0](https://semver.org/) for version numbering and uses the GAP Versioning and Publishing Plugin for automated version management.
+
+## Version Format
+
+Versions follow the format: `MAJOR.MINOR.PATCH[-PRERELEASE]`
+
+- **MAJOR**: Incremented for incompatible API changes
+- **MINOR**: Incremented for added functionality in a backward compatible manner
+- **PATCH**: Incremented for backward compatible bug fixes
+- **PRERELEASE**: Optional identifier for pre-release versions (e.g., SNAPSHOT, alpha, beta, rc.1)
+
+## Version Compatibility
+
+- For versions < 1.0.0 (0.x.y): No compatibility guarantees between different versions
+- For versions >= 1.0.0: Compatibility is guaranteed within the same major version
+
+## How to Update the Version
+
+The library uses the GAP Versioning and Publishing Plugin for automated version management:
+
+### 1. Base Version File
+
+Edit the `version.txt` file in the project root:
+
+```
+1.0
+```
+
+This file contains the base version in `MAJOR.MINOR` format.
+
+### 2. Version Management Tasks
+
+Use the provided Gradle tasks to increment versions:
+
+```bash
+# Increment major version (1.0 → 2.0)
+./gradlew incrementMajor
+
+# Increment minor version (1.0 → 1.1)
+./gradlew incrementMinor
+
+# Show current version information
+./gradlew showVersion
+```
+
+### 3. Version Resolution Strategy
+
+The GAP plugin resolves versions using the following priority:
+
+1. **Environment Variable**: `VERSION=1.2.3` (highest priority - used in CI/CD)
+2. **Project Property**: `./gradlew build -Pversion=1.2.3`
+3. **Base Version + SNAPSHOT**: `version.txt` content + `.0-SNAPSHOT` (default for local development)
+
+Examples:
+- `version.txt` contains `1.0` → Local version becomes `1.0.0-SNAPSHOT`
+- `VERSION=1.2.3` → Version becomes `1.2.3`
+- `./gradlew build -Pversion=2.0.0-RC1` → Version becomes `2.0.0-RC1`
+
+## Version in Code
+
+The library provides a `VersionInfo` class and automatically generated `BuildConfig` that can be used to:
+
+### Using VersionInfo Class
+```kotlin
+// Get the current version
+val version = VersionInfo.version
+
+// Check compatibility
+val isCompatible = VersionInfo.isCompatibleWith("1.2.3")
+
+// Access individual version components
+val major = VersionInfo.major
+val minor = VersionInfo.minor  
+val patch = VersionInfo.patch
+```
+
+### Using BuildConfig
+```kotlin
+import au.com.pexa.gap.buildconfig.BuildConfig
+
+// Get version information
+val version = BuildConfig.VERSION
+val group = BuildConfig.GROUP
+val artifact = BuildConfig.ARTIFACT
+```
+
+## Release Process
+
+### Development Workflow
+1. Work with SNAPSHOT versions locally (automatic from `version.txt`)
+2. Use version management tasks to increment base version as needed
+3. CI/CD handles final version resolution and publishing
+
+### Release Workflow
+1. **Prepare Release**: Ensure `version.txt` contains the desired `MAJOR.MINOR`
+2. **Create Release**: CI/CD will automatically generate semantic version (e.g., `1.0.0`)
+3. **Post-Release**: Increment version for next development cycle
+
+### CI/CD Integration
+The GAP plugin integrates seamlessly with CI/CD:
+- **Pull Requests**: Build with SNAPSHOT versions
+- **Main Branch**: Publish with proper semantic versions
+- **Tags/Releases**: Use tag version for publishing
+
+## Version Checking
+
+The GAP plugin includes automatic version checking to prevent duplicate publishing:
+
+```bash
+# Check if current version already exists in repository
+./gradlew checkVersionExists
+```
+
+This task:
+- ✅ Skips check for SNAPSHOT versions (can be overwritten)
+- ✅ Validates release versions against Artifactory
+- ✅ Prevents accidental duplicate publishing
+
+## Examples
+
+### Local Development
+- `version.txt`: `0.1` → Build version: `0.1.0-SNAPSHOT`
+- `version.txt`: `1.0` → Build version: `1.0.0-SNAPSHOT`
+
+### CI/CD Scenarios
+- **Feature Branch**: `0.1.0-SNAPSHOT` (from version.txt)
+- **Main Branch**: `0.1.0` (CI generates semantic version)
+- **Release Tag**: `1.0.0` (uses tag version)
+- **Manual Override**: `VERSION=1.2.3-RC1` → `1.2.3-RC1`
+
+### Version Progression
+- `0.1.0-SNAPSHOT`: Development version
+- `0.1.0`: Initial stable release
+- `0.2.0`: Compatible feature additions
+- `0.2.1`: Bug fixes
+- `1.0.0`: First major stable release
+- `1.1.0`: Compatible new features
+- `2.0.0`: Breaking changes

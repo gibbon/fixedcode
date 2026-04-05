@@ -1,0 +1,9 @@
+{{#unless IsFeatureLibrary}}
+-- Add retry tracking columns to event_processing_log
+ALTER TABLE event_processing_log 
+  ADD COLUMN retry_count INT DEFAULT 0 NOT NULL,
+  ADD COLUMN last_retry_at TIMESTAMP WITH TIME ZONE,
+  ADD COLUMN next_retry_at TIMESTAMP WITH TIME ZONE;
+
+CREATE INDEX idx_event_processing_log_next_retry ON event_processing_log(next_retry_at) WHERE next_retry_at IS NOT NULL;
+{{/unless}}

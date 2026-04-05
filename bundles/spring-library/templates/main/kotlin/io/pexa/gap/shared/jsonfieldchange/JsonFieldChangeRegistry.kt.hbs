@@ -1,0 +1,76 @@
+package io.pexa.gap.shared.jsonfieldchange
+
+import org.slf4j.LoggerFactory
+import java.util.concurrent.ConcurrentHashMap
+
+/**
+ * Registry for JSON field change handlers.
+ *
+ * Manages handler registration and invocation based on path matching.
+ * Supports exact paths and wildcard patterns.
+ */
+class JsonFieldChangeRegistry {
+    private val logger = LoggerFactory.getLogger(JsonFieldChangeRegistry::class.java)
+    private val handlers = ConcurrentHashMap<String, MutableList<JsonFieldChangeHandler<*>>>()
+
+    /**
+     * Register a handler for its watch path.
+     */
+    fun register(handler: JsonFieldChangeHandler<*>) {
+        handlers.computeIfAbsent(handler.watchPath) { mutableListOf() }.add(handler)
+        logger.info("Registered JsonFieldChangeHandler for path: {}", handler.watchPath)
+    }
+
+    /**
+     * Invoke all matching handlers for the given changes.
+     *
+     * @param changes List of detected changes
+     * @throws Exception if any handler throws (causes transaction rollback)
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun invokeHandlers(changes: List<JsonFieldChange<*>>) {
+        for (change in changes) {
+            val matchingHandlers = findHandlers(change.path)
+            for (handler in matchingHandlers) {
+                logger.debug("Invoking handler {} for path {}", handler::class.simpleName, change.path)
+                (handler as JsonFieldChangeHandler<Any?>).handle(change as JsonFieldChange<Any?>)
+            }
+        }
+    }
+
+    /**
+     * Find all handlers that match the given path.
+     */
+    fun findHandlers(path: String): List<JsonFieldChangeHandler<*>> {
+        val result = mutableListOf<JsonFieldChangeHandler<*>>()
+        for ((pattern, handlerList) in handlers) {
+            if (matchesPattern(pattern, path)) {
+                result.addAll(handlerList)
+            }
+        }
+        return result
+    }
+
+    /**
+     * Check if a path matches a pattern.
+     *
+     * Patterns support:
+     * - Exact match: "addresses" matches "addresses"
+     * - Single wildcard: "addresses.*" matches "addresses.0", "addresses.home"
+     * - Nested wildcard: "addresses.*.street" matches "addresses.0.street"
+     */
+    internal fun matchesPattern(pattern: String, path: String): Boolean {
+        val patternParts = pattern.split(".")
+        val pathParts = path.split(".")
+
+        return patternParts.size == pathParts.size && 
+            patternParts.indices.all { i -> 
+                patternParts[i] == "*" || patternParts[i] == pathParts[i]
+            }
+    }
+
+    /**
+     * Get count of registered handlers (for testing/debugging).
+     */
+    fun handlerCount(): Int = handlers.values.sumOf { it.size }
+}

@@ -1,0 +1,148 @@
+# Docker profile configuration
+# Uses container hostnames instead of localhost
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  application:
+    name: {{LibraryName}}
+
+  datasource:
+    write:
+      jdbc-url: jdbc:postgresql://postgresql:5432/gap_db?currentSchema={{LibraryName}}
+      username: gap_user
+      password: gap_password
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        maximum-pool-size: 5
+        minimum-idle: 1
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+    read:
+      jdbc-url: jdbc:postgresql://postgresql:5432/gap_db?currentSchema={{LibraryName}}
+      username: gap_user
+      password: gap_password
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        maximum-pool-size: 3
+        minimum-idle: 1
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+
+  # Flyway configuration for Docker
+  flyway:
+    enabled: true
+    locations: classpath:db/migration/core
+    table: flyway_schema_history_core
+    baseline-on-migrate: true
+    validate-on-migrate: true
+
+  # Spring Data JDBC configuration
+  sql:
+    init:
+      mode: never  # Let Flyway handle schema
+
+  # OAuth2 Resource Server configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://pexa-eba.au.auth0.com/
+          jwk-set-uri: https://pexa-eba.au.auth0.com/.well-known/jwks.json
+          custom-claims-path: https://eba-dev.pexalabs.com.au/customClaims
+
+  kafka:
+    bootstrap-servers: kafka:29092
+    properties:
+      security.protocol: PLAINTEXT
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      properties:
+        linger.ms: 10
+        batch.size: 16384
+        compression.type: lz4
+        request.timeout.ms: 20000
+        delivery.timeout.ms: 30000
+        max.block.ms: 10000
+        enable.idempotence: true
+    consumer:
+      bootstrap-servers: kafka:29092
+      group-id: {{LibraryName}}.consumer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    listener:
+      ack-mode: manual
+
+# Server configuration
+server:
+  port: 8080
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,configprops
+  endpoint:
+    health:
+      show-details: always
+
+# GAP Library configuration
+gap:
+  object-change:
+    enabled: true   # Enable JSON field change detection and handler registration
+  policy:
+    enabled: false  # Disable policy enforcement for development
+    debug: true     # Enable debug logging
+  events:
+    topic-prefix: ""  # e.g., "gap-au-aml-workspace" for environment-specific topics
+    topic-suffix: ""  # e.g., "dev" for environment-specific topics
+    topics: {{#each RemoteAggregates}}{{#unless @first}},{{/unless}}{{this.Topic}}{{else}}workspace-events{{/each}}
+    dlq-suffix: .DLQ
+  library:
+    name: GAP Library Template Docker
+    version: docker
+    environment: docker
+    debug: true
+    startup-logging-enabled: true
+    security:
+      enabled: false  # Set to false to disable OAuth2 security
+      permit-all-paths:
+        - "/actuator/health"
+        - "/test-harness/index.html"
+        - "/_admin/health/readiness"
+        - "/_admin/health/liveness"
+    validation:
+      maxLabels: 50
+      maxReferenceIdLength: 100
+      maxDescriptionLength: 500
+      allowedReferenceIdPattern: "^[A-Za-z0-9_-]+$"
+    bulk:
+      maxBatchSize: 100
+      timeoutSeconds: 30
+    events:
+      asyncProcessing: true
+      retryAttempts: 3
+      retryDelaySeconds: 5
+    audit:
+      enableAutoAuditing: true
+      defaultUser: "docker-system"
+    features:
+      database: postgresql
+      flyway: true
+      kafka: true
+      actuator: true
+      metrics: true
+      prometheus: false

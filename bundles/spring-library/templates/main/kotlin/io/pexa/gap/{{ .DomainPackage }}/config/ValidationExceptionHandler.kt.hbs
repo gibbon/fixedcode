@@ -1,0 +1,532 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{LibraryName}}.config
+
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import io.pexa.gap.policy.exception.PolicyAuthorizationException
+import io.pexa.gap.shared.exception.ApiException
+import io.pexa.gap.shared.exception.BadRequestException
+import io.pexa.gap.shared.exception.ForbiddenException
+import io.pexa.gap.shared.exception.NotFoundException
+import io.pexa.gap.shared.exception.ServiceUnavailableException
+import io.pexa.gap.shared.exception.UnauthorizedException
+import io.pexa.gap.shared.exception.ValidationExceptionBundle
+import io.pexa.gap.shared.logger.CustomLogger
+import io.pexa.gap.shared.logger.logData
+import jakarta.annotation.Generated
+import jakarta.validation.ConstraintViolationException
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
+import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.bind.annotation.ExceptionHandler
+import java.util.UUID
+
+/**
+ * Global exception handler for policy authorization and validation errors.
+ * Provides consistent error responses and appropriate log levels:
+ * - DEBUG for client errors (400, 404) - expected, not system issues
+ * - WARN for auth/conflict errors (401, 403, 409) - suspicious or potential bugs
+ * - ERROR for server errors (500, 503) - needs investigation
+ */
+@Generated(value = ["GAP Domain Generator"])
+@Suppress("LongMethod", "CyclomaticComplexMethod", "TooManyFunctions")
+@ControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
+class ValidationExceptionHandler {
+
+    companion object {
+        private val logger by lazy { CustomLogger(ValidationExceptionHandler::class.java) }
+        private const val VALIDATION_ERROR_CODE = "GA.{{ title .DomainPackage }}.400000"
+        private const val TYPE_MISMATCH_ERROR_CODE = "GA.{{ title .DomainPackage }}.400001"
+        private const val INVALID_FORMAT_ERROR_CODE = "GA.{{ title .DomainPackage }}.400002"
+        private const val UNAUTHORIZED_ERROR_CODE = "GA.{{ title .DomainPackage }}.401000"
+        private const val POLICY_ERROR_CODE = "GA.{{ title .DomainPackage }}.403000"
+        private const val NOT_FOUND_ERROR_CODE = "GA.{{ title .DomainPackage }}.404000"
+        private const val CONFLICT_ERROR_CODE = "GA.{{ title .DomainPackage }}.409000"
+        private const val PRECONDITION_FAILED_ERROR_CODE = "GA.{{ title .DomainPackage }}.412000"
+        private const val PRECONDITION_REQUIRED_ERROR_CODE = "GA.{{ title .DomainPackage }}.428000"
+        private const val SERVICE_UNAVAILABLE_ERROR_CODE = "GA.{{ title .DomainPackage }}.503000"
+    }
+
+    @ExceptionHandler(PolicyAuthorizationException::class)
+    fun handlePolicyException(ex: PolicyAuthorizationException): ResponseEntity<PolicyErrorResponse> {
+        logger.warn("Policy authorization denied", logData(messageDetails = mapOf(
+            "errorCode" to POLICY_ERROR_CODE,
+            "action" to ex.action,
+            "resource" to ex.resource,
+            "resourceId" to ex.resourceId
+        )))
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(
+                PolicyErrorResponse(
+                    message = ex.message ?: "Access denied",
+                    action = ex.action,
+                    resource = ex.resource,
+                    resourceId = ex.resourceId
+                )
+            )
+    }
+
+    @ExceptionHandler(NotFoundException::class)
+    fun handleNotFoundException(ex: NotFoundException): ResponseEntity<Map<String, Any>> {
+        val errorCode = NOT_FOUND_ERROR_CODE
+        logger.debug("Resource not found", logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "message" to ex.message
+        )))
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to (ex.message ?: "Resource not found"),
+            "field" to null
+        )
+
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    @ExceptionHandler(ValidationExceptionBundle::class)
+    fun handleValidationExceptionBundle(ex: ValidationExceptionBundle): ResponseEntity<Map<String, Any>> {
+        logger.debug("Validation failed", logData(messageDetails = mapOf(
+            "errorCode" to VALIDATION_ERROR_CODE,
+            "errorCount" to ex.errors.size,
+            "fields" to ex.errors.map { it.field }
+        )))
+        val errors = ex.errors.map { error ->
+            mapOf(
+                "field" to error.field,
+                "message" to error.message,
+                "code" to VALIDATION_ERROR_CODE
+            )
+        }
+        return ResponseEntity
+            .badRequest()
+            .body(mapOf("errors" to errors))
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleValidationException(ex: MethodArgumentNotValidException): ResponseEntity<Map<String, Any>> {
+        val errors = ex.bindingResult.fieldErrors.map { error ->
+            val friendlyMessage = when (error.code) {
+                "Email" -> "Invalid email address"
+                "NotNull", "NotBlank", "NotEmpty" -> "${error.field} is required"
+                "Size" -> "Invalid length for ${error.field}"
+                "Pattern" -> "Invalid format for ${error.field}"
+                else -> error.defaultMessage ?: "Invalid value for ${error.field}"
+            }
+
+            mapOf(
+                "field" to error.field,
+                "message" to friendlyMessage,
+                "code" to VALIDATION_ERROR_CODE
+            )
+        }
+        logger.debug("Method argument validation failed", logData(messageDetails = mapOf(
+            "errorCode" to VALIDATION_ERROR_CODE,
+            "errorCount" to errors.size,
+            "fields" to ex.bindingResult.fieldErrors.map { it.field }
+        )))
+        return ResponseEntity
+            .badRequest()
+            .body(mapOf("errors" to errors))
+    }
+
+    @ExceptionHandler(ConstraintViolationException::class)
+    fun handleConstraintViolation(ex: ConstraintViolationException): ResponseEntity<Map<String, Any>> {
+        val errors = ex.constraintViolations.map { violation ->
+            val message = when {
+                violation.message.contains("must be a well-formed email address") ||
+                    violation.message.contains("not a well-formed email address") ||
+                    violation.constraintDescriptor?.annotation?.annotationClass?.simpleName == "Email" ->
+                    "Invalid email address"
+
+                else -> violation.message
+            }
+
+            mapOf(
+                "field" to violation.propertyPath.toString(),
+                "message" to message,
+                "code" to TYPE_MISMATCH_ERROR_CODE
+            )
+        }
+        logger.debug("Constraint violation", logData(messageDetails = mapOf(
+            "errorCode" to TYPE_MISMATCH_ERROR_CODE,
+            "errorCount" to errors.size,
+            "fields" to ex.constraintViolations.map { it.propertyPath.toString() }
+        )))
+
+        return ResponseEntity
+            .badRequest()
+            .body(mapOf("errors" to errors))
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadable(ex: HttpMessageNotReadableException): ResponseEntity<Map<String, Any>> {
+        val cause = ex.cause
+
+        return when (cause) {
+            is MismatchedInputException -> {
+                val fieldName = cause.path.joinToString(".") { it.fieldName ?: "[${it.index}]" }
+                val errorCode = TYPE_MISMATCH_ERROR_CODE
+
+                // Check if this is a missing required field
+                val message = if (cause.message?.contains("missing") == true ||
+                    cause.message?.contains("required") == true ||
+                    cause.message?.contains("Cannot construct instance") == true
+                ) {
+                    "This field is required"
+                } else {
+                    val expectedType = when {
+                        cause.targetType?.isArray == true -> "array"
+                        cause.targetType?.name?.contains("List") == true -> "array"
+                        else -> cause.targetType?.simpleName?.lowercase() ?: "unknown"
+                    }
+                    "Invalid type for field '$fieldName'. Expected $expectedType but received different type."
+                }
+
+                logger.debug("HTTP message not readable", logData(messageDetails = mapOf(
+                    "errorCode" to errorCode,
+                    "field" to fieldName,
+                    "message" to message
+                )))
+
+                ResponseEntity
+                    .badRequest()
+                    .body(
+                        mapOf(
+                            "errors" to listOf(
+                                mapOf(
+                                    "field" to fieldName,
+                                    "message" to message,
+                                    "code" to errorCode
+                                )
+                            )
+                        )
+                    )
+            }
+
+            else -> {
+                val errorCode = INVALID_FORMAT_ERROR_CODE
+                logger.debug("Invalid request format", logData(messageDetails = mapOf(
+                    "errorCode" to errorCode
+                )))
+                ResponseEntity
+                    .badRequest()
+                    .body(
+                        mapOf(
+                            "errors" to listOf(
+                                mapOf(
+                                    "field" to null,
+                                    "message" to "Invalid request format. Please check your JSON structure.",
+                                    "code" to errorCode
+                                )
+                            )
+                        )
+                    )
+            }
+        }
+    }
+
+    @ExceptionHandler(org.springframework.data.relational.core.conversion.DbActionExecutionException::class)
+    fun handleDbActionExecutionException(ex: org.springframework.data.relational.core.conversion.DbActionExecutionException): ResponseEntity<Map<String, Any>> {
+        val cause = generateSequence<Throwable>(ex.cause) { it.cause }
+            .firstOrNull {
+                it is DuplicateKeyException ||
+                it is DataIntegrityViolationException ||
+                it is org.springframework.dao.OptimisticLockingFailureException
+            }
+
+        return when (cause) {
+            is DuplicateKeyException -> handleDuplicateKey(cause)
+            is org.springframework.dao.OptimisticLockingFailureException -> handleOptimisticLockingFailure(cause)
+            is DataIntegrityViolationException -> handleDataIntegrityViolation(cause)
+            else -> throw ex
+        }
+    }
+
+    @ExceptionHandler(DuplicateKeyException::class)
+    fun handleDuplicateKey(ex: DuplicateKeyException): ResponseEntity<Map<String, Any>> {
+        val message = ex.message ?: ""
+        
+        // Extract constraint name from exception message
+        val constraintPattern = Regex("""constraint\s+"([^"]+)"""", RegexOption.IGNORE_CASE)
+        val indexPattern = Regex("""index\s+"([^"]+)"""", RegexOption.IGNORE_CASE)
+        
+        val constraintName = constraintPattern.find(message)?.groupValues?.get(1)
+            ?: indexPattern.find(message)?.groupValues?.get(1)
+        
+        val errorCode = CONFLICT_ERROR_CODE
+        logger.warn("Duplicate key violation", logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "constraint" to constraintName,
+            "message" to message
+        )))
+
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to "A unique constraint was violated. This record already exists.",
+            "field" to constraintName
+        )
+
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException::class)
+    fun handleDataIntegrityViolation(ex: DataIntegrityViolationException): ResponseEntity<Map<String, Any>> {
+        val message = ex.message ?: ""
+
+        // Extract constraint name from exception message
+        val constraintPattern = Regex("""constraint\s+"([^"]+)"""", RegexOption.IGNORE_CASE)
+        val indexPattern = Regex("""index\s+"([^"]+)"""", RegexOption.IGNORE_CASE)
+
+        val constraintName = constraintPattern.find(message)?.groupValues?.get(1)
+            ?: indexPattern.find(message)?.groupValues?.get(1)
+            ?: ""
+
+        // Extract field name from constraint (e.g., "idx_table_field_unique" -> "field")
+        val fieldPattern = Regex("""idx_\w+_(.+)_unique""", RegexOption.IGNORE_CASE)
+        val fieldName = fieldPattern.find(constraintName)?.groupValues?.get(1)?.replace("_", " ") ?: "field"
+
+        val friendlyMessage = when {
+            constraintName.contains("unique") -> "This $fieldName already exists and must be unique"
+            message.lowercase().contains("unique") -> "A unique constraint was violated"
+            else -> "A data constraint was violated. Please check your input values."
+        }
+
+        val errorCode = CONFLICT_ERROR_CODE
+        logger.warn("Data integrity violation", logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "constraint" to constraintName,
+            "field" to fieldName
+        )))
+
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to friendlyMessage,
+            "field" to fieldName.takeIf { it != "field" }
+        )
+
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    @ExceptionHandler(org.springframework.dao.OptimisticLockingFailureException::class)
+    fun handleOptimisticLockingFailure(
+        ex: org.springframework.dao.OptimisticLockingFailureException
+    ): ResponseEntity<Map<String, Any>> {
+        val errorCode = PRECONDITION_FAILED_ERROR_CODE
+        logger.warn("Optimistic locking failure", logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "message" to ex.message
+        )))
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to (ex.message ?: "Resource was modified by another user")
+        )
+        return ResponseEntity
+            .status(HttpStatus.PRECONDITION_FAILED)
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    @ExceptionHandler(PreconditionRequiredException::class)
+    fun handlePreconditionRequired(ex: PreconditionRequiredException): ResponseEntity<Map<String, Any>> {
+        val errorCode = PRECONDITION_REQUIRED_ERROR_CODE
+        logger.warn("Precondition required", logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "message" to ex.message
+        )))
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to (ex.message ?: "Version required for update operations")
+        )
+        return ResponseEntity
+            .status(428) // PRECONDITION_REQUIRED not in HttpStatus enum
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    @ExceptionHandler(BadRequestException::class)
+    fun handleBadRequestException(ex: BadRequestException): ResponseEntity<Map<String, Any>> {
+        val errorCode = VALIDATION_ERROR_CODE
+        logger.debug("Bad request", logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "message" to ex.message
+        )))
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to (ex.message ?: "Bad request"),
+            "field" to null
+        )
+        return ResponseEntity
+            .badRequest()
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    @ExceptionHandler(UnauthorizedException::class)
+    fun handleUnauthorizedException(ex: UnauthorizedException): ResponseEntity<Map<String, Any>> {
+        val errorCode = UNAUTHORIZED_ERROR_CODE
+        logger.warn("Unauthorized access", logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "message" to ex.message
+        )))
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to (ex.message ?: "Unauthorized"),
+            "field" to null
+        )
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    @ExceptionHandler(ForbiddenException::class)
+    fun handleForbiddenException(ex: ForbiddenException): ResponseEntity<Map<String, Any>> {
+        val errorCode = POLICY_ERROR_CODE
+        logger.warn("Forbidden access", logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "message" to ex.message
+        )))
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to (ex.message ?: "Forbidden"),
+            "field" to null
+        )
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    @ExceptionHandler(ServiceUnavailableException::class)
+    fun handleServiceUnavailableException(ex: ServiceUnavailableException): ResponseEntity<Map<String, Any>> {
+        val errorCode = SERVICE_UNAVAILABLE_ERROR_CODE
+        logger.error("Service unavailable", logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "message" to ex.message
+        )))
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to (ex.message ?: "Service temporarily unavailable"),
+            "field" to null
+        )
+        return ResponseEntity
+            .status(HttpStatus.SERVICE_UNAVAILABLE)
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    @ExceptionHandler(ApiException::class)
+    fun handleApiException(ex: ApiException): ResponseEntity<Map<String, Any>> {
+        val errorCode = ex.errorCode.ifBlank { VALIDATION_ERROR_CODE }
+        logger.debug("API exception", logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "message" to ex.message
+        )))
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to (ex.message ?: "Request failed"),
+            "field" to ex.field
+        )
+        return ResponseEntity
+            .badRequest()
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<Map<String, Any>> {
+        logger.debug("Illegal argument", logData(messageDetails = mapOf(
+            "errorCode" to VALIDATION_ERROR_CODE,
+            "message" to ex.message
+        )))
+        val error = mapOf(
+            "code" to VALIDATION_ERROR_CODE,
+            "message" to (ex.message ?: "Invalid argument"),
+            "field" to null
+        )
+
+        return ResponseEntity
+            .badRequest()
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    /**
+     * Handle Spring framework exceptions that indicate client errors (400).
+     * Catches common Spring MVC/Web exceptions before GlobalExceptionHandler's RuntimeException catch-all.
+     */
+    @ExceptionHandler(
+        org.springframework.web.bind.MissingServletRequestParameterException::class,
+        org.springframework.web.method.annotation.MethodArgumentTypeMismatchException::class,
+        org.springframework.web.servlet.resource.NoResourceFoundException::class
+    )
+    fun handleSpringClientError(ex: Exception): ResponseEntity<Map<String, Any>> {
+        val errorCode = when (ex) {
+            is org.springframework.web.servlet.resource.NoResourceFoundException -> NOT_FOUND_ERROR_CODE
+            else -> VALIDATION_ERROR_CODE
+        }
+        
+        val httpStatus = when (ex) {
+            is org.springframework.web.servlet.resource.NoResourceFoundException -> HttpStatus.NOT_FOUND
+            else -> HttpStatus.BAD_REQUEST
+        }
+        
+        val message = ex.message ?: "Invalid request"
+        
+        logger.debug("Spring framework client error", logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "exceptionType" to ex.javaClass.simpleName,
+            "message" to message
+        )))
+        
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to message,
+            "field" to null
+        )
+        
+        return ResponseEntity
+            .status(httpStatus)
+            .body(mapOf("errors" to listOf(error)))
+    }
+
+    /**
+     * Catch-all handler for unexpected exceptions.
+     * Logs full stack trace but returns generic error to client.
+     * This should rarely be reached as specific handlers above catch most cases.
+     */
+    @ExceptionHandler(Exception::class)
+    fun handleGenericException(ex: Exception): ResponseEntity<Map<String, Any>> {
+        val errorCode = "GA.{{ title .DomainPackage }}.500000"
+        
+        // Log full exception with stack trace for debugging
+        logger.error("Unexpected error occurred", ex, logData(messageDetails = mapOf(
+            "errorCode" to errorCode,
+            "exceptionType" to ex.javaClass.simpleName,
+            "message" to ex.message
+        )))
+        
+        // Return generic error to client (don't expose internal details)
+        val error = mapOf(
+            "code" to errorCode,
+            "message" to "An unexpected error occurred. Please contact support with the correlation ID from the response headers.",
+            "field" to null
+        )
+        
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(mapOf("errors" to listOf(error)))
+    }
+}
+
+data class PolicyErrorResponse(
+    val message: String,
+    val action: String?,
+    val resource: String?,
+    val resourceId: UUID?
+)
+{{/unless}}

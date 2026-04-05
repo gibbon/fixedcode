@@ -1,0 +1,163 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: {{LibraryName}}
+  title: GAP Library Template
+  description: A comprehensive Spring Boot library template for PEXA's Global Application Platform (GAP)
+  annotations:
+    # Source Control
+    github.com/project-slug: PEXA-AU/{{LibraryName}}
+    
+    # Documentation
+    backstage.io/techdocs-ref: dir:.
+    
+    # Code Quality & Security
+    sonarqube.org/project-key: {{LibraryName}}
+    
+    # Artifact Repository
+    artifactory.org/group-id: io.pexa.gap
+    artifactory.org/artifact-id: {{LibraryName}}
+    
+    # CI/CD Pipeline Configuration
+    github.com/workflows: CI.yaml,dependabot-auto-merge.yml
+    pidp.org/config-path: ./pidp.yaml
+    pidp.org/workflow-version: v1
+    pidp.org/build-type: jvm-library-gradle
+    
+    # Build & Deployment
+    gradle.org/build-file: build.gradle.kts
+    gradle.org/version: 8.14+
+    java.org/version: "21"
+    kotlin.org/version: 2.1+
+    
+    # Quality Gates
+    jacoco.org/coverage-threshold: "80"
+
+    
+    # Dependency Management
+    dependabot.org/config-path: ./.github/dependabot.yml
+    dependabot.org/auto-merge: enabled
+    
+    # GAP Platform Integration
+    gap.org/bom-version: "1.0.2"
+    gap.org/available-libraries: gap-shared-common,gap-shared-db,gap-shared-event,gap-shared-logger,gap-shared-security,gap-shared-jwt-cache
+    gap.org/plugins-version: "1.1.3"
+    gap.org/international-common-version: "3.3.5-eba-4"
+    
+    # Publishing
+    maven.org/coordinates: io.pexa.gap:{{LibraryName}}
+    artifactory.org/repository: libs-release-local
+  tags:
+    - template
+    - spring-boot
+    - kotlin
+    - java
+    - library
+    - gap
+    - gradle
+    - pidp
+    - ci-cd
+    - auto-merge
+  links:
+    # Source & Documentation
+    - url: https://github.com/PEXA-AU/{{LibraryName}}
+      title: Source Code
+      icon: github
+    - url: https://github.com/PEXA-AU/{{LibraryName}}/blob/main/README.md
+      title: Documentation
+      icon: docs
+    
+    # CI/CD & Workflows
+    - url: https://github.com/PEXA-AU/{{LibraryName}}/actions
+      title: GitHub Actions
+      icon: github
+    - url: https://github.com/PEXA-AU/{{LibraryName}}/actions/workflows/CI.yaml
+      title: CI Pipeline
+      icon: build
+    - url: https://github.com/PEXA-AU/{{LibraryName}}/actions/workflows/dependabot-auto-merge.yml
+      title: Dependabot Auto-merge
+      icon: merge
+    - url: https://github.com/PEXA-AU/{{LibraryName}}/blob/main/pidp.yaml
+      title: PIDP Configuration
+      icon: settings
+    
+    # Quality & Security
+    - url: https://sonarqube.pexa.com.au/dashboard?id={{LibraryName}}
+      title: SonarQube Dashboard
+      icon: dashboard
+    - url: https://github.com/PEXA-AU/{{LibraryName}}/security
+      title: Security Advisories
+      icon: security
+    - url: https://github.com/PEXA-AU/{{LibraryName}}/network/dependencies
+      title: Dependency Graph
+      icon: dependencies
+    
+    # Artifacts & Publishing
+    - url: https://pexaartifacts.jfrog.io/ui/repos/tree/General/libs-release-local/io/pexa/gap/{{LibraryName}}
+      title: Artifactory Repository
+      icon: package
+    - url: https://github.com/PEXA-AU/{{LibraryName}}/releases
+      title: Releases
+      icon: release
+    
+    # Development Tools
+    - url: https://github.com/PEXA-AU/{{LibraryName}}/blob/main/build.gradle.kts
+      title: Build Configuration
+      icon: gradle
+spec:
+  type: template
+  lifecycle: production
+  owner: engineering-standards
+  system: gap
+  
+  # Core Dependencies
+  dependsOn:
+    # Core Platform Dependencies
+    - component:spring-boot
+    - component:kotlin
+    - component:gradle
+    
+    # GAP Platform Dependencies (Active)
+    - component:gap-shared-bom
+    
+    # GAP Shared Libraries (Available/Optional)
+    - component:gap-shared-common
+    - component:gap-shared-db
+    - component:gap-shared-event
+    - component:gap-shared-logger
+    - component:gap-shared-security
+    - component:gap-shared-jwt-cache
+    
+    # GAP Platform Tools
+    - component:gap-shared-plugins
+  
+  # Provides capabilities for other components
+  providesApis:
+    - {{LibraryName}}-api
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: gap
+  title: Global Application Platform (GAP)
+  description: PEXA's Global Application Platform providing shared libraries and services
+  tags:
+    - platform
+    - microservices
+    - spring-boot
+    - kotlin
+spec:
+  owner: gap-platform-team
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: engineering-standards
+  title: PEXA Engineering Standards
+  description: Group for PEXA engineering standards and best practices
+spec:
+  type: team
+  profile:
+    displayName: Engineering Standards
+    email: engineering@pexa.com.au
+  children: []

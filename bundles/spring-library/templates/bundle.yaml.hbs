@@ -1,0 +1,91 @@
+name: spring-library
+version: 1.0.0
+description: Spring Boot library template bundle for GAP domain libraries
+
+variables:
+  required:
+    - name: LibraryName
+      description: Kebab-case library name (e.g., workspace-core)
+      pattern: "^[a-z][a-z0-9-]*[a-z0-9]$"
+      example: workspace-core
+    
+    - name: Description
+      description: Human-readable library description
+      example: "Workspace domain core library for GAP"
+  
+  optional:
+    - name: Version
+      description: Initial library version
+      default: "0.1.0"
+      pattern: "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9]+)?$"
+    
+    - name: Group
+      description: Maven group ID
+      default: "io.pexa.gap"
+    
+    - name: DatabaseEnabled
+      description: Enable database support
+      default: true
+      type: boolean
+    
+    - name: DatabaseType
+      description: Database type
+      default: postgresql
+      options: [postgresql, mysql, none]
+    
+    - name: DatabasePort
+      description: Database port for development
+      default: 5433
+      type: integer
+    
+    - name: KafkaEnabled
+      description: Enable Kafka support
+      default: false
+      type: boolean
+    
+    - name: ActuatorEnabled
+      description: Enable Spring Boot Actuator
+      default: true
+      type: boolean
+    
+    - name: ServerPort
+      description: Default server port
+      default: 8080
+      type: integer
+
+derived:
+  - name: LibraryNamePascal
+    description: PascalCase library name
+    transform: toPascalCase(LibraryName)
+  
+  - name: LibraryNameCamel
+    description: camelCase library name
+    transform: toCamelCase(LibraryName)
+  
+  - name: PackageName
+    description: Package-safe library name
+    transform: toPackageName(LibraryName)
+  
+  - name: DatabaseName
+    description: Database name
+    transform: "gap_" + toSnakeCase(PackageName) + "_db"
+  
+  - name: PropertyPrefix
+    description: Configuration property prefix
+    transform: "gap." + LibraryNameCamel
+
+features:
+  database:
+    enabled: "{{LibraryName}}"
+    type: "{{LibraryName}}"
+  
+  messaging:
+    enabled: "{{LibraryName}}"
+  
+  observability:
+    actuator: "{{LibraryName}}"
+
+outputs:
+  - type: directory
+    path: "{{LibraryName}}"
+    description: Complete Spring Boot library project

@@ -1,0 +1,37 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug Tests",
+      "request": "launch",
+      "mainClass": "",
+      "projectName": "gap-library-template",
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "stopOnEntry": false,
+      "args": "",
+      "vmArgs": "-ea"
+    },
+    {
+      "type": "java",
+      "name": "Debug Spring Boot Application",
+      "request": "launch",
+      "mainClass": "io.pexa.gap.GapLibraryTemplateApplication",
+      "projectName": "gap-library-template",
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole",
+      "stopOnEntry": false,
+      "args": "",
+      "vmArgs": "-Dspring.profiles.active=local"
+    },
+    {
+      "type": "java",
+      "name": "Attach to Process",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5005,
+      "timeout": 30000
+    }
+  ]
+}

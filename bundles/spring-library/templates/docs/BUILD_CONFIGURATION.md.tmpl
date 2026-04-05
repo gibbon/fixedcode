@@ -1,0 +1,344 @@
+# Build Configuration Guide
+
+This document explains the structure and configuration of the `build.gradle.kts` file in the GAP Library Template.
+
+## File Structure Overview
+
+The build script is organized into logical sections for maintainability and clarity:
+
+```kotlin
+// 1. PLUGINS - All plugin declarations
+// 2. PROJECT CONFIGURATION - Basic project settings
+// 3. REPOSITORIES - Dependency sources
+// 4. GAP PLUGIN CONFIGURATION - GAP-specific settings
+// 5. DEPENDENCIES - Library dependencies
+// 6. JAVA & KOTLIN CONFIGURATION - Language settings
+// 7. TESTING CONFIGURATION - Test framework setup
+// 8. CODE QUALITY CONFIGURATION - Static analysis and coverage
+// 9. BUILD TASK CONFIGURATION - JAR and build customization
+// 10. DOCUMENTATION CONFIGURATION - API docs setup
+```
+
+## Section Details
+
+### 1. Plugins
+
+```kotlin
+plugins {
+    // Core plugins for Kotlin library development
+    alias(libs.plugins.kotlin)
+    id("java-library")
+    
+    // Quality and documentation tools
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.detekt)
+    id("jacoco")
+    
+    // Modern testing framework
+    id("jvm-test-suite")
+    
+    // GAP ecosystem integration
+    id("au.com.pexa.gap.versioning-publishing") version "1.0.0-SNAPSHOT"
+}
+```
+
+**Key Features:**
+- Uses version catalog (`libs.plugins.*`) for consistent versioning
+- GAP plugin provides automated versioning and publishing
+- Modern test suite plugin for better test organization
+
+### 2. Project Configuration
+
+```kotlin
+group = "au.com.pexa.gap"
+```
+
+**Template Variables:**
+- This will be updated by the setup script based on your package structure
+
+### 3. Repositories
+
+```kotlin
+repositories {
+    mavenCentral()
+    
+    maven {
+        name = "PEXAArtifactory"
+        url = uri("https://pexaartifacts.jfrog.io/artifactory/libs-release-local")
+        credentials(PasswordCredentials::class) {
+            username = System.getenv("ARTIFACTORY_USER") ?: System.getProperty("artifactory.user")
+            password = System.getenv("ARTIFACTORY_PASSWORD") ?: System.getProperty("artifactory.password")
+        }
+        authentication {
+            create<BasicAuthentication>("basic")
+        }
+    }
+}
+```
+
+**Features:**
+- Maven Central for public dependencies
+- PEXA Artifactory for internal libraries
+- Secure credential handling via environment variables
+
+### 4. GAP Plugin Configuration
+
+```kotlin
+gapVersioning {
+    versionFile = "version.txt"
+    enableVersionChecking = true
+    generateBuildConfig = true
+    buildConfigPackage = "au.com.pexa.gap.buildconfig"
+    artifactoryUrl = "https://pexaartifacts.jfrog.io/artifactory/libs-release-local"
+}
+```
+
+**Capabilities:**
+- Automatic version resolution from `version.txt`
+- BuildConfig generation for runtime version access
+- Version existence checking to prevent duplicates
+- Integrated publishing to Artifactory
+
+### 5. Dependencies
+
+```kotlin
+dependencies {
+    // Kotlin standard libraries
+    implementation(libs.kotlinStdlib)
+    implementation(libs.kotlinReflect)
+
+    // Logging framework
+    implementation(libs.slf4j)
+
+    // JSON processing
+    implementation(libs.jacksonDatabind)
+    implementation(libs.jacksonKotlin)
+}
+```
+
+**Design Principles:**
+- Uses version catalog for dependency management
+- Includes common libraries needed by most GAP libraries
+- Test dependencies are configured separately in the testing block
+
+### 6. Java & Kotlin Configuration
+
+```kotlin
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+    withJavadocJar()
+    withSourcesJar()
+}
+
+kotlin {
+    jvmToolchain(21)
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xjsr305=strict"
+        )
+    }
+}
+```
+
+**Features:**
+- Java 21 toolchain for consistent builds
+- Automatic generation of sources and javadoc JARs
+- Enhanced Kotlin compiler options for better code quality
+
+### 7. Testing Configuration
+
+```kotlin
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+            
+            dependencies {
+                implementation(platform("org.junit:junit-bom:5.10.1"))
+                implementation(libs.junitApi)
+                runtimeOnly(libs.junitEngine)
+                implementation(libs.junitParams)
+                implementation(libs.mockitoCore)
+                implementation(libs.assertj)
+            }
+            
+            targets {
+                all {
+                    testTask.configure {
+                        jvmArgs = listOf(
+                            "--add-opens", "java.base/java.lang=ALL-UNNAMED"
+                        )
+                        useJUnitPlatform()
+                        testLogging {
+                            events("passed", "skipped", "failed")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+**Benefits:**
+- Modern JVM test suite API
+- JUnit 5 with comprehensive testing libraries
+- Java 21 compatibility configuration
+- Enhanced test logging
+
+### 8. Code Quality Configuration
+
+```kotlin
+// Static analysis
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom("$projectDir/config/detekt.yml")
+    ignoreFailures = false
+}
+
+// Code coverage
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal() // 80% coverage minimum
+            }
+        }
+    }
+}
+```
+
+**Quality Gates:**
+- Detekt for static code analysis
+- JaCoCo for code coverage measurement
+- Configurable coverage thresholds
+- Multiple report formats for CI/CD integration
+
+### 9. Build Task Configuration
+
+```kotlin
+tasks.named<Jar>("sourcesJar") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    archiveClassifier.set("sources")
+}
+
+tasks.named<Jar>("jar") {
+    manifest {
+        attributes(
+            "Implementation-Title" to project.name,
+            "Implementation-Version" to project.version,
+            "Implementation-Vendor" to "PEXA"
+        )
+    }
+}
+```
+
+**Enhancements:**
+- Proper JAR manifest with metadata
+- Duplicate handling for source JARs
+- Professional artifact configuration
+
+### 10. Documentation Configuration
+
+```kotlin
+tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
+    dokkaSourceSets {
+        named("main") {
+            moduleName.set(project.name)
+            includes.from("docs/api.md")
+        }
+    }
+}
+```
+
+**Features:**
+- Dokka for API documentation generation
+- Configurable documentation includes
+- Professional documentation output
+
+## Customization Guide
+
+### Adding Dependencies
+
+```kotlin
+dependencies {
+    // Add your dependencies here
+    implementation("com.example:library:1.0.0")
+    
+    // Or use version catalog
+    implementation(libs.yourLibrary)
+}
+```
+
+### Adjusting Code Quality
+
+```kotlin
+// Adjust coverage threshold
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.90".toBigDecimal() // 90% coverage
+            }
+        }
+    }
+}
+
+// Customize Detekt rules
+detekt {
+    config.setFrom("$projectDir/config/custom-detekt.yml")
+}
+```
+
+### Adding Test Suites
+
+```kotlin
+testing {
+    suites {
+        val integrationTest by registering(JvmTestSuite::class) {
+            useJUnitJupiter()
+            
+            dependencies {
+                implementation(project())
+                // Add integration test specific dependencies
+            }
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Keep sections organized** - Don't mix configuration types
+2. **Use version catalogs** - Centralize dependency versions
+3. **Document custom configurations** - Add comments for complex setups
+4. **Test your changes** - Always run `./gradlew build` after modifications
+5. **Follow GAP standards** - Use the GAP plugin for versioning and publishing
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Build fails after changes**: Run `./gradlew clean build`
+2. **Dependency resolution issues**: Check version catalog and repository configuration
+3. **Test failures**: Verify JVM arguments and test dependencies
+4. **Coverage failures**: Adjust thresholds or improve test coverage
+
+### Getting Help
+
+- Check the main README.md for general guidance
+- Review VERSIONING.md for GAP plugin details
+- Use `./gradlew help --task <taskname>` for task-specific help
+- Consult Gradle documentation for advanced configurations

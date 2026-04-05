@@ -1,0 +1,39 @@
+{{#unless IsFeatureLibrary}}
+package io.pexa.gap.{{.BoundedContextLower}}.application.shared
+
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+
+class TopicNameResolverTest {
+
+    @Test
+    fun `should return base topic when no prefix or suffix`() {
+        val resolver = TopicNameResolver("", "")
+        assertThat(resolver.resolveTopicName("workspace")).isEqualTo("workspace")
+    }
+
+    @Test
+    fun `should add prefix when configured`() {
+        val resolver = TopicNameResolver("gap-au-aml", "")
+        assertThat(resolver.resolveTopicName("workspace")).isEqualTo("gap-au-aml.workspace")
+    }
+
+    @Test
+    fun `should add suffix when configured`() {
+        val resolver = TopicNameResolver("", "dev")
+        assertThat(resolver.resolveTopicName("workspace")).isEqualTo("workspace.dev")
+    }
+
+    @Test
+    fun `should add both prefix and suffix when configured`() {
+        val resolver = TopicNameResolver("gap-au-aml", "dev")
+        assertThat(resolver.resolveTopicName("workspace")).isEqualTo("gap-au-aml.workspace.dev")
+    }
+
+    @Test
+    fun `should handle blank prefix and suffix`() {
+        val resolver = TopicNameResolver("  ", "  ")
+        assertThat(resolver.resolveTopicName("workspace")).isEqualTo("workspace")
+    }
+}
+{{/unless}}

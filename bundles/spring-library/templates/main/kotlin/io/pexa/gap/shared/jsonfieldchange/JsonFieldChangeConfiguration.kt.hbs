@@ -1,0 +1,48 @@
+package io.pexa.gap.shared.jsonfieldchange
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.annotation.PostConstruct
+import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+
+/**
+ * Auto-configuration for JSON field change detection infrastructure.
+ *
+ * Beans are always created. Handler auto-registration is conditional on:
+ * gap.object-change.enabled=true
+ */
+@Configuration
+class JsonFieldChangeConfiguration(
+    private val objectMapper: ObjectMapper
+) {
+    private val logger = LoggerFactory.getLogger(JsonFieldChangeConfiguration::class.java)
+
+    @Bean
+    fun objectChangeRegistry(): JsonFieldChangeRegistry = JsonFieldChangeRegistry()
+
+    @Bean
+    fun objectChangeDetector(): JsonFieldChangeDetector = JsonFieldChangeDetector(objectMapper)
+
+    /**
+     * Auto-registers handlers when enabled.
+     */
+    @Configuration
+    @ConditionalOnProperty(name = ["gap.object-change.enabled"], havingValue = "true", matchIfMissing = false)
+    class HandlerRegistration(
+        private val registry: JsonFieldChangeRegistry,
+        private val handlers: List<JsonFieldChangeHandler<*>>
+    ) {
+        private val logger = LoggerFactory.getLogger(HandlerRegistration::class.java)
+
+        @PostConstruct
+        fun registerHandlers() {
+            logger.info("Object change detection enabled, registering {} handlers", handlers.size)
+            handlers.forEach { handler ->
+                registry.register(handler)
+            }
+            logger.info("Registered {} JSON field change handlers", registry.handlerCount())
+        }
+    }
+}

@@ -1,0 +1,10 @@
+{{#unless IsFeatureLibrary}}
+-- Add causation_id column to outbox table for event lineage tracking
+ALTER TABLE outbox ADD COLUMN IF NOT EXISTS causation_id UUID;
+
+-- Index for causation queries (event lineage)
+CREATE INDEX IF NOT EXISTS idx_outbox_causation ON outbox(causation_id);
+
+-- Index for correlation queries (diagnostic)
+CREATE INDEX IF NOT EXISTS idx_outbox_trace ON outbox(trace_id);
+{{/unless}}

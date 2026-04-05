@@ -1,0 +1,190 @@
+{{#unless IsFeatureLibrary}}
+
+package io.pexa.gap.{{.BoundedContextLower}}.domain.shared
+
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+import java.time.Instant
+
+/**
+ * Test suite for JwtService.
+ */
+class JwtServiceTest {
+
+    private lateinit var jwtService: JwtService
+
+    @BeforeEach
+    fun setUp() {
+        jwtService = JwtService(
+            customClaimsPath = "https://pexa.au.auth.com/customClaims",
+            debugMode = false
+        )
+        SecurityContextHolder.clearContext()
+    }
+
+    @Test
+    fun `getCurrentUserId should return pexaUserId when present`() {
+        // Given
+        val customClaims = mapOf(
+            "pexaUserId" to "user-456",
+            "supportUserId" to "support-123"
+        )
+        setupJwtContext(customClaims)
+
+        // When
+        val result = jwtService.getCurrentUserId()
+
+        // Then
+        assertEquals("user-456", result)
+    }
+
+    @Test
+    fun `getCurrentUserId should return supportUserId when pexaUserId is null`() {
+        // Given
+        val customClaims = mapOf(
+            "supportUserId" to "support-123"
+        )
+        setupJwtContext(customClaims)
+
+        // When
+        val result = jwtService.getCurrentUserId()
+
+        // Then
+        assertEquals("support-123", result)
+    }
+
+    @Test
+    fun `getCurrentUserId should return system when both claims are null`() {
+        // Given
+        val customClaims = emptyMap<String, Any>()
+        setupJwtContext(customClaims)
+
+        // When
+        val result = jwtService.getCurrentUserId()
+
+        // Then
+        assertEquals("system", result)
+    }
+
+    @Test
+    fun `getCurrentUserId should return system when no JWT context`() {
+        // Given - No JWT context set up
+
+        // When
+        val result = jwtService.getCurrentUserId()
+
+        // Then
+        assertEquals("system", result)
+    }
+
+    @Test
+    fun `getCurrentUserId should prioritize pexaUserId over supportUserId`() {
+        // Given - Both claims present
+        val customClaims = mapOf(
+            "pexaUserId" to "user-888",
+            "supportUserId" to "support-999"
+        )
+        setupJwtContext(customClaims)
+
+        // When
+        val result = jwtService.getCurrentUserId()
+
+        // Then
+        assertEquals("user-888", result)
+    }
+
+    @Test
+    fun `getCustomClaim should return claim value when present`() {
+        // Given
+        val customClaims = mapOf(
+            "subscriberId" to "sub-123"
+        )
+        setupJwtContext(customClaims)
+
+        // When
+        val result = jwtService.getCustomClaim("subscriberId")
+
+        // Then
+        assertEquals("sub-123", result)
+    }
+
+    @Test
+    fun `getCustomClaim should throw error when claim not found`() {
+        // Given
+        val customClaims = emptyMap<String, Any>()
+        setupJwtContext(customClaims)
+
+        // When/Then
+        val exception = org.junit.jupiter.api.assertThrows<IllegalStateException> {
+            jwtService.getCustomClaim("missingClaim")
+        }
+        assertEquals("Custom claim 'missingClaim' not found in JWT", exception.message)
+    }
+
+    @Test
+    fun `getCustomClaim should throw error when no JWT context`() {
+        // Given - No JWT context
+
+        // When/Then
+        val exception = org.junit.jupiter.api.assertThrows<IllegalStateException> {
+            jwtService.getCustomClaim("anyClaim")
+        }
+        assertEquals("No JWT authentication found", exception.message)
+    }
+
+    @Test
+    fun `getCustomClaimOrNull should return claim value when present`() {
+        // Given
+        val customClaims = mapOf(
+            "subscriberId" to "sub-456"
+        )
+        setupJwtContext(customClaims)
+
+        // When
+        val result = jwtService.getCustomClaimOrNull("subscriberId")
+
+        // Then
+        assertEquals("sub-456", result)
+    }
+
+    @Test
+    fun `getCustomClaimOrNull should return null when claim not found`() {
+        // Given
+        val customClaims = emptyMap<String, Any>()
+        setupJwtContext(customClaims)
+
+        // When
+        val result = jwtService.getCustomClaimOrNull("missingClaim")
+
+        // Then
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getCustomClaimOrNull should return null when no JWT context`() {
+        // Given - No JWT context
+
+        // When
+        val result = jwtService.getCustomClaimOrNull("anyClaim")
+
+        // Then
+        assertEquals(null, result)
+    }
+
+    private fun setupJwtContext(customClaims: Map<String, Any>) {
+        val jwt = Jwt.withTokenValue("test-token")
+            .header("alg", "RS256")
+            .claim("sub", "test-subject")
+            .claim("https://pexa.au.auth.com/customClaims", customClaims)
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(3600))
+            .build()
+        SecurityContextHolder.getContext().authentication = JwtAuthenticationToken(jwt)
+    }
+}
+
+{{/unless}}
