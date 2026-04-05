@@ -125,6 +125,59 @@ generators:
   openapi: "./generators/openapi"
 ```
 
+## Cross-Functional Requirements (CFRs)
+
+CFRs are non-functional requirements every service needs: auth, logging, error handling, etc. Bundles declare which CFRs they bake in. The engine verifies and reports on compliance.
+
+### CFR CLI Commands
+```bash
+fixedcode cfr catalog                              # list all 28 known CFRs across 7 categories
+fixedcode cfr catalog --category security          # filter by category
+fixedcode cfr suggest <spec.yaml>                  # show CFRs not yet covered by the bundle
+fixedcode cfr check <spec.yaml> <outputDir>        # verify CFR files are present after generation
+fixedcode cfr report <spec.yaml> <outputDir>       # generate Markdown compliance report
+fixedcode cfr report <spec.yaml> <outputDir> -o compliance.md  # save to file
+```
+
+### CFR Categories
+- **security** — auth, authorization, CORS, input validation, rate limiting
+- **observability** — logging, metrics, health checks, tracing, audit log
+- **resilience** — error handling, retry, circuit breaker, optimistic locking, dead letter queue
+- **data** — pagination, filtering, migrations, soft delete
+- **events** — domain events, transactional outbox, event schema versioning
+- **testing** — unit tests, integration tests, contract tests
+- **devops** — Docker, CI/CD, OpenAPI spec
+
+### How bundles declare CFRs
+```typescript
+export const bundle: Bundle = {
+  kind: 'my-bundle',
+  // ...
+  cfrs: {
+    provides: ['auth', 'logging', 'domain-events', 'unit-tests'],
+    files: {
+      'auth': ['src/main/kotlin/*/config/SecurityConfig.kt'],
+      'logging': ['src/main/resources/logback-spring.xml'],
+    },
+  },
+};
+```
+
+### How specs configure CFRs
+```yaml
+spec:
+  # ... domain content ...
+  cfrs:
+    rate-limiting: false    # disable a CFR the bundle provides
+    soft-delete: true       # request a CFR (bundle must support it)
+```
+
+### AI Agent workflow for CFRs
+1. Run `fixedcode cfr suggest <spec>` to see what's missing
+2. Add the missing CFRs to the bundle templates
+3. Update `cfrs.provides` and `cfrs.files` on the bundle export
+4. Run `fixedcode cfr check` to verify everything is wired
+
 ## Key Files
 
 - `engine/src/types.ts` — Bundle, Generator, FileEntry, Context interfaces
@@ -136,7 +189,9 @@ generators:
 - `engine/src/engine/registry.ts` — registry fetch/search/install/publish
 - `bundles/spring-domain/src/index.ts` — enrich() + generateFiles()
 - `bundles/spring-domain/src/enrich/conventions.ts` — HTTP/auth/response convention engine
+- `engine/src/engine/cfr.ts` — CFR catalog, verify, report, suggest
 - `generators/openapi/src/index.ts` — OpenAPI spec generator
+- `bundles/spring-domain/src/adapters/openapi.ts` — maps domain context to OpenAPI generator input
 
 ## Programmatic API
 
