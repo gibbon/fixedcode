@@ -5,7 +5,14 @@ export async function dynamicImport(bundlePath: string, configDir: string): Prom
   let resolvedPath: string;
 
   if (bundlePath.startsWith('@')) {
-    resolvedPath = bundlePath;
+    // For scoped npm packages, resolve from the config directory's node_modules
+    const fromConfigDir = join(configDir, 'node_modules', ...bundlePath.split('/'));
+    if (existsSync(fromConfigDir)) {
+      resolvedPath = fromConfigDir;
+    } else {
+      // Fall back to Node's native resolution (works if engine is in the same project)
+      resolvedPath = bundlePath;
+    }
   } else if (isAbsolute(bundlePath)) {
     resolvedPath = bundlePath;
   } else {
