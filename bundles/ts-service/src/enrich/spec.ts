@@ -10,7 +10,7 @@ export interface RawTsServiceSpec {
 }
 
 export function parseSpec(raw: Record<string, unknown>): RawTsServiceSpec {
-  const spec = raw as RawTsServiceSpec;
+  const spec = raw as unknown as RawTsServiceSpec;
   return {
     service: {
       port: spec.service.port ?? 3000,
