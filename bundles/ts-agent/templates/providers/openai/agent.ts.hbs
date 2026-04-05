@@ -1,0 +1,59 @@
+import OpenAI from 'openai';
+import { logger } from './logger.js';
+{{#each tools}}
+import { handle as handle{{this.name.pascal}} } from './tools/{{this.name.kebab}}.js';
+{{/each}}
+
+const client = new OpenAI();
+
+const MODEL_TIERS: Record<string, string> = {
+  fast: 'gpt-4o-mini',
+  balanced: 'gpt-4o',
+  quality: 'gpt-4o',
+};
+
+const toolDefs: OpenAI.ChatCompletionTool[] = [
+{{#each tools}}
+  {
+    type: 'function',
+    function: {
+      name: '{{this.name.kebab}}',
+      description: '{{this.name.pascal}} tool',
+      parameters: { type: 'object', properties: { input: { type: 'string' } }, required: ['input'] },
+    },
+  },
+{{/each}}
+];
+
+const handlers: Record<string, (input: Record<string, unknown>) => Promise<unknown>> = {
+{{#each tools}}
+  '{{this.name.kebab}}': handle{{this.name.pascal}},
+{{/each}}
+};
+
+export async function runAgent(input: string): Promise<string> {
+  const messages: OpenAI.ChatCompletionMessageParam[] = [
+    { role: 'system', content: `{{prompt}}` },
+    { role: 'user', content: input },
+  ];
+  const model = MODEL_TIERS['{{modelTier}}'] ?? MODEL_TIERS.balanced;
+
+  let response = await client.chat.completions.create({ model, messages, tools: toolDefs });
+
+  while (response.choices[0]?.finish_reason === 'tool_calls') {
+    const toolCalls = response.choices[0].message.tool_calls ?? [];
+    messages.push(response.choices[0].message);
+
+    for (const call of toolCalls) {
+      const handler = handlers[call.function.name];
+      const args = JSON.parse(call.function.arguments);
+      const result = handler ? await handler(args) : { error: 'unknown tool' };
+      messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
+    }
+
+    response = await client.chat.completions.create({ model, messages, tools: toolDefs });
+  }
+
+  logger.info({ usage: response.usage }, 'agent completed');
+  return response.choices[0]?.message.content ?? '';
+}

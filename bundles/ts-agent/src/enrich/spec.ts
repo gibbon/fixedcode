@@ -11,7 +11,7 @@ export interface RawTsAgentSpec {
 }
 
 export function parseSpec(raw: Record<string, unknown>): RawTsAgentSpec {
-  const spec = raw as RawTsAgentSpec;
+  const spec = raw as unknown as RawTsAgentSpec;
   return {
     mode: spec.mode ?? 'single',
     provider: spec.provider ?? 'vercel-ai',

@@ -1,0 +1,9 @@
+import { describe, it, expect } from 'vitest';
+import { handle } from '../../src/tools/{{tool.name.kebab}}.js';
+
+describe('{{tool.name.pascal}} tool', () => {
+  it('handles input', async () => {
+    const result = await handle({ input: 'test' });
+    expect(result).toBeDefined();
+  });
+});
