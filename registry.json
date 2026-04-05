@@ -50,6 +50,36 @@
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/bundle-mcp-wrapper",
       "install": "npm install @fixedcode/bundle-mcp-wrapper"
+    },
+    {
+      "name": "@fixedcode/bundle-rdan-tool-api",
+      "description": "r.dan tool template — external API caller with auth from knowledge base",
+      "version": "0.1.0",
+      "kind": "bundle",
+      "tags": ["rdan", "tool", "api", "rest", "template"],
+      "author": "fixedcode",
+      "repo": "https://github.com/gibbon/fixedcode",
+      "install": "npm install @fixedcode/bundle-rdan-tool-api"
+    },
+    {
+      "name": "@fixedcode/bundle-rdan-agent-specialist",
+      "description": "r.dan agent template — specialist agent with tools, prompt, and model tier",
+      "version": "0.1.0",
+      "kind": "bundle",
+      "tags": ["rdan", "agent", "specialist", "template"],
+      "author": "fixedcode",
+      "repo": "https://github.com/gibbon/fixedcode",
+      "install": "npm install @fixedcode/bundle-rdan-agent-specialist"
+    },
+    {
+      "name": "@fixedcode/bundle-rdan-infra-dashboard-page",
+      "description": "r.dan infra template — dynamic dashboard page with charts, tables, metrics",
+      "version": "0.1.0",
+      "kind": "bundle",
+      "tags": ["rdan", "infra", "dashboard", "page", "charts", "template"],
+      "author": "fixedcode",
+      "repo": "https://github.com/gibbon/fixedcode",
+      "install": "npm install @fixedcode/bundle-rdan-infra-dashboard-page"
     }
   ]
 }

@@ -5,6 +5,9 @@ bundles:
   spring-library: "./bundles/spring-library"
   mcp-wrapper: "./bundles/mcp-wrapper"
   spring-domain: "./bundles/spring-domain"
+  rdan-tool-api: "./bundles/rdan-tool-api"
+  rdan-agent-specialist: "./bundles/rdan-agent-specialist"
+  rdan-infra-dashboard-page: "./bundles/rdan-infra-dashboard-page"
 
 generators:
   openapi: "./generators/openapi"
