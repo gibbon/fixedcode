@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "packages": [
+    {
+      "name": "@fixedcode/bundle-spring-library",
+      "description": "Spring Boot project skeleton — Gradle, Docker, CI, configs, migrations",
+      "version": "0.1.0",
+      "kind": "bundle",
+      "tags": ["spring", "kotlin", "library", "skeleton", "gradle", "docker"],
+      "author": "fixedcode",
+      "repo": "https://github.com/fixedcode-io/bundle-spring-library",
+      "install": "npm install @fixedcode/bundle-spring-library"
+    },
+    {
+      "name": "@fixedcode/bundle-spring-domain",
+      "description": "Spring/Kotlin DDD domain code — aggregates, entities, commands, queries, events, services, tests",
+      "version": "0.1.0",
+      "kind": "bundle",
+      "tags": ["spring", "kotlin", "ddd", "domain", "aggregate", "cqrs"],
+      "author": "fixedcode",
+      "repo": "https://github.com/fixedcode-io/bundle-spring-domain",
+      "install": "npm install @fixedcode/bundle-spring-domain"
+    },
+    {
+      "name": "@fixedcode/generator-openapi",
+      "description": "OpenAPI 3.0.3 spec generator — produces API specs from any bundle with HTTP operations",
+      "version": "0.1.0",
+      "kind": "generator",
+      "tags": ["openapi", "api", "rest", "swagger", "spec"],
+      "author": "fixedcode",
+      "repo": "https://github.com/fixedcode-io/generator-openapi",
+      "install": "npm install @fixedcode/generator-openapi"
+    },
+    {
+      "name": "@fixedcode/bundle-crud-api",
+      "description": "Simple CRUD REST API scaffold",
+      "version": "0.1.0",
+      "kind": "bundle",
+      "tags": ["crud", "rest", "api", "simple"],
+      "author": "fixedcode",
+      "repo": "https://github.com/fixedcode-io/bundle-crud-api",
+      "install": "npm install @fixedcode/bundle-crud-api"
+    },
+    {
+      "name": "@fixedcode/bundle-mcp-wrapper",
+      "description": "Model Context Protocol server wrapper — expose tools to AI coding agents",
+      "version": "0.1.0",
+      "kind": "bundle",
+      "tags": ["mcp", "ai", "agent", "tools", "model-context-protocol"],
+      "author": "fixedcode",
+      "repo": "https://github.com/fixedcode-io/bundle-mcp-wrapper",
+      "install": "npm install @fixedcode/bundle-mcp-wrapper"
+    }
+  ]
+}
