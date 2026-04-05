@@ -43,7 +43,15 @@ export async function generate(
     throw new Error(`Enrichment failed in bundle '${rawSpec.kind}': ${message}`);
   }
 
-  const bundleDir = resolve(config.configDir, config.bundles[bundle.kind]);
+  const bundlePath = config.bundles[bundle.kind];
+  let bundleDir: string;
+  if (bundlePath.startsWith('@')) {
+    // npm scoped package — resolve from project's node_modules
+    const fromNodeModules = resolve(config.configDir, 'node_modules', ...bundlePath.split('/'));
+    bundleDir = existsSync(fromNodeModules) ? fromNodeModules : resolve(config.configDir, bundlePath);
+  } else {
+    bundleDir = resolve(config.configDir, bundlePath);
+  }
   const templatesDir = resolve(bundleDir, bundle.templates);
   const outputDir = options.outputDir ?? resolve(specDir, 'build');
 
