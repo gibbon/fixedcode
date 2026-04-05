@@ -1,0 +1,48 @@
+import { logger } from './logger.js';
+{{#each agents}}
+import { runAgent as run{{this.name.pascal}} } from './agents/{{this.name.kebab}}/agent.js';
+{{/each}}
+
+interface AgentResult {
+  agent: string;
+  success: boolean;
+  output?: string;
+  error?: string;
+}
+
+interface OrchestratorResult {
+  results: AgentResult[];
+  finalOutput: string;
+}
+
+const AGENTS = [
+{{#each agents}}
+  { name: '{{this.name.kebab}}', run: run{{this.name.pascal}}, critical: {{this.critical}} },
+{{/each}}
+];
+
+export async function runOrchestrator(input: string): Promise<OrchestratorResult> {
+  const results: AgentResult[] = [];
+  let context = input;
+
+  for (const agent of AGENTS) {
+    try {
+      logger.info({ agent: agent.name }, 'running agent');
+      const output = await agent.run(context);
+      results.push({ agent: agent.name, success: true, output });
+      context = output;
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err);
+      results.push({ agent: agent.name, success: false, error });
+
+      if (agent.critical) {
+        logger.error({ agent: agent.name, error }, 'critical agent failed — halting pipeline');
+        return { results, finalOutput: `Pipeline halted: ${agent.name} failed — ${error}` };
+      }
+
+      logger.warn({ agent: agent.name, error }, 'non-critical agent failed — continuing');
+    }
+  }
+
+  return { results, finalOutput: context };
+}
