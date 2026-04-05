@@ -1,0 +1,33 @@
+package {{packagePath}}.api.{{names.kebab}}
+
+import {{packagePath}}.application.{{names.kebab}}.{{names.pascal}}CommandService
+import {{packagePath}}.application.{{names.kebab}}.{{names.pascal}}QueryService
+{{#each commands}}
+import {{../packagePath}}.domain.{{../names.kebab}}.commands.{{names.pascal}}Command
+{{/each}}
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Service
+import java.util.UUID
+
+@Service
+class {{names.pascal}}ApiDelegateImpl(
+    private val commandService: {{names.pascal}}CommandService,
+    private val queryService: {{names.pascal}}QueryService
+) {
+{{#each commands}}
+    fun {{names.camel}}({{#each params.path}}{{names.camel}}: UUID, {{/each}}{{#each params.body}}{{names.camel}}: String{{#unless required}}?{{/unless}}, {{/each}}): ResponseEntity<Any> {
+        val command = {{names.pascal}}Command({{#each params.path}}{{names.camel}}, {{/each}}{{#each params.body}}{{names.camel}}{{#unless @last}}, {{/unless}}{{/each}})
+        commandService.handle(command)
+        return ResponseEntity.status(HttpStatus.valueOf({{http.statusCode}})).build()
+    }
+
+{{/each}}
+{{#each queries}}
+    fun {{names.camel}}({{#each params.path}}{{names.camel}}: UUID{{/each}}): ResponseEntity<Any> {
+        val result = queryService.{{names.camel}}({{#each params.path}}{{names.camel}}{{/each}})
+        return ResponseEntity.ok(result)
+    }
+
+{{/each}}
+}
