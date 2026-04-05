@@ -1,0 +1,11 @@
+apiVersion: "1.0"
+kind: ts-service
+metadata:
+  name: hello-service
+
+spec:
+  service:
+    port: 3000
+    package: hello-service
+  features:
+    docker: true
