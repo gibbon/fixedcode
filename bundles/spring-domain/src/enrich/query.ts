@@ -1,0 +1,59 @@
+import { generateVariants, type NamingVariants } from './naming.js';
+import { detectPattern, deriveHttp, deriveAuth, deriveResponse, type OperationPattern } from './conventions.js';
+import type { EnrichedParam } from './command.js';
+
+export interface EnrichedQuery {
+  name: string;
+  names: NamingVariants;
+  pattern: OperationPattern;
+  http: { method: string; path: string; statusCode: number };
+  auth: { action: string; expression: string };
+  response: { type: string; returnType: string };
+  params: { path: EnrichedParam[]; query: EnrichedParam[] };
+}
+
+interface AggCtx {
+  names: { pluralKebab: string; pascal: string };
+  identityField: string;
+}
+
+function parseParam(raw: string): EnrichedParam {
+  const optional = raw.endsWith('?');
+  const name = optional ? raw.slice(0, -1) : raw;
+  return { name, names: generateVariants(name), required: !optional };
+}
+
+export function enrichQuery(raw: {
+  name: string;
+  path?: string[];
+  query?: string[];
+  returns: string;
+}, agg: AggCtx): EnrichedQuery {
+  const names = generateVariants(raw.name);
+  const pattern = detectPattern(raw.name);
+  const needsId = pattern === 'Get';
+
+  const pathParams: EnrichedParam[] = raw.path
+    ? raw.path.map(parseParam)
+    : needsId
+      ? [{ name: agg.identityField, names: generateVariants(agg.identityField), required: true }]
+      : [];
+
+  const queryParams = (raw.query ?? []).map(parseParam);
+
+  const hasIdParam = pathParams.length > 0;
+  const idParamName = pathParams[0]?.name;
+  const http = deriveHttp(pattern, agg.names.pluralKebab, hasIdParam, idParamName);
+  const auth = deriveAuth(pattern, agg.names.pascal);
+  const response = deriveResponse(pattern, agg.names.pascal);
+
+  return {
+    name: raw.name,
+    names,
+    pattern,
+    http,
+    auth,
+    response,
+    params: { path: pathParams, query: queryParams },
+  };
+}
