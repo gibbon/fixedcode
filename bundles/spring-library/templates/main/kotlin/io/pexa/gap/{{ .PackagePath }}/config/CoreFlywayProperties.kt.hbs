@@ -1,9 +1,9 @@
 {{#unless IsFeatureLibrary}}
-package io.pexa.gap.{{LibraryName}}.config
+package io.pexa.gap.{{PackageName}}.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "gap.{{LibraryName}}-core.flyway")
+@ConfigurationProperties(prefix = "gap.{{PropertyPrefix}}.flyway")
 data class CoreFlywayProperties(
     val enabled: Boolean = true,
     val locations: List<String> = listOf("classpath:db/migration/core"),

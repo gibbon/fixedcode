@@ -7,12 +7,12 @@ services:
     image: postgres:15-alpine
     container_name: {{LibraryName}}-postgres
     environment:
-      POSTGRES_DB: {{LibraryName}}
+      POSTGRES_DB: {{SchemaName}}
       POSTGRES_USER: gap_user
       POSTGRES_PASSWORD: gap_password
     ports:
-      - "{{LibraryName}}:5432"
-      - "{{LibraryName}}:5432"
+      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     command:
@@ -24,7 +24,7 @@ services:
       - "-c"
       - "max_replication_slots=10"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gap_user -d {{LibraryName}}"]
+      test: ["CMD-SHELL", "pg_isready -U gap_user -d {{SchemaName}}"]
       interval: 5s
       timeout: 5s
       retries: 5

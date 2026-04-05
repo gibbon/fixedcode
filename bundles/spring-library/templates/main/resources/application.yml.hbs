@@ -30,7 +30,7 @@ spring:
         max.block.ms: ${KAFKA_PRODUCER_MAX_BLOCK_MS:10000}
         enable.idempotence: true
     consumer:
-      group-id: {{LibraryName}}.consumer
+      group-id: {{PackageName}}.consumer
       auto-offset-reset: earliest
       enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer

@@ -12,7 +12,7 @@ spring:
 
   datasource:
     write:
-      jdbc-url: jdbc:postgresql://postgresql:5432/gap_db?currentSchema={{LibraryName}}
+      jdbc-url: jdbc:postgresql://postgresql:5432/gap_db?currentSchema={{SchemaName}}
       username: gap_user
       password: gap_password
       driver-class-name: org.postgresql.Driver
@@ -23,7 +23,7 @@ spring:
         idle-timeout: 600000
         max-lifetime: 1800000
     read:
-      jdbc-url: jdbc:postgresql://postgresql:5432/gap_db?currentSchema={{LibraryName}}
+      jdbc-url: jdbc:postgresql://postgresql:5432/gap_db?currentSchema={{SchemaName}}
       username: gap_user
       password: gap_password
       driver-class-name: org.postgresql.Driver
@@ -75,7 +75,7 @@ spring:
         enable.idempotence: true
     consumer:
       bootstrap-servers: kafka:29092
-      group-id: {{LibraryName}}.consumer
+      group-id: {{PackageName}}.consumer
       auto-offset-reset: earliest
       enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer

@@ -1,5 +1,5 @@
 {{#unless IsFeatureLibrary}}
-package io.pexa.gap.{{LibraryName}}.config
+package io.pexa.gap.{{PackageName}}.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.jdbc.DataSourceBuilder
@@ -16,7 +16,7 @@ import javax.sql.DataSource
  * Write operations use the primary datasource, read operations use the read replica.
  */
 @Configuration
-@EnableJdbcRepositories(basePackages = ["io.pexa.gap.{{LibraryName}}.infrastructure", "io.pexa.gap.events"])
+@EnableJdbcRepositories(basePackages = ["io.pexa.gap.{{PackageName}}.infrastructure", "io.pexa.gap.events"])
 class DatabaseConfiguration {
 
     /**

@@ -40,7 +40,7 @@ spring:
   # Read/Write datasource split configuration for development
   datasource:
     write:
-      jdbc-url: jdbc:postgresql://localhost:5432/gap_db?currentSchema={{LibraryName}}
+      jdbc-url: jdbc:postgresql://localhost:5432/gap_db?currentSchema={{SchemaName}}
       username: gap_user
       password: gap_password
       driver-class-name: org.postgresql.Driver
@@ -51,7 +51,7 @@ spring:
         idle-timeout: 600000
         max-lifetime: 1800000
     read:
-      jdbc-url: jdbc:postgresql://localhost:5432/gap_db?currentSchema={{LibraryName}}
+      jdbc-url: jdbc:postgresql://localhost:5432/gap_db?currentSchema={{SchemaName}}
       username: gap_user
       password: gap_password
       driver-class-name: org.postgresql.Driver
@@ -105,7 +105,7 @@ spring:
         enable.idempotence: true
     consumer:
       bootstrap-servers: localhost:9092
-      group-id: {{LibraryName}}.consumer
+      group-id: {{PackageName}}.consumer
       auto-offset-reset: earliest
       enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -143,8 +143,8 @@ logging:
   level:
     root: INFO
     io.pexa.gap: DEBUG
-    {{LibraryName}}: DEBUG
-    {{LibraryName}}.application.shared.SideEffectScheduler: WARN
+    {{PackageName}}: DEBUG
+    {{PackageName}}.application.shared.SideEffectScheduler: WARN
     org.springframework.kafka: WARN
     org.apache.kafka: WARN
     org.springframework.jdbc: INFO
@@ -153,9 +153,9 @@ logging:
     org.flywaydb: INFO
 
 gap:
-  {{LibraryName}}-core:
+  {{PropertyPrefix}}:
     flyway:
-      default-schema: {{LibraryName}}
+      default-schema: {{SchemaName}}
   test-harness:
     db-viewer:
       enabled: true

@@ -491,8 +491,8 @@ tasks.jacocoTestReport {
                 
                 // Exclude test applications and main application class
                 exclude("**/SkeletonTestApplication*")
-                exclude("**/{{LibraryName}}Application*")
-                exclude("**/{{LibraryName}}ApplicationKt*")
+                exclude("**/{{LibraryNamePascal}}Application*")
+                exclude("**/{{LibraryNamePascal}}ApplicationKt*")
                 exclude("**/*Application.class")
                 exclude("**/*ApplicationKt.class")
 
@@ -609,8 +609,8 @@ tasks.jacocoTestCoverageVerification {
                 
                 // Exclude application classes
                 exclude("**/SkeletonTestApplication*")
-                exclude("**/{{LibraryName}}Application*")
-                exclude("**/{{LibraryName}}ApplicationKt*")
+                exclude("**/{{LibraryNamePascal}}Application*")
+                exclude("**/{{LibraryNamePascal}}ApplicationKt*")
                 exclude("**/*Application.class")
                 exclude("**/*ApplicationKt.class")
                 
@@ -663,7 +663,7 @@ tasks.build {
 
 // Spring Boot configuration
 springBoot {
-    mainClass.set("io.pexa.gap.{{LibraryName}}.ApplicationKt")
+    mainClass.set("io.pexa.gap.{{PackageName}}.ApplicationKt")
 }
 
 // OpenAPI Generator Configuration
@@ -676,9 +676,9 @@ openApiGenerate {
     inputSpec.set(openApiFile.absolutePath)
     outputDir.set("${layout.buildDirectory.get().asFile}/generated/openapi")
 
-    apiPackage.set("io.pexa.gap.{{LibraryName}}.api.controller")
-    modelPackage.set("io.pexa.gap.{{LibraryName}}.api.dto")
-    invokerPackage.set("io.pexa.gap.{{LibraryName}}.api")
+    apiPackage.set("io.pexa.gap.{{PackageName}}.api.controller")
+    modelPackage.set("io.pexa.gap.{{PackageName}}.api.dto")
+    invokerPackage.set("io.pexa.gap.{{PackageName}}.api")
 
     configOptions.set(mapOf(
         "dateLibrary" to "java8",

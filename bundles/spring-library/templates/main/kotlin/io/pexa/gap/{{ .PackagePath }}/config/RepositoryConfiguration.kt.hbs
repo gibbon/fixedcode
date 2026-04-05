@@ -1,5 +1,5 @@
 {{#if IsFeatureLibrary}}
-package io.pexa.gap.{{LibraryName}}.config
+package io.pexa.gap.{{PackageName}}.config
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
@@ -11,6 +11,6 @@ import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories
  * Datasources are provided by the parent domain's DatabaseConfiguration.
  */
 @Configuration
-@EnableJdbcRepositories(basePackages = ["io.pexa.gap.{{LibraryName}}.infrastructure"])
+@EnableJdbcRepositories(basePackages = ["io.pexa.gap.{{PackageName}}.infrastructure"])
 class RepositoryConfiguration
 {{/if}}

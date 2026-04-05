@@ -1,4 +1,4 @@
-package io.pexa.gap.{{LibraryName}}.architecture
+package io.pexa.gap.{{PackageName}}.architecture
 
 import com.tngtech.archunit.core.importer.ImportOption
 import com.tngtech.archunit.junit.AnalyzeClasses
@@ -52,7 +52,7 @@ import org.springframework.web.bind.annotation.RestController
  * To disable a specific rule, comment out or remove the @ArchTest annotation.
  */
 @AnalyzeClasses(
-    packages = ["io.pexa.gap.{{LibraryName}}"],
+    packages = ["io.pexa.gap.{{PackageName}}"],
     importOptions = [ImportOption.DoNotIncludeTests::class, ImportOption.DoNotIncludeJars::class]
 )
 class ArchitectureTest {
@@ -238,7 +238,7 @@ class ArchitectureTest {
     // Uncomment to enforce strict acyclic architecture:
     // @ArchTest
     // val noCyclicDependencies: ArchRule = com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices()
-    //     .matching("io.pexa.gap.{{LibraryName}}.(*)..")
+    //     .matching("io.pexa.gap.{{PackageName}}.(*)..")
     //     .should().beFreeOfCycles()
     //     .because("Cyclic dependencies make code harder to understand and maintain")
 }

@@ -1,8 +1,8 @@
 {{ if or .IsWorkspaceDomain .HasParticipantAccess }}
-package io.pexa.gap.{{LibraryName}}
+package io.pexa.gap.{{PackageName}}
 
-import io.pexa.gap.{{LibraryName}}.base.BaseIntegrationTest
-import io.pexa.gap.{{LibraryName}}.infrastructure.repository.ParticipantAccessRepository
+import io.pexa.gap.{{PackageName}}.base.BaseIntegrationTest
+import io.pexa.gap.{{PackageName}}.infrastructure.repository.ParticipantAccessRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested

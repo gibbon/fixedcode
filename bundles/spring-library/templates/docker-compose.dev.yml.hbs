@@ -8,8 +8,8 @@ services:
     container_name: {{LibraryName}}
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/gap_db?currentSchema={{LibraryName}}
-      - SPRING_DATASOURCE_READ_URL=jdbc:postgresql://postgresql:5434/gap_db?currentSchema={{LibraryName}}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/gap_db?currentSchema={{SchemaName}}
+      - SPRING_DATASOURCE_READ_URL=jdbc:postgresql://postgresql:5434/gap_db?currentSchema={{SchemaName}}
       - SPRING_DATASOURCE_USERNAME=gap_user
       - SPRING_DATASOURCE_PASSWORD=gap_password
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
@@ -41,7 +41,7 @@ services:
     networks:
       - gap-network
     ports:
-      - "{{LibraryName}}:8080"
+      - "{{ServerPort}}:8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s

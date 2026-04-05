@@ -1,9 +1,9 @@
-package io.pexa.gap.{{LibraryName}}.config
+package io.pexa.gap.{{PackageName}}.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "{{LibraryName}}")
-data class {{LibraryName}}Properties(
+@ConfigurationProperties(prefix = "{{PropertyPrefix}}")
+data class {{LibraryNamePascal}}Properties(
     val name: String = "GAP {{LibraryName}} Library",
     val version: String = "{{LibraryName}}",
     val environment: String = "production",
