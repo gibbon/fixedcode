@@ -34,4 +34,24 @@ describe('enrichAggregate', () => {
     expect(agg.entities[0].parentIdentityField).toBe('workspaceId');
     expect(agg.entities[0].commands[0].http.method).toBe('POST');
   });
+
+  it('supports plural override on aggregates and entities', () => {
+    const agg = enrichAggregate('Workspace', {
+      plural: 'workspacez',
+      attributes: { workspaceId: 'uuid' },
+      commands: [{ name: 'CreateWorkspace', body: ['status'] }],
+      entities: {
+        Party: {
+          plural: 'partys',
+          attributes: { partyId: 'uuid' },
+          commands: [{ name: 'AddParty', body: ['partyType'] }],
+        },
+      },
+    });
+
+    expect(agg.names.pluralKebab).toBe('workspacez');
+    expect(agg.commands[0].http.path).toBe('/workspacez');
+    expect(agg.entities[0].names.pluralKebab).toBe('partys');
+    expect(agg.entities[0].commands[0].http.path).toBe('/partys');
+  });
 });
