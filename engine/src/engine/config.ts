@@ -40,11 +40,12 @@ export function loadConfig(cwd: string = process.cwd()): FixedCodeConfig {
 
   try {
     const content = readFileSync(configPath, 'utf-8');
-    const parsed = parseYaml(content) as { bundles?: Record<string, string> };
+    const parsed = parseYaml(content) as { bundles?: Record<string, string>; generators?: Record<string, string> };
     const configDir = resolve(configPath, '..');
-    
+
     return {
       bundles: parsed.bundles ?? {},
+      generators: parsed.generators ?? {},
       configDir,
     };
   } catch (err) {
