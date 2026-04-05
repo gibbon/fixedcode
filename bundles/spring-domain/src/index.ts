@@ -129,6 +129,22 @@ export const bundle: Bundle = {
   adapters: {
     openapi: toOpenApi as unknown as (ctx: Context) => Record<string, unknown>,
   },
+  cfrs: {
+    provides: [
+      'auth', 'authorization', 'input-validation',
+      'error-handling', 'optimistic-locking',
+      'pagination', 'filtering',
+      'domain-events', 'outbox',
+      'unit-tests',
+      'openapi',
+    ],
+    files: {
+      'auth': ['src/main/kotlin/*/config/SecurityConfig.kt'],
+      'domain-events': ['src/main/kotlin/*/domain/shared/DomainEvent.kt'],
+      'input-validation': ['src/main/kotlin/*/domain/shared/ValidationResult.kt'],
+      'openapi': ['*-openapi.yaml'],
+    },
+  },
 };
 
 export default bundle;
