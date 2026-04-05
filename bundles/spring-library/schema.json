@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Spring Library Bundle Spec",
+  "type": "object",
+  "required": ["library"],
+  "properties": {
+    "library": {
+      "type": "object",
+      "required": ["name", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*[a-z0-9]$",
+          "description": "Kebab-case library name (e.g., workspace-core)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable library description"
+        },
+        "version": {
+          "type": "string",
+          "default": "0.1.0",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9]+)?$"
+        },
+        "group": {
+          "type": "string",
+          "default": "io.pexa.gap"
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "database": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "type": { "type": "string", "default": "postgresql" },
+            "name": { "type": "string" },
+            "port": { "type": "integer", "default": 5433 }
+          }
+        },
+        "messaging": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": false }
+          }
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "port": { "type": "integer", "default": 8080 }
+      }
+    }
+  }
+}

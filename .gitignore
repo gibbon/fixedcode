@@ -4,3 +4,4 @@ out/
 .next/
 .env*.local
 *.log
+build/
