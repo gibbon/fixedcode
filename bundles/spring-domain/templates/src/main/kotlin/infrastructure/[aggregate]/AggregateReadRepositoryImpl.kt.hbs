@@ -1,0 +1,15 @@
+package {{packagePath}}.infrastructure.{{names.kebab}}
+
+import {{packagePath}}.domain.{{names.kebab}}.{{names.pascal}}
+import org.springframework.stereotype.Repository
+import java.util.UUID
+
+@Repository
+class {{names.pascal}}ReadRepositoryImpl {
+{{#each queries}}
+    fun {{names.camel}}({{#each params.path}}{{names.camel}}: UUID{{/each}}): {{response.returnType}} {
+        TODO("Implement {{names.camel}}")
+    }
+
+{{/each}}
+}
