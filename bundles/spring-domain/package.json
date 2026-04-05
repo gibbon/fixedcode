@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@fixedcode/engine": "file:../../engine",
+    "@fixedcode/generator-openapi": "file:../../generators/openapi",
     "pluralize": "^8.0.0",
     "yaml": "^2.8.3"
   },
