@@ -147,6 +147,72 @@ import { generate, validate, build, deploy, verify } from '@fixedcode/engine';
 import { fetchRegistry, searchRegistry, installPackage, publishPackage } from '@fixedcode/engine';
 ```
 
+## AI Sandwich Workflow
+
+FixedCode is designed for AI-assisted development at every layer:
+
+### Top Slice — AI creates the spec
+
+Given natural language requirements, generate a YAML spec that conforms to the bundle's schema:
+
+1. Read the bundle's `schema.json` to understand the spec format
+2. Read this CLAUDE.md for convention rules (command naming → HTTP derivation, `?` for optionals, etc.)
+3. Translate the requirements into a valid YAML spec
+4. Run `fixedcode validate <spec.yaml>` to confirm validity
+
+Example prompt: "I need a workspace management service with CRUD operations for workspaces and parties"
+→ AI produces `workspace-domain.yaml` with aggregates, commands, queries, events.
+
+### Middle — FixedCode generates (deterministic)
+
+```bash
+fixedcode build . -o build    # always produces identical output from same spec
+```
+
+### Bottom Slice — AI fills in extension points
+
+After generation, extension points need business logic:
+
+1. Read `.fixedcode-manifest.json` → find files with `"overwrite": false`
+2. These are the user-owned files (e.g. `DefaultWorkspaceBusinessService.kt`, `DefaultWorkspaceValidator.kt`)
+3. Each has TODO stubs where business logic goes
+4. AI implements the domain logic based on the original requirements
+5. On regeneration, these files are preserved — the AI's work is safe
+
+### Creating Bundles from Existing Code
+
+To turn an existing codebase into a reusable bundle:
+
+1. **Analyze the codebase** — Identify the structural patterns that repeat across services:
+   - Which files exist in every service? (these become templates)
+   - What varies between services? (these become template variables)
+   - What's the directory structure? (this becomes the template tree)
+   - Which files contain business logic? (these become extension points with `overwrite: false`)
+
+2. **Extract the spec format** — Define what a user needs to provide:
+   - What's the minimum input to generate this codebase? (aggregate names, field types, etc.)
+   - Write a `schema.json` that validates this input
+   - Design conventions that reduce what the user has to specify (e.g. `Create*` → POST)
+
+3. **Create the bundle**:
+   ```bash
+   fixedcode bundle init my-bundle
+   ```
+   Then:
+   - Copy representative source files into `templates/`, replace variable parts with `{{handlebars}}` syntax
+   - Write `src/index.ts` with `enrich()` that maps spec → template context
+   - If one spec produces many files (one-to-many), add `generateFiles()` returning explicit `FileEntry[]`
+   - Mark extension points with `overwrite: false` in the file entries
+   - Add adapter functions if you want generators (e.g. OpenAPI) to work with your bundle
+
+4. **Publish**:
+   ```bash
+   cd my-bundle
+   fixedcode registry publish --kind bundle --tags "spring,kotlin,my-pattern"
+   ```
+
+**Tip for AI agents extracting bundles:** Compare 2-3 existing services that follow the same pattern. The parts that differ between them are the template variables. The parts that are identical are the static template content. The `enrich()` function should compute everything the templates need from the minimal spec input.
+
 ## Working Example
 
 ```bash
