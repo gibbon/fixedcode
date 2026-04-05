@@ -1,0 +1,11 @@
+import { runAgent as baseRunAgent } from '../agent.js';
+import { preProcess, postProcess } from './default-{{agent.name.kebab}}.js';
+import { logger } from '../logger.js';
+
+export async function runAgent(input: string): Promise<string> {
+  logger.info({ agent: '{{agent.name.kebab}}' }, 'agent started');
+
+  const processed = preProcess(input);
+  const result = await baseRunAgent(processed);
+  return postProcess(result);
+}

@@ -1,0 +1,10 @@
+// Extension point for {{agent.name.pascal}} agent.
+// Generated once, then owned by you. NOT overwritten on regeneration.
+
+export function preProcess(input: string): string {
+  return `{{agent.prompt}}\n\n${input}`;
+}
+
+export function postProcess(output: string): string {
+  return output;
+}
