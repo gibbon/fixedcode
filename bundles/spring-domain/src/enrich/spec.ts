@@ -1,4 +1,5 @@
 export interface RawAggregateSpec {
+  plural?: string;
   attributes?: Record<string, string>;
   commands?: RawCommandSpec[];
   queries?: RawQuerySpec[];
