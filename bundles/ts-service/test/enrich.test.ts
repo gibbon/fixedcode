@@ -1,0 +1,37 @@
+import { describe, it, expect } from 'vitest';
+import { enrich } from '../src/index.js';
+
+describe('ts-service enrich', () => {
+  it('enriches a basic service spec', () => {
+    const ctx = enrich(
+      { service: { port: 3000, package: 'ops-agent' }, features: { docker: true } },
+      { name: 'ops-agent', apiVersion: '1.0' }
+    );
+    expect(ctx.serviceName.pascal).toBe('OpsAgent');
+    expect(ctx.serviceName.kebab).toBe('ops-agent');
+    expect(ctx.serviceName.snake).toBe('ops_agent');
+    expect(ctx.packageName).toBe('ops-agent');
+    expect(ctx.port).toBe(3000);
+    expect(ctx.hasDocker).toBe(true);
+    expect(ctx.hasDatabase).toBe(false);
+  });
+
+  it('applies defaults', () => {
+    const ctx = enrich(
+      { service: { package: 'my-svc' } },
+      { name: 'my-svc', apiVersion: '1.0' }
+    );
+    expect(ctx.port).toBe(3000);
+    expect(ctx.hasDocker).toBe(true);
+    expect(ctx.hasDatabase).toBe(false);
+  });
+
+  it('enables database feature', () => {
+    const ctx = enrich(
+      { service: { package: 'db-svc' }, features: { database: { enabled: true, type: 'postgres' } } },
+      { name: 'db-svc', apiVersion: '1.0' }
+    );
+    expect(ctx.hasDatabase).toBe(true);
+    expect(ctx.databaseType).toBe('postgres');
+  });
+});
