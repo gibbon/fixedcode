@@ -1,0 +1,29 @@
+package {{packageDot}}.domain.{{names.kebab}}
+
+{{#each commands}}
+import {{../packageDot}}.domain.{{../names.kebab}}.commands.{{names.pascal}}Command
+{{/each}}
+import {{packageDot}}.infrastructure.{{names.kebab}}.{{names.pascal}}WriteRepositoryImpl
+import {{packageDot}}.domain.shared.ValidationResult
+
+/**
+ * Default business service implementation for {{names.pascal}}.
+ *
+ * THIS IS AN EXTENSION POINT — generated once, then owned by you.
+ * Add your business logic, validation rules, and domain operations here.
+ * This file will NOT be overwritten on regeneration.
+ */
+@org.springframework.stereotype.Service
+@org.springframework.transaction.annotation.Transactional
+class Default{{names.pascal}}BusinessService(
+    private val repository: {{names.pascal}}WriteRepositoryImpl
+) : {{names.pascal}}BusinessService {
+
+{{#each commands}}
+    override fun {{names.camel}}(command: {{names.pascal}}Command){{#if (eq ../response.type "entity")}}: {{../names.pascal}}{{/if}} {
+        // TODO: implement {{names.pascal}} business logic
+        throw UnsupportedOperationException("{{names.pascal}} not yet implemented")
+    }
+
+{{/each}}
+}

@@ -1,0 +1,16 @@
+package {{packageDot}}.domain.{{names.kebab}}
+
+{{#each commands}}
+import {{../packageDot}}.domain.{{../names.kebab}}.commands.{{names.pascal}}Command
+{{/each}}
+
+/**
+ * Business service interface for {{names.pascal}}.
+ * Defines the contract for domain business operations.
+ * Generated — safe to regenerate.
+ */
+interface {{names.pascal}}BusinessService {
+{{#each commands}}
+    fun {{names.camel}}(command: {{names.pascal}}Command)
+{{/each}}
+}
