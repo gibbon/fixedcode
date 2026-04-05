@@ -3,6 +3,9 @@ import { createGenerateCommand } from './generate.js';
 import { createValidateCommand } from './validate-cmd.js';
 import { createInitCommand } from './init.js';
 import { createBundleInitCommand } from './bundle-init.js';
+import { createBuildCommand } from './build-cmd.js';
+import { createDeployCommand } from './deploy-cmd.js';
+import { createVerifyCommand } from './verify-cmd.js';
 
 export function createProgram() {
   const program = new Command();
@@ -14,6 +17,9 @@ export function createProgram() {
 
   program.addCommand(createGenerateCommand());
   program.addCommand(createValidateCommand());
+  program.addCommand(createBuildCommand());
+  program.addCommand(createDeployCommand());
+  program.addCommand(createVerifyCommand());
   program.addCommand(createInitCommand());
   program.addCommand(createBundleInitCommand());
 
