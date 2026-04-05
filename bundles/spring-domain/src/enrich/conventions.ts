@@ -19,19 +19,24 @@ export interface HttpMetadata {
   statusCode: number;
 }
 
+function toPascal(kebab: string): string {
+  return kebab.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
+}
+
 /**
  * Extract a kebab-case suffix from a Find* operation name.
- * e.g. "FindWorkspacesByStatus" with entity "Workspace" → "by-status"
- *      "FindOrdersByDateRange" with entity "Order" → "by-date-range"
+ * e.g. "FindWorkspacesByStatus" with entity "workspace-references" → "by-status"
+ *      "FindOrdersByDateRange" with entity "order" → "by-date-range"
+ *
+ * Accepts entityPluralKebab in kebab-case (e.g. "workspace-references") and
+ * converts to PascalCase internally before matching against the operation name.
  */
-function deriveFindSuffix(operationName: string, entityPlural: string): string {
+function deriveFindSuffix(operationName: string, entityPluralKebab: string): string {
   // Strip "Find" prefix, then strip the entity name (singular or plural forms)
   let remainder = operationName.slice(4); // remove "Find"
 
-  // Try to strip plural entity name first (e.g. "Workspaces"), then singular
-  const entitySingular = entityPlural.replace(/s$/, '');
-  const entityPluralPascal = entityPlural.charAt(0).toUpperCase() + entityPlural.slice(1);
-  const entitySingularPascal = entitySingular.charAt(0).toUpperCase() + entitySingular.slice(1);
+  const entityPluralPascal = toPascal(entityPluralKebab);
+  const entitySingularPascal = entityPluralPascal.replace(/s$/, '');
 
   if (remainder.startsWith(entityPluralPascal)) {
     remainder = remainder.slice(entityPluralPascal.length);

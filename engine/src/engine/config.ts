@@ -8,7 +8,7 @@ const DEFAULT_CONFIG_NAME = '.fixedcode.yaml';
 
 export function findConfigFile(cwd: string): string | null {
   let current = resolve(cwd);
-  const root = parse(process.cwd()).root;
+  const root = parse(resolve(cwd)).root;
   
   while (current !== root) {
     const configPath = resolve(current, DEFAULT_CONFIG_NAME);
