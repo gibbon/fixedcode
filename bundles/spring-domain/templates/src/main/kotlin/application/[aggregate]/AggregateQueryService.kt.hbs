@@ -1,0 +1,9 @@
+package {{packagePath}}.application.{{names.kebab}}
+
+import java.util.UUID
+
+interface {{names.pascal}}QueryService {
+{{#each queries}}
+    fun {{names.camel}}({{#each params.path}}{{names.camel}}: UUID{{/each}}): {{response.returnType}}
+{{/each}}
+}
