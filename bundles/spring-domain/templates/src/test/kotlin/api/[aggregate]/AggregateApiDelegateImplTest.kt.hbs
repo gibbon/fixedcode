@@ -1,0 +1,21 @@
+package {{packagePath}}.api.{{names.kebab}}
+
+import org.junit.jupiter.api.Test
+
+class {{names.pascal}}ApiDelegateImplTest {
+
+{{#each commands}}
+    @Test
+    fun `should {{this.names.camel}} via API`() {
+        // TODO: implement API test for {{this.names.camel}}
+    }
+
+{{/each}}
+{{#each queries}}
+    @Test
+    fun `should {{this.names.camel}} via API`() {
+        // TODO: implement API test for {{this.names.camel}}
+    }
+
+{{/each}}
+}
