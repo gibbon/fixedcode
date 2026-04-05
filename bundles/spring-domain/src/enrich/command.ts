@@ -55,7 +55,7 @@ export function enrichCommand(raw: {
 
   const hasIdParam = pathParams.length > 0;
   const idParamName = pathParams[0]?.name;
-  const http = deriveHttp(pattern, agg.names.pluralKebab, hasIdParam, idParamName);
+  const http = deriveHttp(pattern, agg.names.pluralKebab, hasIdParam, idParamName, '', raw.name);
   const auth = deriveAuth(pattern, agg.names.pascal);
   const response = deriveResponse(pattern, agg.names.pascal);
 

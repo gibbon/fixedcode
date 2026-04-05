@@ -47,6 +47,19 @@ describe('deriveHttp', () => {
     expect(h.method).toBe('GET');
     expect(h.path).toBe('/orders');
   });
+  it('Find with suffix → GET /orders/by-status 200', () => {
+    const h = deriveHttp('Find', 'orders', false, undefined, '', 'FindOrdersByStatus');
+    expect(h.method).toBe('GET');
+    expect(h.path).toBe('/orders/by-status');
+  });
+  it('Find with multi-word suffix → GET /orders/by-date-range', () => {
+    const h = deriveHttp('Find', 'orders', false, undefined, '', 'FindWorkspacesByDateRange');
+    expect(h.path).toBe('/orders/by-date-range');
+  });
+  it('Find with explicit path param uses withId', () => {
+    const h = deriveHttp('Find', 'orders', true, 'subscriberId', '', 'FindWorkspacesBySubscriber');
+    expect(h.path).toBe('/orders/{subscriberId}');
+  });
 });
 
 describe('deriveAuth', () => {
