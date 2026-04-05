@@ -19,12 +19,41 @@ export interface HttpMetadata {
   statusCode: number;
 }
 
+/**
+ * Extract a kebab-case suffix from a Find* operation name.
+ * e.g. "FindWorkspacesByStatus" with entity "Workspace" → "by-status"
+ *      "FindOrdersByDateRange" with entity "Order" → "by-date-range"
+ */
+function deriveFindSuffix(operationName: string, entityPlural: string): string {
+  // Strip "Find" prefix, then strip the entity name (singular or plural forms)
+  let remainder = operationName.slice(4); // remove "Find"
+
+  // Try to strip plural entity name first (e.g. "Workspaces"), then singular
+  const entitySingular = entityPlural.replace(/s$/, '');
+  const entityPluralPascal = entityPlural.charAt(0).toUpperCase() + entityPlural.slice(1);
+  const entitySingularPascal = entitySingular.charAt(0).toUpperCase() + entitySingular.slice(1);
+
+  if (remainder.startsWith(entityPluralPascal)) {
+    remainder = remainder.slice(entityPluralPascal.length);
+  } else if (remainder.startsWith(entitySingularPascal)) {
+    remainder = remainder.slice(entitySingularPascal.length);
+  }
+
+  if (!remainder) return '';
+
+  // Convert PascalCase remainder to kebab-case: "ByStatus" → "by-status"
+  return remainder
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase();
+}
+
 export function deriveHttp(
   pattern: OperationPattern,
   resourcePlural: string,
   hasIdParam: boolean,
   idParamName?: string,
-  pathPrefix = ''
+  pathPrefix = '',
+  operationName = ''
 ): HttpMetadata {
   const base = `${pathPrefix}/${resourcePlural}`;
   const withId = `${base}/{${idParamName ?? 'id'}}`;
@@ -38,7 +67,11 @@ export function deriveHttp(
     case 'Remove': return { method: 'DELETE', path: withId, statusCode: 204 };
     case 'Get':    return { method: 'GET', path: withId, statusCode: 200 };
     case 'Search': return { method: 'GET', path: base, statusCode: 200 };
-    case 'Find':   return { method: 'GET', path: hasIdParam ? withId : base, statusCode: 200 };
+    case 'Find': {
+      const suffix = deriveFindSuffix(operationName, resourcePlural);
+      const findPath = suffix ? `${base}/${suffix}` : base;
+      return { method: 'GET', path: hasIdParam ? withId : findPath, statusCode: 200 };
+    }
   }
 }
 
