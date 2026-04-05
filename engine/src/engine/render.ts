@@ -60,7 +60,7 @@ export function renderFile(
 
   try {
     const content = readFileSync(absTemplatePath, 'utf-8');
-    return hb.compile(content)(ctx);
+    return hb.compile(content, { noEscape: options.noEscape })(ctx);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     throw new RenderError(absTemplatePath, msg);
