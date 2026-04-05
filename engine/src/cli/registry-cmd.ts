@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { fetchRegistry, searchRegistry, listRegistry, installPackage } from '../engine/registry.js';
+import { fetchRegistry, searchRegistry, listRegistry, installPackage, publishPackage } from '../engine/registry.js';
 
 export function createRegistryCommand() {
   const registry = new Command('registry')
@@ -76,6 +76,33 @@ export function createRegistryCommand() {
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error';
         console.error(`Install failed: ${message}`);
+        process.exit(1);
+      }
+    });
+
+  registry
+    .command('publish')
+    .description('Publish current directory as a bundle/generator to the registry (opens a PR)')
+    .option('-k, --kind <kind>', 'Package kind: bundle or generator', 'bundle')
+    .option('-t, --tags <tags>', 'Comma-separated tags', '')
+    .option('-d, --dir <dir>', 'Package directory (default: current directory)')
+    .action(async (opts) => {
+      try {
+        const tags = opts.tags ? opts.tags.split(',').map((t: string) => t.trim()) : [];
+        const dir = opts.dir ?? process.cwd();
+
+        console.log('Publishing to fixedcode registry...\n');
+        const prUrl = await publishPackage({
+          packageDir: dir,
+          kind: opts.kind,
+          tags,
+        });
+
+        console.log(`\nPull request created: ${prUrl}`);
+        console.log('Once merged, the package will be available via `fixedcode registry search`');
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        console.error(`Publish failed: ${message}`);
         process.exit(1);
       }
     });
