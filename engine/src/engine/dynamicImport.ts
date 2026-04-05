@@ -21,7 +21,18 @@ export async function dynamicImport(bundlePath: string, configDir: string): Prom
 
   if (existsSync(join(resolvedPath, 'package.json'))) {
     const pkg = JSON.parse(readFileSync(join(resolvedPath, 'package.json'), 'utf-8'));
-    const entry = pkg.main ?? pkg.exports ?? 'src/index.js';
+    let entry: string = 'src/index.js';
+    if (typeof pkg.main === 'string') {
+      entry = pkg.main;
+    } else if (typeof pkg.exports === 'string') {
+      entry = pkg.exports;
+    } else if (typeof pkg.exports === 'object' && pkg.exports !== null) {
+      const dotEntry = (pkg.exports as Record<string, unknown>)['.'];
+      if (typeof dotEntry === 'string') entry = dotEntry;
+      else if (typeof dotEntry === 'object' && dotEntry !== null) {
+        entry = (dotEntry as Record<string, string>).import ?? (dotEntry as Record<string, string>).default ?? entry;
+      }
+    }
     if (entry.startsWith('.')) {
       resolvedPath = resolve(resolvedPath, entry);
     } else {
