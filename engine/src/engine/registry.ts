@@ -31,7 +31,7 @@ export async function fetchRegistry(url?: string): Promise<Registry> {
 
   // Try fetching from URL first
   try {
-    const response = await fetch(registryUrl);
+    const response = await fetch(registryUrl, { headers: { 'Cache-Control': 'no-cache' } });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json() as Registry;
   } catch {
