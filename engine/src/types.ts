@@ -27,6 +27,13 @@ export interface Bundle {
    * Returns an explicit list of files to generate with per-file contexts.
    */
   generateFiles?: (ctx: Context) => FileEntry[];
+
+  /**
+   * Optional adapters that map this bundle's enriched context into
+   * the input shape expected by named generators.
+   * Key = generator name (e.g. 'openapi'), value = mapping function.
+   */
+  adapters?: Record<string, (ctx: Context) => Record<string, unknown>>;
 }
 
 export interface SpecMetadata {
@@ -67,8 +74,22 @@ export interface FileEntry {
   ctx: Record<string, unknown>;
 }
 
+/**
+ * A generator is a programmatic (non-template) file producer.
+ * It defines a named input contract and produces files from that input.
+ * Generators are standalone packages — they don't depend on any specific bundle.
+ */
+export interface Generator {
+  /** Unique name used to match with bundle adapters (e.g. 'openapi') */
+  name: string;
+
+  /** Produce files from the adapter-provided input */
+  generate(input: Record<string, unknown>): RenderedFile[];
+}
+
 export interface FixedCodeConfig {
   bundles: Record<string, string>;
+  generators?: Record<string, string>;
   /** Directory the config was loaded from — used to resolve relative bundle paths */
   configDir: string;
 }

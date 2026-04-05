@@ -1,4 +1,4 @@
-export type { Bundle, SpecMetadata, Context, RawSpec, RenderedFile, FixedCodeConfig, FileEntry } from './types.js';
+export type { Bundle, SpecMetadata, Context, RawSpec, RenderedFile, FixedCodeConfig, FileEntry, Generator } from './types.js';
 export {
   FixedCodeError, SpecParseError, EnvelopeError, BundleNotFoundError,
   BundleLoadError, SpecValidationError, EnrichmentError, RenderError, WriteError,
