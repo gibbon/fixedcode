@@ -15,6 +15,13 @@ export function createValidateCommand() {
       }
 
       const specPath = opts.spec ?? resolveSpecPath(name!);
-      await validate(specPath);
+
+      try {
+        await validate(specPath);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        console.error(`Validate failed: ${message}`);
+        process.exit(1);
+      }
     });
 }

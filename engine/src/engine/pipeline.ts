@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 import type { RawSpec, FixedCodeConfig, Context, RenderedFile } from '../types.js';
+import { EnrichmentError } from '../errors.js';
 import { parseSpec, validateEnvelope } from './parse.js';
 import { loadConfig } from './config.js';
 import { resolveBundle, resolveGenerators } from './resolve.js';
@@ -40,7 +41,7 @@ export async function generate(
     context = bundle.enrich(rawSpec.spec, metadata);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    throw new Error(`Enrichment failed in bundle '${rawSpec.kind}': ${message}`);
+    throw new EnrichmentError(rawSpec.kind, message);
   }
 
   const bundlePath = config.bundles[bundle.kind];

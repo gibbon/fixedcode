@@ -21,6 +21,12 @@ export function createGenerateCommand() {
       const specPath = opts.spec ?? resolveSpecPath(name!);
       const outputDir = opts.output ?? output;
 
-      await generate(specPath, { outputDir, dryRun: opts.dryRun, diff: opts.diff });
+      try {
+        await generate(specPath, { outputDir, dryRun: opts.dryRun, diff: opts.diff });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        console.error(`Generate failed: ${message}`);
+        process.exit(1);
+      }
     });
 }
