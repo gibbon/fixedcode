@@ -1,0 +1,460 @@
+openapi: 3.0.3
+info:
+  title: Workspace Domain API
+  version: v1
+  description: API for the Workspace bounded context
+paths:
+  /parties:
+    post:
+      summary: Add Party
+      operationId: addParty
+      tags:
+        - Party
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddPartyRequest'
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Party'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+    get:
+      summary: Search Party
+      operationId: searchParty
+      tags:
+        - Party
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ASC, DESC]
+      responses:
+        '200':
+          description: Retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedPartyList'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+  /parties/{partyId}:
+    put:
+      summary: Update Party
+      operationId: updateParty
+      tags:
+        - Party
+      parameters:
+        - name: partyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePartyRequest'
+      responses:
+        '200':
+          description: Retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Party'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+    delete:
+      summary: Remove Party
+      operationId: removeParty
+      tags:
+        - Party
+      parameters:
+        - name: partyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+  /workspaces:
+    post:
+      summary: Create Workspace
+      operationId: createWorkspace
+      tags:
+        - Workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkspaceRequest'
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+    get:
+      summary: Search Workspace
+      operationId: searchWorkspace
+      tags:
+        - Workspace
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ASC, DESC]
+      responses:
+        '200':
+          description: Retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedWorkspaceList'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+  /workspaces/by-status:
+    get:
+      summary: Find Workspaces By Status
+      operationId: findWorkspacesByStatus
+      tags:
+        - Workspace
+      parameters:
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+  /workspaces/{workspaceId}:
+    put:
+      summary: Update Workspace Status
+      operationId: updateWorkspaceStatus
+      tags:
+        - Workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWorkspaceStatusRequest'
+      responses:
+        '200':
+          description: Retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+    delete:
+      summary: Delete Workspace
+      operationId: deleteWorkspace
+      tags:
+        - Workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+    get:
+      summary: Get Workspace
+      operationId: getWorkspace
+      tags:
+        - Workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Sort:
+      type: object
+      properties:
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+        empty:
+          type: boolean
+    Pageable:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        sort:
+          $ref: '#/components/schemas/Sort'
+        offset:
+          type: integer
+          format: int64
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
+    Workspace:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        status:
+          type: string
+        transactionType:
+          type: string
+        jurisdiction:
+          type: string
+        completionDate:
+          type: string
+          format: date
+          nullable: true
+        labels:
+          type: object
+          nullable: true
+    PagedWorkspaceList:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Workspace'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+        sort:
+          $ref: '#/components/schemas/Sort'
+        last:
+          type: boolean
+        first:
+          type: boolean
+        empty:
+          type: boolean
+    Party:
+      type: object
+      properties:
+        partyId:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        partyType:
+          type: string
+        role:
+          type: string
+        partyDetails:
+          type: object
+        representationDetails:
+          type: object
+          nullable: true
+    PagedPartyList:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Party'
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+        sort:
+          $ref: '#/components/schemas/Sort'
+        last:
+          type: boolean
+        first:
+          type: boolean
+        empty:
+          type: boolean
+    CreateWorkspaceRequest:
+      type: object
+      required:
+        - transactionType
+        - jurisdiction
+      properties:
+        transactionType:
+          type: string
+        jurisdiction:
+          type: string
+        completionDate:
+          type: string
+          nullable: true
+    UpdateWorkspaceStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+    AddPartyRequest:
+      type: object
+      required:
+        - partyType
+        - role
+        - partyDetails
+      properties:
+        partyType:
+          type: string
+        role:
+          type: string
+        partyDetails:
+          type: string
+        representationDetails:
+          type: string
+          nullable: true
+    UpdatePartyRequest:
+      type: object
+      properties:
+        partyDetails:
+          type: string
+          nullable: true
+        representationDetails:
+          type: string
+          nullable: true
+security:
+  - bearerAuth: []
