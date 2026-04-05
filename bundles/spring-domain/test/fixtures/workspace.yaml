@@ -1,0 +1,42 @@
+apiVersion: "1.0"
+kind: spring-domain
+metadata:
+  name: workspace-service
+
+spec:
+  boundedContext: Workspace
+  service:
+    port: 8081
+    package: io.example.workspace
+  aggregates:
+    Workspace:
+      attributes:
+        workspaceId: uuid
+        status: string = Status
+      commands:
+        - name: CreateWorkspace
+          body: [status]
+          emits: WorkspaceCreated
+        - name: UpdateWorkspaceStatus
+          body: [status]
+          emits: WorkspaceStatusUpdated
+      queries:
+        - name: GetWorkspace
+          returns: Workspace
+        - name: SearchWorkspace
+          returns: PagedWorkspaceList
+      events:
+        WorkspaceCreated:
+          fields: [workspaceId, status]
+      entities:
+        Party:
+          attributes:
+            partyId: uuid
+            workspaceId: uuid
+          commands:
+            - name: AddParty
+              body: [partyType, role]
+              emits: PartyAdded
+          events:
+            PartyAdded:
+              fields: [workspaceId, partyId]
