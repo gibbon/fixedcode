@@ -1,0 +1,14 @@
+package {{packagePath}}.application.{{names.kebab}}
+
+import org.junit.jupiter.api.Test
+
+class {{names.pascal}}CommandServiceTest {
+
+{{#each commands}}
+    @Test
+    fun `should handle {{this.names.pascal}}`() {
+        // TODO: implement test for {{this.names.camel}} command
+    }
+
+{{/each}}
+}

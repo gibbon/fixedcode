@@ -1,0 +1,27 @@
+package {{packagePath}}.domain.{{names.kebab}}
+
+import org.junit.jupiter.api.Test
+import java.util.UUID
+
+class {{names.pascal}}Test {
+
+    @Test
+    fun `should create {{names.pascal}}`() {
+        // TODO: implement test for {{names.pascal}} aggregate
+    }
+
+{{#each commands}}
+    @Test
+    fun `should handle {{this.names.pascal}}`() {
+        // TODO: implement test for {{this.names.camel}} command
+    }
+
+{{/each}}
+{{#each queries}}
+    @Test
+    fun `should handle {{this.names.pascal}}`() {
+        // TODO: implement test for {{this.names.camel}} query
+    }
+
+{{/each}}
+}
