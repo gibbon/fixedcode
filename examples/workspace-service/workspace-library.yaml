@@ -1,0 +1,20 @@
+apiVersion: "1.0"
+kind: spring-library
+metadata:
+  name: workspace-service
+
+spec:
+  library:
+    name: gap-workspace-core
+    description: Workspace domain library for managing property transaction workspaces
+    version: 0.1.0
+    group: io.pexa.gap
+  features:
+    database:
+      enabled: true
+      type: postgresql
+      port: 5433
+    messaging:
+      enabled: true
+  service:
+    port: 8081
