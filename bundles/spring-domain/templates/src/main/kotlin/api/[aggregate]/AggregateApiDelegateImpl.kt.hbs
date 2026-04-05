@@ -1,9 +1,9 @@
-package {{packagePath}}.api.{{names.kebab}}
+package {{packageDot}}.api.{{names.kebab}}
 
-import {{packagePath}}.application.{{names.kebab}}.{{names.pascal}}CommandService
-import {{packagePath}}.application.{{names.kebab}}.{{names.pascal}}QueryService
+import {{packageDot}}.application.{{names.kebab}}.{{names.pascal}}CommandService
+import {{packageDot}}.application.{{names.kebab}}.{{names.pascal}}QueryService
 {{#each commands}}
-import {{../packagePath}}.domain.{{../names.kebab}}.commands.{{names.pascal}}Command
+import {{../packageDot}}.domain.{{../names.kebab}}.commands.{{names.pascal}}Command
 {{/each}}
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

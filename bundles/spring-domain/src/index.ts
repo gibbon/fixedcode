@@ -13,6 +13,7 @@ export interface EnrichedContext extends Context {
   boundedContext: string;
   names: ReturnType<typeof generateVariants>;
   packagePath: string;
+  packageDot: string;
   service: { port?: number; package: string };
   aggregates: ReturnType<typeof enrichAggregate>[];
 }
@@ -26,6 +27,7 @@ export function enrich(raw: Record<string, unknown>, _metadata: SpecMetadata): E
     boundedContext: spec.boundedContext,
     names,
     packagePath,
+    packageDot: spec.service.package,
     service: spec.service,
     aggregates: Object.entries(spec.aggregates).map(([name, agg]) => enrichAggregate(name, agg)),
   };
@@ -46,7 +48,7 @@ export function generateFiles(ctx: EnrichedContext): FileEntry[] {
   );
 
   for (const agg of ctx.aggregates) {
-    const aggCtx = { ...agg, packagePath: pkg } as Record<string, unknown>;
+    const aggCtx = { ...agg, packagePath: pkg, packageDot: ctx.packageDot } as Record<string, unknown>;
     const aggPath = `src/main/kotlin/${pkg}/domain/${agg.names.kebab}`;
     const testPath = `src/test/kotlin/${pkg}`;
 

@@ -1,7 +1,7 @@
-package {{packagePath}}.application.{{names.kebab}}
+package {{packageDot}}.application.{{names.kebab}}
 
 {{#each commands}}
-import {{../packagePath}}.domain.{{../names.kebab}}.commands.{{names.pascal}}Command
+import {{../packageDot}}.domain.{{../names.kebab}}.commands.{{names.pascal}}Command
 {{/each}}
 
 interface {{names.pascal}}CommandService {

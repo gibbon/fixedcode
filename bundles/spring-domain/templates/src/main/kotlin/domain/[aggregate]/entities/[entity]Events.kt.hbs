@@ -1,8 +1,8 @@
-package {{packagePath}}.domain.{{names.kebab}}.entities
+package {{packageDot}}.domain.{{names.kebab}}.entities
 
 import java.time.Instant
 import java.util.UUID
-import {{packagePath}}.domain.shared.DomainEvent
+import {{packageDot}}.domain.shared.DomainEvent
 
 {{#each entity.events}}
 data class {{names.pascal}}(
