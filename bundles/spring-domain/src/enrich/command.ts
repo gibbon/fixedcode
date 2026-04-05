@@ -17,7 +17,6 @@ export interface EnrichedCommand {
   params: { path: EnrichedParam[]; body: EnrichedParam[]; query: EnrichedParam[] };
   emits?: string;
   methodSignature: string;
-  imports: string[];
 }
 
 interface AggCtx {
@@ -72,6 +71,5 @@ export function enrichCommand(raw: {
     params: { path: pathParams, body: bodyParams, query: queryParams },
     emits: raw.emits,
     methodSignature,
-    imports: [],
   };
 }

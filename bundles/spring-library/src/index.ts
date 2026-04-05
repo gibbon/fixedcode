@@ -122,9 +122,7 @@ function enrich(spec: LibrarySpec, _metadata: SpecMetadata): LibraryContext {
   const featureConf = spec.featureLibrary;
 
   const { domain, suffix } = parseLibraryName(lib.name);
-  const domainKebab = toKebabCase(domain);
   const domainPascal = toPascalCase(domain);
-  const domainCamel = toCamelCase(domain);
   const domainSnake = toSnakeCase(domain);
 
   const libraryPascal = toPascalCase(lib.name);

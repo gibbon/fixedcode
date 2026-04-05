@@ -32,6 +32,8 @@ export function verify(options: VerifyOptions): VerifyResult {
     verifyDomainSpec(spec.spec, outputDir, checks);
   } else if (kind === 'spring-library') {
     verifyLibrarySpec(outputDir, checks);
+  } else {
+    console.warn(`Warning: no verification rules for bundle kind '${kind}'. Skipping.`);
   }
 
   const missing = checks.filter(c => !c.exists).map(c => c.file);
