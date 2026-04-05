@@ -3,7 +3,7 @@
  * Smart migration handling — skips V002 if already deployed (incremental mode).
  */
 import { resolve, relative, dirname } from 'node:path';
-import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync, statSync, copyFileSync } from 'node:fs';
+import { existsSync, readdirSync, mkdirSync, statSync, copyFileSync } from 'node:fs';
 
 export interface DeployOptions {
   /** Build output directory (source) */

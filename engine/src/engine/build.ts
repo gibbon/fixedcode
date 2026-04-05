@@ -4,7 +4,8 @@
  * and consolidating per-aggregate migrations into a single V002 migration.
  */
 import { resolve } from 'node:path';
-import { existsSync, readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { parse as parseYaml } from 'yaml';
 import { generate } from './pipeline.js';
 
 export interface BuildOptions {
@@ -46,9 +47,21 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
 
   // Generate from each spec into the same output directory
   // Library specs should go first (project skeleton), then domain specs (DDD code)
-  const librarySpecs = specFiles.filter(f => f.includes('library'));
-  const domainSpecs = specFiles.filter(f => !f.includes('library'));
-  const orderedSpecs = [...librarySpecs, ...domainSpecs];
+  // Read the kind field from each spec YAML to determine ordering
+  const specKinds = specFiles.map(f => {
+    try {
+      const content = readFileSync(f, 'utf-8');
+      const parsed = parseYaml(content);
+      return { path: f, kind: parsed?.kind as string ?? '' };
+    } catch {
+      return { path: f, kind: '' };
+    }
+  });
+
+  const orderedSpecs = [
+    ...specKinds.filter(s => s.kind.includes('library')).map(s => s.path),
+    ...specKinds.filter(s => !s.kind.includes('library')).map(s => s.path),
+  ];
 
   for (const specPath of orderedSpecs) {
     console.log(`Generating from: ${specPath}`);
