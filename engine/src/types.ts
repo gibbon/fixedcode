@@ -34,6 +34,15 @@ export interface Bundle {
    * Key = generator name (e.g. 'openapi'), value = mapping function.
    */
   adapters?: Record<string, (ctx: Context) => Record<string, unknown>>;
+
+  /**
+   * Optional CFR (Cross-Functional Requirements) manifest.
+   * Declares which CFRs this bundle bakes in and which files implement each one.
+   */
+  cfrs?: {
+    provides: string[];
+    files?: Record<string, string[]>;
+  };
 }
 
 export interface SpecMetadata {
