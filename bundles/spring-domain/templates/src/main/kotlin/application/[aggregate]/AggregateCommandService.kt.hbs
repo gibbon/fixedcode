@@ -1,0 +1,11 @@
+package {{packagePath}}.application.{{names.kebab}}
+
+{{#each commands}}
+import {{../packagePath}}.domain.{{../names.kebab}}.commands.{{names.pascal}}Command
+{{/each}}
+
+interface {{names.pascal}}CommandService {
+{{#each commands}}
+    fun handle(command: {{names.pascal}}Command)
+{{/each}}
+}
