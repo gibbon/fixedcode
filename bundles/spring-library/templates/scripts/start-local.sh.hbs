@@ -1,0 +1,35 @@
+#!/bin/bash
+set -e
+
+echo "Starting {{LibraryName}} local development environment..."
+echo ""
+
+# Start docker compose
+echo "Starting Docker containers (Postgres, Kafka, Zookeeper, Debezium)..."
+docker compose -f docker-compose-libdev.yml up -d
+
+echo ""
+echo "Waiting for services to be healthy..."
+sleep 15
+
+echo ""
+echo "=========================================="
+echo "Local development environment is ready!"
+echo "=========================================="
+echo ""
+echo "Services:"
+echo "  - PostgreSQL: localhost:{{DatabasePort}}"
+echo "  - Kafka: localhost:9092"
+echo "  - Kafka UI: http://localhost:8090"
+echo "  - Debezium Connect: http://localhost:8083"
+echo ""
+echo "Next steps:"
+echo "  1. Start the application (this will create the outbox table):"
+echo "     ./gradlew bootRun --args='--spring.profiles.active=libdev'"
+echo ""
+echo "  2. After the app starts, setup Debezium connector:"
+echo "     ./scripts/setup-debezium.sh"
+echo ""
+echo "To stop all services:"
+echo "  docker compose -f docker-compose-libdev.yml down"
+echo ""

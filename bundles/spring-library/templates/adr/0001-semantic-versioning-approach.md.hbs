@@ -1,0 +1,116 @@
+# ADR 0001: Semantic Versioning Approach for GAP Libraries
+
+## Status
+
+Accepted
+
+## Context
+
+GAP (Group API Platform) libraries need a consistent, reliable versioning system that:
+
+1. Follows semantic versioning principles
+2. Automates version increments during CI/CD processes
+3. Ensures version consistency across artifacts
+4. Provides clear compatibility information to consumers
+5. Integrates with our build and deployment tools
+
+## Decision
+
+We have adopted a hybrid manual/automated semantic versioning approach with the following components:
+
+### 1. Base Version Management
+
+- Store the base version (major.minor) in a simple `version.txt` file
+- Manual control of major and minor version increments
+- Automated patch version increments during CI/CD
+
+### 2. Automated Version Generation
+
+- Use the `PEXA-AU/github-action-auto-semver` GitHub Action to:
+  - Read the base version from `version.txt`
+  - Determine the next appropriate patch version based on git history
+  - Generate a full semantic version (major.minor.patch)
+  - Create appropriate git tags and GitHub releases
+
+### 3. CI/CD Integration
+
+- Integrate with the `PEXA-AU/pidp-workflows/.github/workflows/build-jvm-library-gradle.yaml` workflow
+- Automatically generate versions during build
+- Publish artifacts with consistent version information
+- Create GitHub releases with appropriate tags
+
+### 4. Runtime Version Information
+
+- Generate a `BuildConfig` class during build with version information
+- Make version information available at runtime for compatibility checks
+- Include group and artifact information for complete identification
+
+### 5. Version Compatibility
+
+- Implement version compatibility checking in libraries
+- Follow semantic versioning rules:
+  - Major version changes indicate breaking changes
+  - Minor version changes indicate backward-compatible new features
+  - Patch version changes indicate backward-compatible bug fixes
+
+## Consequences
+
+### Positive
+
+1. **Automation**: Reduces manual work for patch version increments
+2. **Consistency**: Ensures version numbers always increase appropriately
+3. **Traceability**: Each version is tagged in Git and has a corresponding GitHub release
+4. **Control**: Developers maintain control over major and minor versions
+5. **Integration**: Works seamlessly with Gradle, GitHub Actions, and Artifactory
+6. **Compatibility**: Provides clear compatibility information to consumers
+
+### Negative
+
+1. **Complexity**: Involves multiple components (version.txt, GitHub Actions, Gradle)
+2. **Manual Steps**: Still requires manual intervention for major and minor version bumps
+3. **Dependency**: Relies on custom GitHub Actions for version generation
+
+### Neutral
+
+1. **Learning Curve**: Developers need to understand the versioning workflow
+2. **Process Change**: Requires adherence to the versioning process
+
+## Implementation Details
+
+### Version Storage
+
+- Base version (major.minor) stored in `version.txt` at repository root
+- Full version (major.minor.patch) determined during CI/CD
+
+### Version Generation Logic
+
+1. Read base version from `version.txt`
+2. Find the latest semantic version tag in git history
+3. If no tags exist, create a new version with patch=0
+4. If tags exist:
+   - If base version matches latest tag's major.minor, increment patch
+   - If base version is higher than latest tag, start new version with patch=0
+   - If base version is lower than latest tag, fail with error
+5. Verify new version doesn't already exist as a tag
+
+### Gradle Integration
+
+- Read base version from `version.txt`
+- For local development, use `<base-version>.0`
+- Allow override via `VERSION` environment variable (set by CI)
+- Generate `BuildConfig` class with version information
+- Configure Maven publication with current version
+
+### Manual Version Management
+
+- Use Gradle tasks for version management:
+  - `showVersion`: Display current version
+  - `incrementMajor`: Increment major version and reset minor to 0
+  - `incrementMinor`: Increment minor version
+  - `checkVersionExists`: Check if version exists in Artifactory
+
+## References
+
+- [Semantic Versioning 2.0.0](https://semver.org/)
+- [PEXA-AU/github-action-auto-semver](https://github.com/PEXA-AU/github-action-auto-semver)
+- [PEXA-AU/pidp-workflows](https://github.com/PEXA-AU/pidp-workflows)

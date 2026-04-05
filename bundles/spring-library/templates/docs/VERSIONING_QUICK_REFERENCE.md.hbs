@@ -1,0 +1,139 @@
+# Versioning Quick Reference
+
+A quick reference guide for contributors working with GAP library versioning.
+
+## 🚀 Quick Commands
+
+```bash
+# Check current version
+./gradlew showVersion
+
+# Increment for breaking changes
+./gradlew incrementMajor
+
+# Increment for new features  
+./gradlew incrementMinor
+
+# Check if version exists in repository
+./gradlew checkVersionExists
+
+# Build with specific version
+./gradlew build -Pversion=1.2.3
+```
+
+## 📋 Version Decision Matrix
+
+| Change Type | Examples | Command | Version Impact |
+|-------------|----------|---------|----------------|
+| **Breaking Changes** | Remove API, Change signatures | `incrementMajor` | 1.2 → 2.0 |
+| **New Features** | Add methods, New functionality | `incrementMinor` | 1.2 → 1.3 |
+| **Bug Fixes** | Fix bugs, Update docs | *Automatic* | 1.2.0 → 1.2.1 |
+
+## 🔄 Workflow Cheat Sheet
+
+### Before Starting Development
+```bash
+git checkout main
+git pull origin main
+./gradlew showVersion  # Note current version
+```
+
+### During Development
+```bash
+# Work on your feature
+./gradlew build        # Test locally
+./gradlew test         # Run tests
+```
+
+### Before Pull Request
+```bash
+# If you added new features
+./gradlew incrementMinor
+
+# If you made breaking changes  
+./gradlew incrementMajor
+
+# Verify version
+./gradlew showVersion
+./gradlew checkVersionExists
+```
+
+### Pull Request Title Format
+```
+feat: add new authentication method (minor)
+fix: resolve null pointer exception
+BREAKING: remove deprecated API methods (major)
+docs: update API documentation
+```
+
+## 🎯 Version Compatibility Rules
+
+### Pre-1.0.0 (Development)
+- **0.1.0 vs 0.1.1**: ❌ Not compatible
+- **0.1.0 vs 0.2.0**: ❌ Not compatible
+- Use for: Initial development, alpha/beta
+
+### Post-1.0.0 (Stable)
+- **1.0.0 vs 1.1.0**: ✅ Compatible
+- **1.0.0 vs 2.0.0**: ❌ Not compatible  
+- Use for: Production releases
+
+## 🔍 Version Information in Code
+
+```kotlin
+// Get current version
+val version = BuildConfig.VERSION
+
+// Check compatibility
+val compatible = VersionInfo.isCompatibleWith("1.2.0")
+
+// Access components
+val major = VersionInfo.major
+val minor = VersionInfo.minor
+val patch = VersionInfo.patch
+```
+
+## 🚨 Common Mistakes to Avoid
+
+❌ **Don't manually edit version in build files**
+✅ **Use `version.txt` and GAP plugin tasks**
+
+❌ **Don't increment patch versions manually**
+✅ **Let CI/CD handle patch versions**
+
+❌ **Don't forget to check version exists**
+✅ **Always run `checkVersionExists` before PR**
+
+❌ **Don't mix version types in one PR**
+✅ **One version increment per PR**
+
+## 🆘 Troubleshooting
+
+### "Version already exists" error
+```bash
+./gradlew checkVersionExists
+# If exists, increment version:
+./gradlew incrementMinor  # or incrementMajor
+```
+
+### "Unspecified version" in build
+```bash
+# Check version.txt exists and has content
+cat version.txt
+# Should show something like: 1.0
+```
+
+### Version not updating
+```bash
+# Clean and rebuild
+./gradlew clean build
+# Check GAP plugin is applied
+./gradlew tasks --group=versioning
+```
+
+## 📚 More Information
+
+- **Detailed Guide**: See `VERSIONING.md`
+- **Contributing**: See `CONTRIBUTING.md`
+- **Build Config**: See `docs/BUILD_CONFIGURATION.md`
+- **Template Usage**: See `TEMPLATE_USAGE.md`

@@ -1,0 +1,157 @@
+# IDE Configuration Templates
+
+This directory contains pre-configured IDE settings for optimal development experience with the GAP Library Template. These configurations are optional and can be copied to your project if desired.
+
+## IntelliJ IDEA Configuration
+
+### Quick Setup
+
+Copy the IntelliJ IDEA configurations to your project:
+
+```bash
+# From the project root directory
+cp -r ide-configs/intellij-idea/* .idea/
+```
+
+### What's Included
+
+**Project Settings:**
+- `compiler.xml` - Java 21 compilation settings with parameter preservation
+- `encodings.xml` - UTF-8 encoding for all source directories
+- `misc.xml` - Java 21 project SDK and framework detection
+- `vcs.xml` - Git version control configuration
+- `gradle.xml` - Gradle project settings with proper JVM configuration
+- `kotlinc.xml` - Kotlin compiler settings for Java 21 target
+- `.name` - Project name configuration
+
+**Run Configurations:** (`runConfigurations/`)
+- `Build.xml` - Complete project build
+- `Test.xml` - Unit test execution
+- `Integration_Tests.xml` - Integration test suite
+- `Quality_Checks.xml` - Detekt and JaCoCo analysis
+- `Publish_to_Maven_Local.xml` - Local Maven publishing
+
+**Code Style:** (`codeStyles/`)
+- `Project.xml` - Kotlin official code style with Spring Boot conventions
+- `codeStyleConfig.xml` - Project-specific code style configuration
+
+**Inspection Profiles:** (`inspectionProfiles/`)
+- `Project_Default.xml` - Enhanced inspection profile with Spring Boot and Kotlin-specific rules
+
+### Features
+
+- **Java 21 Support**: Proper toolchain and compiler configuration
+- **Kotlin Integration**: Optimized Kotlin compiler settings and code style
+- **Spring Boot Support**: Enhanced inspections and code completion
+- **Quality Tools**: Integrated Detekt and JaCoCo support
+- **Consistent Formatting**: Team-wide code style consistency
+
+## VS Code Configuration
+
+### Quick Setup
+
+Copy the VS Code configurations to your project:
+
+```bash
+# From the project root directory
+cp -r ide-configs/vscode/* .vscode/
+```
+
+### What's Included
+
+**Settings:** (`settings.json`)
+- Java 21 configuration with proper JVM settings
+- Kotlin language server with Java 21 target
+- Code formatting with format-on-save
+- Detekt integration for real-time analysis
+- Optimized file watching and exclusions
+
+**Tasks:** (`tasks.json`)
+- **Build Tasks**: Build, clean build, quality checks
+- **Test Tasks**: Unit tests and integration tests
+- **Publishing**: Maven local publishing
+- **OpenAPI**: Code generation tasks
+- **Docker**: Service management tasks
+
+**Launch Configurations:** (`launch.json`)
+- **Debug Tests**: JUnit test debugging
+- **Debug Spring Boot**: Application debugging with profiles
+- **Attach to Process**: Remote debugging support
+
+**Extensions:** (`extensions.json`)
+- **Java Development**: Complete Java extension pack
+- **Kotlin Support**: Kotlin language server and tools
+- **Spring Boot**: Spring Boot development tools
+- **Quality Tools**: Detekt, SonarLint integration
+- **General Development**: Git, Docker, testing tools
+
+### Features
+
+- **Lightweight Setup**: Optimized for VS Code performance
+- **Extension Recommendations**: Curated list of useful extensions
+- **Task Integration**: Pre-configured build and test tasks
+- **Debug Support**: Comprehensive debugging configurations
+- **Quality Integration**: Real-time code analysis and formatting
+
+## Usage Instructions
+
+### For New Projects
+
+When creating a new project from this template via Backstage or PIDP CLI, you can optionally set up IDE configurations:
+
+1. **Choose Your IDE**: IntelliJ IDEA or VS Code (or both)
+2. **Copy Configurations**: Use the commands above to copy the relevant configurations
+3. **Restart IDE**: Restart your IDE to apply the new settings
+4. **Customize**: Modify the configurations as needed for your specific requirements
+
+### For Existing Projects
+
+If you want to apply these configurations to an existing project:
+
+1. **Backup Current Settings**: Save any existing IDE configurations you want to keep
+2. **Copy New Configurations**: Use the copy commands above
+3. **Merge Settings**: Combine with your existing settings if needed
+4. **Test**: Verify that the configurations work with your project setup
+
+## Customization
+
+These configurations are starting points and can be customized for your team's specific needs:
+
+### IntelliJ IDEA Customization
+
+- **Code Style**: Modify `codeStyles/Project.xml` for different formatting preferences
+- **Inspections**: Adjust `inspectionProfiles/Project_Default.xml` for different code quality rules
+- **Run Configurations**: Add or modify configurations in `runConfigurations/`
+
+### VS Code Customization
+
+- **Settings**: Modify `settings.json` for different editor preferences
+- **Tasks**: Add or modify tasks in `tasks.json`
+- **Extensions**: Update `extensions.json` with additional recommended extensions
+
+## Benefits
+
+- **Zero Configuration**: Start developing immediately with optimal settings
+- **Team Consistency**: Shared code style and formatting rules
+- **Quality Integration**: Built-in code analysis and quality tools
+- **Productivity**: Pre-configured run configurations and tasks
+- **Best Practices**: Settings based on Spring Boot and Kotlin best practices
+
+## Support
+
+If you encounter issues with these configurations:
+
+1. **Check Compatibility**: Ensure your IDE version supports the configuration format
+2. **Review Settings**: Verify that paths and settings match your project structure
+3. **Update as Needed**: Modify configurations for your specific environment
+4. **Share Improvements**: Contribute back improvements to the template
+
+## Version Compatibility
+
+These configurations are tested with:
+
+- **IntelliJ IDEA**: 2023.3+ (Ultimate or Community Edition)
+- **VS Code**: 1.80+ with recommended extensions
+- **Java**: OpenJDK 21 or compatible JVM
+- **Kotlin**: 2.1.21+
+- **Gradle**: 8.14+

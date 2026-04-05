@@ -1,0 +1,242 @@
+# Dependabot Configuration Guide
+
+This document explains the Dependabot configuration for the GAP Library Template and how it helps maintain dependency security and compatibility.
+
+## Overview
+
+Dependabot automatically creates pull requests to update dependencies, helping to:
+- **Maintain Security**: Keep dependencies updated with latest security patches
+- **Ensure Compatibility**: Regular updates prevent large version gaps
+- **Reduce Manual Work**: Automated dependency management
+- **Follow GAP Standards**: Consistent dependency management across GAP libraries
+
+## Configuration Structure
+
+### 1. GitHub Actions Updates
+
+```yaml
+- package-ecosystem: "github-actions"
+  schedule:
+    interval: "weekly"
+    day: "monday"
+    time: "09:00"
+    timezone: "Australia/Melbourne"
+```
+
+**Purpose**: Updates workflow dependencies (e.g., PIDP workflows, actions/checkout)
+**Schedule**: Weekly on Mondays at 9 AM AEST
+**Impact**: Ensures CI/CD workflows use latest stable versions
+
+### 2. Gradle Dependencies Updates
+
+```yaml
+- package-ecosystem: "gradle"
+  schedule:
+    interval: "weekly"
+    day: "tuesday"
+    time: "09:00"
+    timezone: "Australia/Melbourne"
+```
+
+**Purpose**: Updates all Gradle dependencies including:
+- Kotlin standard libraries
+- Testing frameworks (JUnit, Mockito, AssertJ)
+- Build plugins (Detekt, Dokka)
+- Application dependencies (Jackson, SLF4J)
+
+**Schedule**: Weekly on Tuesdays at 9 AM AEST
+
+### 3. Docker Updates (Optional)
+
+```yaml
+- package-ecosystem: "docker"
+  schedule:
+    interval: "weekly"
+    day: "wednesday"
+    time: "09:00"
+    timezone: "Australia/Melbourne"
+```
+
+**Purpose**: Updates Docker base images if Dockerfile exists
+**Schedule**: Weekly on Wednesdays at 9 AM AEST
+
+## Dependency Grouping
+
+Dependencies are grouped to reduce PR noise and improve review efficiency:
+
+### Kotlin Group
+- All Kotlin-related dependencies
+- Includes: `org.jetbrains.kotlin*`, `kotlin*`
+- **Benefit**: Single PR for Kotlin ecosystem updates
+
+### Testing Group
+- All testing framework dependencies
+- Includes: JUnit, Mockito, AssertJ
+- **Benefit**: Coordinated testing dependency updates
+
+### Jackson Group
+- JSON processing dependencies
+- Includes: `com.fasterxml.jackson*`
+- **Benefit**: Consistent JSON library versions
+
+### Gradle Plugins Group
+- Build and quality plugins
+- Includes: Dokka, Detekt, Gradle plugins
+- **Benefit**: Coordinated build tooling updates
+
+## Ignored Dependencies
+
+Certain dependencies are ignored for manual control:
+
+### GAP Plugin
+```yaml
+- dependency-name: "au.com.pexa.gap.versioning-publishing"
+  reason: "Manual updates required for GAP plugin compatibility"
+```
+
+**Why**: GAP plugin updates require coordination with platform team
+
+### Major Version Updates
+```yaml
+- dependency-name: "*"
+  update-types: ["version-update:semver-major"]
+  reason: "Major updates require manual review for breaking changes"
+```
+
+**Why**: Major updates may introduce breaking changes requiring code modifications
+
+## Pull Request Configuration
+
+### Labels
+- `dependencies`: All dependency updates
+- `github-actions`: GitHub Actions updates
+- `gradle`: Gradle dependency updates
+- `docker`: Docker image updates
+- `automated`: Automated updates
+
+### Commit Message Format
+- **GitHub Actions**: `ci: update action-name to v1.2.3`
+- **Gradle**: `deps: update kotlin to 1.9.0`
+- **Docker**: `docker: update base image to alpine:3.18`
+
+## Limits and Scheduling
+
+### Pull Request Limits
+- **GitHub Actions**: 5 concurrent PRs
+- **Gradle**: 10 concurrent PRs
+- **Docker**: 3 concurrent PRs
+
+**Purpose**: Prevents overwhelming the review process
+
+### Scheduling Strategy
+- **Monday**: GitHub Actions (CI/CD infrastructure)
+- **Tuesday**: Gradle dependencies (main dependencies)
+- **Wednesday**: Docker images (containerization)
+
+**Purpose**: Spreads updates across the week for manageable review
+
+## Best Practices for GAP Libraries
+
+### 1. Review Process
+```bash
+# For each Dependabot PR:
+1. Review the changelog and release notes
+2. Check for breaking changes
+3. Run local tests: ./gradlew build
+4. Verify GAP plugin compatibility
+5. Merge if all checks pass
+```
+
+### 2. Testing Strategy
+- **Automated Tests**: All PRs run full test suite
+- **Manual Testing**: Complex updates may require manual verification
+- **Compatibility Testing**: Ensure GAP plugin still works
+
+### 3. Version Compatibility
+- **Minor/Patch Updates**: Generally safe to auto-merge
+- **Major Updates**: Require manual review and testing
+- **GAP Plugin**: Always coordinate with platform team
+
+## Customization for Specific Libraries
+
+### Adding Custom Groups
+```yaml
+groups:
+  my-custom-group:
+    patterns:
+      - "com.example.*"
+    update-types:
+      - "minor"
+      - "patch"
+```
+
+### Ignoring Specific Dependencies
+```yaml
+ignore:
+  - dependency-name: "com.example.problematic-lib"
+    reason: "Known compatibility issues"
+```
+
+### Adjusting Schedule
+```yaml
+schedule:
+  interval: "daily"  # or "monthly"
+  time: "14:00"
+  timezone: "UTC"
+```
+
+## Monitoring and Maintenance
+
+### Regular Tasks
+1. **Weekly Review**: Check and merge Dependabot PRs
+2. **Monthly Audit**: Review ignored dependencies
+3. **Quarterly Review**: Assess grouping effectiveness
+4. **Annual Review**: Update configuration as needed
+
+### Metrics to Track
+- **PR Merge Rate**: How many Dependabot PRs are merged
+- **Time to Merge**: How quickly PRs are reviewed
+- **Security Updates**: Number of security-related updates
+- **Breaking Changes**: Frequency of major version updates
+
+## Troubleshooting
+
+### Common Issues
+
+#### Dependabot PRs Not Created
+- Check repository settings for Dependabot enablement
+- Verify configuration syntax with GitHub's validator
+- Ensure package manifests exist (build.gradle.kts, etc.)
+
+#### Too Many PRs
+- Reduce `open-pull-requests-limit`
+- Increase grouping to consolidate updates
+- Adjust schedule frequency
+
+#### Failed Dependency Updates
+- Check for dependency conflicts
+- Review build failures in PR checks
+- Consider ignoring problematic dependencies temporarily
+
+### Getting Help
+- **GitHub Documentation**: [Dependabot Configuration Options](https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates)
+- **GAP Platform Team**: For GAP-specific dependency questions
+- **Repository Issues**: For template-specific problems
+
+## Security Considerations
+
+### Automated Security Updates
+- Dependabot automatically creates PRs for security vulnerabilities
+- These PRs are prioritized and should be reviewed quickly
+- Security updates bypass normal scheduling
+
+### Dependency Scanning
+- All dependencies are scanned for known vulnerabilities
+- Security advisories trigger immediate update PRs
+- Regular updates reduce security exposure window
+
+### Best Practices
+1. **Review Security PRs Immediately**: Don't delay security updates
+2. **Monitor Security Advisories**: Stay informed about vulnerabilities
+3. **Regular Updates**: Frequent updates reduce security debt
+4. **Audit Dependencies**: Regularly review all dependencies for necessity

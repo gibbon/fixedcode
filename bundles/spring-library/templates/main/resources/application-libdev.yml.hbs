@@ -124,7 +124,7 @@ spring:
 # Server configuration for development
 # Uses 9xxx ports (e.g., 8081 -> 9081) to avoid conflicts with Docker containers
 server:
-  port: {{ add 1000 .ServerPort }}
+  port: {{ add 1000 ServerPort }}
 
 # Management endpoints for development
 management:

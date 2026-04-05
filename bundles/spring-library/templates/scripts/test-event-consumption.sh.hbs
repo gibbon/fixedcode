@@ -1,0 +1,81 @@
+{{#unless IsFeatureLibrary}}
+#!/bin/bash
+set -e
+
+echo "=========================================="
+echo "Event Consumption Test Script"
+echo "=========================================="
+echo ""
+
+# Check if Kafka is running
+if ! docker ps | grep -q kafka; then
+    echo "Kafka is not running. Start it with: ./scripts/start-local.sh"
+    exit 1
+fi
+
+echo "Kafka is running"
+echo ""
+
+# Create test topics if they don't exist
+echo "Creating test topics..."
+{{#each RemoteAggregates}}
+docker exec {{../LibraryName}}-kafka kafka-topics --create --if-not-exists \
+    --bootstrap-server localhost:9092 \
+    --topic {{Topic}} \
+    --partitions 1 \
+    --replication-factor 1 2>/dev/null || true
+{{/each}}
+echo "Topics created"
+echo ""
+
+{{#each RemoteAggregates}}
+AGG_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+WORKSPACE_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+EVENT_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+
+echo "Posting {{Name}} event to Kafka topic: {{Topic}}..."
+echo "{\"before\":null,\"after\":{\"event_id\":\"$EVENT_ID\",\"event_type\":\"{{EventType}}\",\"trace_id\":\"$(uuidgen | tr '[:upper:]' '[:lower:]')\",\"aggregate_id\":\"$AGG_ID\",\"aggregate_type\":\"{{Name}}\",\"topic\":\"{{Topic}}\",\"payload\":\"{\\\"eventId\\\":\\\"$EVENT_ID\\\",\\\"eventType\\\":\\\"{{EventType}}\\\",\\\"eventVersion\\\":1,\\\"{{NameCamel}}Id\\\":\\\"$AGG_ID\\\",\\\"workspaceId\\\":\\\"$WORKSPACE_ID\\\",\\\"status\\\":\\\"ACTIVE\\\"}\",\"created_by\":\"system\",\"created_at\":$(date +%s)000000,\"status\":\"PENDING\"},\"source\":{\"version\":\"2.4.2.Final\",\"connector\":\"postgresql\",\"name\":\"outbox\",\"ts_ms\":$(date +%s)000,\"snapshot\":\"false\",\"db\":\"gap_{{Topic}}_db\",\"schema\":\"public\",\"table\":\"outbox\",\"txId\":756,\"lsn\":2761700,\"xmin\":null},\"op\":\"c\",\"ts_ms\":$(date +%s)000,\"transaction\":null}" | \
+docker exec -i {{../LibraryName}}-kafka kafka-console-producer \
+    --bootstrap-server localhost:9092 \
+    --topic {{Topic}}
+
+echo "Event posted"
+echo "  {{Name}} ID: $AGG_ID"
+echo "  Workspace ID: $WORKSPACE_ID"
+echo ""
+{{/each}}
+
+# Wait for events to be processed
+echo "Waiting 5 seconds for events to be processed..."
+sleep 5
+echo ""
+
+# Verification
+echo "=========================================="
+echo "Verification"
+echo "=========================================="
+echo ""
+
+# Check event_processing_log for idempotency
+echo "Checking event_processing_log for idempotency tracking..."
+PGPASSWORD=gap_password psql -h localhost -p {{DatabasePort}} -U gap_user -d {{DatabaseName}} -c "SELECT aggregate_id, version, event_type, processed_at FROM event_processing_log ORDER BY processed_at DESC LIMIT 10;"
+echo ""
+
+# Check Kafka consumer group
+echo "Checking Kafka consumer group status..."
+docker exec {{LibraryName}}-kafka kafka-consumer-groups \
+    --bootstrap-server localhost:9092 \
+    --group {{LibraryName}}-consumer \
+    --describe 2>/dev/null || echo "Consumer group not found (app may not be running)"
+echo ""
+
+echo "=========================================="
+echo "Test Complete!"
+echo "=========================================="
+echo ""
+echo "To check DLQ for failed events:"
+{{#each RemoteAggregates}}
+echo "  docker exec {{../LibraryName}}-kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic {{Topic}}.DLQ --from-beginning --max-messages 5"
+{{/each}}
+echo ""
+{{/unless}}
