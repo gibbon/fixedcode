@@ -72,6 +72,17 @@ export interface FileEntry {
   template: string;
   output: string;
   ctx: Record<string, unknown>;
+  /**
+   * Whether to overwrite this file if it already exists. Default: true.
+   * Set to false for extension points (e.g. DefaultBusinessService)
+   * that should only be generated once and then owned by the user.
+   */
+  overwrite?: boolean;
+}
+
+export interface RenderedFileWithMeta extends RenderedFile {
+  /** Whether to overwrite if file exists. Default: true. */
+  overwrite: boolean;
 }
 
 /**
