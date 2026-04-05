@@ -9,7 +9,7 @@ import type { RawAggregateSpec } from './spec.js';
 export function enrichAggregate(name: string, raw: RawAggregateSpec) {
   const attrs = enrichAttributes(raw.attributes);
   const identityField = attrs.find(a => a.isIdentity)?.name ?? 'id';
-  const names = generateVariants(name);
+  const names = generateVariants(name, raw.plural);
   const aggCtx = { names: { pluralKebab: names.pluralKebab, pascal: names.pascal }, identityField };
 
   const entities = Object.entries(raw.entities ?? {}).map(([eName, eRaw]) =>
