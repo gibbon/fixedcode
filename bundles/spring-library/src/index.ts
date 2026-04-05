@@ -70,12 +70,14 @@ export interface LibraryContext extends Context {
 }
 
 function parseLibraryName(name: string): { domain: string; suffix: string } {
-  const parts = name.split('-');
+  // Strip leading 'gap-' prefix if present
+  const stripped = name.startsWith('gap-') ? name.slice(4) : name;
+  const parts = stripped.split('-');
   if (parts.length >= 2 && parts[parts.length - 1] === 'core') {
     const domain = parts.slice(0, -1).join('-');
     return { domain, suffix: 'core' };
   }
-  return { domain: name, suffix: '' };
+  return { domain: stripped, suffix: '' };
 }
 
 function toPascalCase(str: string): string {
@@ -192,11 +194,17 @@ function enrich(spec: LibrarySpec, _metadata: SpecMetadata): LibraryContext {
   };
 }
 
+const helpers: Bundle['helpers'] = {
+  /** {{add a b}} — numeric addition for use in templates */
+  add: (a: unknown, b: unknown) => Number(a) + Number(b),
+};
+
 export const bundle: Bundle = {
   kind: 'spring-library',
   specSchema: schema as Bundle['specSchema'],
   enrich: enrich as unknown as (spec: Record<string, unknown>, metadata: SpecMetadata) => Context,
   templates: 'templates',
+  helpers,
 };
 
 export default bundle;

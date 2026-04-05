@@ -1,0 +1,18 @@
+apiVersion: fixedcode/v1
+kind: spring-library
+metadata:
+  name: workspace-core
+spec:
+  library:
+    name: workspace-core
+    description: Workspace domain core library
+    version: 0.1.0
+    group: io.pexa.gap
+
+  features:
+    database:
+      enabled: true
+      type: postgresql
+
+  service:
+    port: 8080
