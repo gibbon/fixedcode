@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import type { RawSpec, FixedCodeConfig, Context, RenderedFile } from '../types.js';
 import { parseSpec, validateEnvelope } from './parse.js';
 import { loadConfig } from './config.js';
-import { resolveBundle } from './resolve.js';
+import { resolveBundle, resolveGenerators } from './resolve.js';
 import { validateBody } from './validate.js';
 import { renderTemplates, renderFile } from './render.js';
 import { writeFiles, writeSingleFile, type WriteOptions } from './write.js';
@@ -68,6 +68,22 @@ export async function generate(
       partials: bundle.partials,
     });
     writeFiles(rendered, outputDir, { dryRun: options.dryRun, diff: options.diff });
+  }
+
+  // Run generators that have matching adapters on this bundle
+  const generators = await resolveGenerators(config);
+  for (const gen of generators) {
+    const adapter = bundle.adapters?.[gen.name];
+    if (!adapter) continue;
+
+    try {
+      const input = adapter(context);
+      const files = gen.generate(input);
+      writeFiles(files, outputDir, { dryRun: options.dryRun, diff: options.diff });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.warn(`Generator '${gen.name}' failed: ${message}`);
+    }
   }
 }
 
