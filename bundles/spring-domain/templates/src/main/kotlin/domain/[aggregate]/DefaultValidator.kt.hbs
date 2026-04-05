@@ -1,0 +1,25 @@
+package {{packageDot}}.domain.{{names.kebab}}
+
+{{#each commands}}
+import {{../packageDot}}.domain.{{../names.kebab}}.commands.{{names.pascal}}Command
+{{/each}}
+import {{packageDot}}.domain.shared.ValidationResult
+
+/**
+ * Default validator for {{names.pascal}} commands.
+ *
+ * THIS IS AN EXTENSION POINT — generated once, then owned by you.
+ * Add your validation rules here.
+ * This file will NOT be overwritten on regeneration.
+ */
+@org.springframework.stereotype.Component
+class Default{{names.pascal}}Validator {
+
+{{#each commands}}
+    fun validate(command: {{names.pascal}}Command): ValidationResult {
+        // TODO: add validation rules for {{names.pascal}}
+        return ValidationResult.valid()
+    }
+
+{{/each}}
+}
