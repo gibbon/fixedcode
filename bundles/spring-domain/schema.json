@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["boundedContext", "service", "aggregates"],
+  "properties": {
+    "boundedContext": { "type": "string" },
+    "service": {
+      "type": "object",
+      "required": ["package"],
+      "properties": {
+        "port": { "type": "number" },
+        "package": { "type": "string" }
+      }
+    },
+    "aggregates": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/aggregate" }
+    },
+    "remote_aggregates": {
+      "type": "object"
+    }
+  },
+  "definitions": {
+    "aggregate": {
+      "type": "object",
+      "properties": {
+        "attributes": { "type": "object" },
+        "commands": { "type": "array" },
+        "queries": { "type": "array" },
+        "events": { "type": "object" },
+        "enumDefaults": { "type": "object" },
+        "entities": { "type": "object" }
+      }
+    }
+  }
+}
