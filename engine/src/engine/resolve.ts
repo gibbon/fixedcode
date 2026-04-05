@@ -1,5 +1,5 @@
 import { dynamicImport } from './dynamicImport.js';
-import type { Bundle, FixedCodeConfig } from '../types.js';
+import type { Bundle, Generator, FixedCodeConfig } from '../types.js';
 import { BundleNotFoundError, BundleLoadError } from '../errors.js';
 
 export async function resolveBundle(kind: string, config: FixedCodeConfig): Promise<Bundle> {
@@ -31,4 +31,23 @@ export async function resolveBundle(kind: string, config: FixedCodeConfig): Prom
     const message = err instanceof Error ? err.message : 'Unknown error';
     throw new BundleLoadError(bundlePath, message);
   }
+}
+
+export async function resolveGenerators(config: FixedCodeConfig): Promise<Generator[]> {
+  const generators: Generator[] = [];
+  for (const [name, genPath] of Object.entries(config.generators ?? {})) {
+    try {
+      const module = await dynamicImport(genPath, config.configDir) as { default?: Record<string, unknown> };
+      const gen = module.default ?? module as Record<string, unknown>;
+      if (typeof gen.generate !== 'function') {
+        console.warn(`Generator '${name}' at ${genPath} has no generate() function, skipping`);
+        continue;
+      }
+      generators.push({ name: (gen.name as string) ?? name, generate: gen.generate as Generator['generate'] });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.warn(`Failed to load generator '${name}' from ${genPath}: ${message}`);
+    }
+  }
+  return generators;
 }
