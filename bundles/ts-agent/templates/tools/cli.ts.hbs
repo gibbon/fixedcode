@@ -1,0 +1,12 @@
+import { execSync } from 'node:child_process';
+import { logger } from '../logger.js';
+
+export function handle(input: Record<string, unknown>): { output: string } {
+  const args = (input.args as string) ?? (input.input as string) ?? '';
+  const cmd = `{{tool.config.command}} ${args}`;
+
+  logger.info({ cmd }, '{{tool.name.pascal}} exec');
+
+  const output = execSync(cmd, { encoding: 'utf-8', timeout: 30_000 });
+  return { output: output.trim() };
+}

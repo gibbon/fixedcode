@@ -1,0 +1,8 @@
+import { logger } from '../logger.js';
+
+export async function handle(input: Record<string, unknown>): Promise<unknown> {
+  logger.info({ input }, '{{tool.name.pascal}} called');
+
+  // TODO: implement {{tool.name.kebab}} handler
+  return { success: true };
+}

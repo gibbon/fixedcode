@@ -1,0 +1,18 @@
+import { logger } from '../logger.js';
+
+const BASE_URL = '{{tool.config.baseUrl}}';
+
+export async function handle(input: Record<string, unknown>): Promise<unknown> {
+  const { path = '', method = 'GET', body } = input;
+  const url = `${BASE_URL}${path}`;
+
+  logger.info({ url, method }, '{{tool.name.pascal}} request');
+
+  const res = await fetch(url, {
+    method: method as string,
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  return res.json();
+}
