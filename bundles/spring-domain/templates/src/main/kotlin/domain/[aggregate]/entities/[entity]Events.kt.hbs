@@ -1,0 +1,22 @@
+package {{packagePath}}.domain.{{names.kebab}}.entities
+
+import java.time.Instant
+import java.util.UUID
+import {{packagePath}}.domain.shared.DomainEvent
+
+{{#each entity.events}}
+data class {{names.pascal}}(
+    override val eventId: UUID = UUID.randomUUID(),
+    override val occurredAt: Instant = Instant.now(),
+    override val eventVersion: Int = 1,
+    override val version: Long? = null,
+    override val eventType: String = "{{names.snake}}",
+{{#each fields}}
+    val {{names.camel}}: UUID{{#unless @last}},{{/unless}}
+{{/each}}
+) : DomainEvent {
+    override fun getRootAggregateId(): UUID = {{#with (lookup fields 0)}}{{names.camel}}{{/with}}
+    override fun getTopicName(): String = "{{../../names.snake}}"
+}
+
+{{/each}}

@@ -1,0 +1,9 @@
+package {{packagePath}}.domain.{{names.kebab}}.entities
+
+import java.util.UUID
+
+data class {{entity.names.pascal}}(
+{{#each entity.attributes}}
+    val {{names.camel}}: {{kotlinType}}{{#unless required}}?{{/unless}}{{#unless @last}},{{/unless}}
+{{/each}}
+)

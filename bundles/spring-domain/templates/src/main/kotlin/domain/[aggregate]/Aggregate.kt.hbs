@@ -1,0 +1,16 @@
+package {{packagePath}}.domain.{{names.kebab}}
+
+import java.util.UUID
+import {{packagePath}}.domain.shared.DomainEvent
+
+data class {{names.pascal}}(
+{{#each attributes}}
+    val {{names.camel}}: {{kotlinType}}{{#unless required}}?{{/unless}}{{#unless @last}},{{/unless}}
+{{/each}}
+) {
+    private val domainEvents = mutableListOf<DomainEvent>()
+
+    fun getDomainEvents(): List<DomainEvent> = domainEvents.toList()
+    fun clearDomainEvents() = domainEvents.clear()
+    protected fun registerEvent(event: DomainEvent) = domainEvents.add(event)
+}
