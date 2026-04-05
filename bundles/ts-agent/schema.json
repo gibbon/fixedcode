@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["mode", "provider"],
+  "properties": {
+    "mode": { "enum": ["single", "orchestrator"], "default": "single" },
+    "provider": { "enum": ["vercel-ai", "claude-sdk", "openai"], "default": "vercel-ai" },
+    "model": {
+      "type": "object",
+      "properties": {
+        "tier": { "enum": ["fast", "balanced", "quality"], "default": "balanced" }
+      }
+    },
+    "prompt": { "type": "string" },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "type": { "enum": ["http", "cli", "function", "database", "mcp"] },
+          "config": { "type": "object" }
+        }
+      }
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "prompt"],
+        "properties": {
+          "name": { "type": "string" },
+          "prompt": { "type": "string" },
+          "tools": { "type": "array", "items": { "type": "string" } },
+          "critical": { "type": "boolean", "default": true }
+        }
+      }
+    },
+    "routing": { "enum": ["sequential", "parallel", "llm-decided"], "default": "sequential" },
+    "server": {
+      "type": "object",
+      "properties": {
+        "port": { "type": "integer", "default": 3100 }
+      }
+    }
+  },
+  "if": { "properties": { "mode": { "const": "orchestrator" } } },
+  "then": { "required": ["agents"] },
+  "else": { "required": ["prompt", "tools"] }
+}
