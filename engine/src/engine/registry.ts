@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 
-const DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/fixedcode-io/registry/main/registry.json';
+const DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/fixedcode-ai/registry/main/registry.json';
 
 export interface RegistryPackage {
   name: string;
