@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path';
 import { parseSpec } from './enrich/spec.js';
 import { enrichAggregate } from './enrich/aggregate.js';
 import { generateVariants } from './enrich/naming.js';
+import { toOpenApi } from './adapters/openapi.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const schema = JSON.parse(readFileSync(join(__dirname, '..', 'schema.json'), 'utf-8'));
@@ -117,6 +118,9 @@ export const bundle: Bundle = {
   enrich: enrich as Bundle['enrich'],
   generateFiles: generateFiles as unknown as Bundle['generateFiles'],
   templates: 'templates',
+  adapters: {
+    openapi: toOpenApi as unknown as (ctx: Context) => Record<string, unknown>,
+  },
 };
 
 export default bundle;
