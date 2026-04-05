@@ -74,7 +74,15 @@ export function generateFiles(ctx: EnrichedContext): FileEntry[] {
       { template: 'src/test/kotlin/application/[aggregate]/AggregateCommandServiceTest.kt.hbs',
         output: `${testPath}/application/${agg.names.kebab}/${agg.names.pascal}CommandServiceTest.kt`, ctx: aggCtx },
       { template: 'src/test/kotlin/api/[aggregate]/AggregateApiDelegateImplTest.kt.hbs',
-        output: `${testPath}/api/${agg.names.kebab}/${agg.names.pascal}ApiDelegateImplTest.kt`, ctx: aggCtx }
+        output: `${testPath}/api/${agg.names.kebab}/${agg.names.pascal}ApiDelegateImplTest.kt`, ctx: aggCtx },
+      // Interface (generated, always overwritten)
+      { template: 'src/main/kotlin/domain/[aggregate]/AggregateBusinessService.kt.hbs',
+        output: `${aggPath}/${agg.names.pascal}BusinessService.kt`, ctx: aggCtx },
+      // Extension points (generated ONCE, then user-owned)
+      { template: 'src/main/kotlin/domain/[aggregate]/DefaultBusinessService.kt.hbs',
+        output: `${aggPath}/Default${agg.names.pascal}BusinessService.kt`, ctx: aggCtx, overwrite: false },
+      { template: 'src/main/kotlin/domain/[aggregate]/DefaultValidator.kt.hbs',
+        output: `${aggPath}/Default${agg.names.pascal}Validator.kt`, ctx: aggCtx, overwrite: false }
     );
 
     // Per command
