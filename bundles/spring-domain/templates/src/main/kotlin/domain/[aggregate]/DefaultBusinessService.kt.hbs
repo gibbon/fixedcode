@@ -20,7 +20,7 @@ class Default{{names.pascal}}BusinessService(
 ) : {{names.pascal}}BusinessService {
 
 {{#each commands}}
-    override fun {{names.camel}}(command: {{names.pascal}}Command){{#if (eq ../response.type "entity")}}: {{../names.pascal}}{{/if}} {
+    override fun {{names.camel}}(command: {{names.pascal}}Command) {
         // TODO: implement {{names.pascal}} business logic
         throw UnsupportedOperationException("{{names.pascal}} not yet implemented")
     }
