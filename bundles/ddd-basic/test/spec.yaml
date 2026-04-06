@@ -1,0 +1,64 @@
+apiVersion: "1.0"
+kind: ddd-basic
+metadata:
+  name: order-service
+
+spec:
+  package: com.example.order
+  boundedContext: Order
+
+  aggregates:
+    Order:
+      attributes:
+        - name: orderId
+          type: uuid
+          identity: true
+        - name: customerId
+          type: uuid
+          required: true
+        - name: status
+          type: string
+          default: "PENDING"
+        - name: totalAmount
+          type: decimal
+
+      commands:
+        - name: CreateOrder
+          params:
+            - name: customerId
+              type: uuid
+              required: true
+          emits: OrderCreated
+
+        - name: ShipOrder
+          params:
+            - name: orderId
+              type: uuid
+              required: true
+          emits: OrderShipped
+
+      queries:
+        - name: GetOrder
+          returns: single
+        - name: SearchOrders
+          returns: list
+          filters:
+            - name: status
+              type: string
+
+      events:
+        - name: OrderCreated
+          fields:
+            - name: orderId
+              type: uuid
+            - name: customerId
+              type: uuid
+            - name: status
+              type: string
+
+        - name: OrderShipped
+          fields:
+            - name: orderId
+              type: uuid
+            - name: shippedAt
+              type: datetime
