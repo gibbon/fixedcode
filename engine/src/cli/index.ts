@@ -8,6 +8,8 @@ import { createDeployCommand } from './deploy-cmd.js';
 import { createVerifyCommand } from './verify-cmd.js';
 import { createRegistryCommand } from './registry-cmd.js';
 import { createCfrCommand } from './cfr-cmd.js';
+import { createDraftCommand } from './draft-cmd.js';
+import { createEnrichCommand } from './enrich-cmd.js';
 
 export function createProgram() {
   const program = new Command();
@@ -24,6 +26,8 @@ export function createProgram() {
   program.addCommand(createVerifyCommand());
   program.addCommand(createRegistryCommand());
   program.addCommand(createCfrCommand());
+  program.addCommand(createDraftCommand());
+  program.addCommand(createEnrichCommand());
   program.addCommand(createInitCommand());
   program.addCommand(createBundleInitCommand());
 
@@ -31,5 +35,8 @@ export function createProgram() {
 }
 
 export { generate, validate } from '../engine/pipeline.js';
+export { draft } from '../engine/draft.js';
+export { enrich } from '../engine/enrich.js';
+export { resolveLlmConfig, chatCompletion } from '../engine/llm.js';
 export * from '../types.js';
 export * from '../errors.js';

@@ -43,13 +43,14 @@ export function loadConfig(cwd: string = process.cwd(), explicitPath?: string): 
 
   try {
     const content = readFileSync(configPath, 'utf-8');
-    const parsed = parseYaml(content) as { bundles?: Record<string, string>; generators?: Record<string, string> };
+    const parsed = parseYaml(content) as { bundles?: Record<string, string>; generators?: Record<string, string>; llm?: { provider?: string; model?: string; baseUrl?: string; apiKeyEnv?: string; } };
     const configDir = resolve(configPath, '..');
 
     return {
       bundles: parsed.bundles ?? {},
       generators: parsed.generators ?? {},
       configDir,
+      llm: parsed.llm as FixedCodeConfig['llm'],
     };
   } catch (err) {
     console.error(`Warning: Failed to load config from ${configPath}:`, err);
