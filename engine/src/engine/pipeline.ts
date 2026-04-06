@@ -14,6 +14,7 @@ export interface GenerateOptions {
   outputDir?: string;
   dryRun?: boolean;
   diff?: boolean;
+  configPath?: string;
 }
 
 export async function generate(
@@ -21,7 +22,7 @@ export async function generate(
   options: GenerateOptions = {}
 ): Promise<void> {
   const specDir = resolve(specPath, '..');
-  const config = loadConfig(specDir);
+  const config = loadConfig(specDir, options.configPath);
   
   const rawSpec = parseSpec(specPath);
   validateEnvelope(rawSpec);
@@ -148,9 +149,9 @@ export async function generate(
   if (warned > 0) console.log(`  Warning: ${warned} user-modified files were overwritten`);
 }
 
-export async function validate(specPath: string): Promise<void> {
+export async function validate(specPath: string, options?: { configPath?: string }): Promise<void> {
   const specDir = resolve(specPath, '..');
-  const config = loadConfig(specDir);
+  const config = loadConfig(specDir, options?.configPath);
   
   const rawSpec = parseSpec(specPath);
   validateEnvelope(rawSpec);
