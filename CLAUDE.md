@@ -57,6 +57,36 @@ fixedcode registry install <name>              # npm install + add to .fixedcode
 fixedcode registry publish --kind bundle --tags "tag1,tag2"  # open PR to registry repo
 ```
 
+### Draft a spec from natural language (AI-assisted)
+```bash
+fixedcode draft <kind> "<description>" -o <output.yaml>
+fixedcode draft spring-domain "order service with CRUD" -o order-domain.yaml
+```
+Uses AI to generate a YAML spec from a description. Validates against the bundle's schema. Auto-retries once on validation failure.
+
+### Enrich extension points with AI
+```bash
+fixedcode enrich <outputDir>                    # fill all extension points
+fixedcode enrich <outputDir> --file <path>      # fill one specific file
+fixedcode enrich <outputDir> --force            # skip git safety check
+```
+Reads the manifest, finds extension point stubs (overwrite: false), sends them to an LLM with neighbouring files for context, writes AI-generated business logic in place. Requires committed extension point files (use --force to skip).
+
+### LLM Configuration (for draft and enrich commands)
+
+Add to `.fixedcode.yaml`:
+```yaml
+llm:
+  provider: openrouter          # openrouter | ollama | openai
+  model: google/gemini-2.5-flash
+  baseUrl: https://openrouter.ai/api/v1
+  apiKeyEnv: OPENROUTER_API_KEY  # env var name holding the API key
+```
+
+Override with env vars: `FIXEDCODE_LLM_PROVIDER`, `FIXEDCODE_LLM_MODEL`, `FIXEDCODE_LLM_BASE_URL`, `FIXEDCODE_LLM_API_KEY`
+Override with CLI flags: `--provider`, `--model`
+Priority: CLI flags > env vars > .fixedcode.yaml
+
 ## Spec Format
 
 Specs are YAML files with a standard envelope:
@@ -233,6 +263,20 @@ After generation, extension points need business logic:
 3. Each has TODO stubs where business logic goes
 4. AI implements the domain logic based on the original requirements
 5. On regeneration, these files are preserved — the AI's work is safe
+
+### Full AI Sandwich Workflow
+```bash
+# Top slice — AI creates the spec
+fixedcode draft spring-domain "order service with orders and lineItems" -o order-domain.yaml
+fixedcode validate order-domain.yaml
+
+# Middle — deterministic generation
+fixedcode generate order-domain.yaml -o build
+
+# Bottom slice — AI fills extension points
+fixedcode enrich build/
+git diff build/    # review AI additions
+```
 
 ### Creating Bundles from Existing Code
 
