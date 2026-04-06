@@ -13,6 +13,8 @@ export interface ManifestEntry {
   hash: string;
   bundle: string;
   overwrite: boolean;
+  /** Path to the spec that generated this file (relative to outputDir) */
+  specFile?: string;
 }
 
 export interface Manifest {
