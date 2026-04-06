@@ -35,5 +35,8 @@ export function createProgram() {
 }
 
 export { generate, validate } from '../engine/pipeline.js';
+export { draft } from '../engine/draft.js';
+export { enrich } from '../engine/enrich.js';
+export { resolveLlmConfig, chatCompletion } from '../engine/llm.js';
 export * from '../types.js';
 export * from '../errors.js';
