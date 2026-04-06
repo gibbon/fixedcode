@@ -60,3 +60,24 @@ export class WriteError extends FixedCodeError {
     this.name = 'WriteError';
   }
 }
+
+export class LlmError extends FixedCodeError {
+  constructor(message: string) {
+    super(message, 'LLM_ERROR');
+    this.name = 'LlmError';
+  }
+}
+
+export class DraftError extends FixedCodeError {
+  constructor(message: string) {
+    super(message, 'DRAFT_ERROR');
+    this.name = 'DraftError';
+  }
+}
+
+export class EnrichError extends FixedCodeError {
+  constructor(message: string) {
+    super(message, 'ENRICH_ERROR');
+    this.name = 'EnrichError';
+  }
+}
