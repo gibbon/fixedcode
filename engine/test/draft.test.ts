@@ -5,9 +5,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 describe('extractYaml', () => {
-  it('returns plain YAML as-is', () => {
+  it('returns trimmed plain YAML when no fences', () => {
     const yaml = 'apiVersion: "1.0"\nkind: test\n';
-    expect(extractYaml(yaml)).toBe(yaml);
+    expect(extractYaml(yaml)).toBe('apiVersion: "1.0"\nkind: test');
   });
 
   it('strips markdown yaml fences', () => {

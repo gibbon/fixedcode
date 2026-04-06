@@ -38,6 +38,7 @@ describe('resolveLlmConfig', () => {
       llm: { provider: 'openrouter', model: 'old-model' },
     };
     process.env.FIXEDCODE_LLM_MODEL = 'new-model';
+    process.env.FIXEDCODE_LLM_API_KEY = 'test-key';
     const result = resolveLlmConfig(config);
     expect(result.model).toBe('new-model');
   });
@@ -48,11 +49,13 @@ describe('resolveLlmConfig', () => {
       llm: { provider: 'openrouter', model: 'old-model' },
     };
     process.env.FIXEDCODE_LLM_MODEL = 'env-model';
+    process.env.FIXEDCODE_LLM_API_KEY = 'test-key';
     const result = resolveLlmConfig(config, { model: 'cli-model' });
     expect(result.model).toBe('cli-model');
   });
 
   it('derives default baseUrl for openrouter', () => {
+    process.env.FIXEDCODE_LLM_API_KEY = 'test-key';
     const config: FixedCodeConfig = { ...baseConfig, llm: { provider: 'openrouter', model: 'test' } };
     expect(resolveLlmConfig(config).baseUrl).toBe('https://openrouter.ai/api/v1');
   });
@@ -63,6 +66,7 @@ describe('resolveLlmConfig', () => {
   });
 
   it('derives default baseUrl for openai', () => {
+    process.env.FIXEDCODE_LLM_API_KEY = 'test-key';
     const config: FixedCodeConfig = { ...baseConfig, llm: { provider: 'openai', model: 'gpt-4o' } };
     expect(resolveLlmConfig(config).baseUrl).toBe('https://api.openai.com/v1');
   });
@@ -79,6 +83,14 @@ describe('resolveLlmConfig', () => {
   it('does not require API key for ollama', () => {
     const config: FixedCodeConfig = { ...baseConfig, llm: { provider: 'ollama', model: 'llama3' } };
     expect(resolveLlmConfig(config).apiKey).toBeUndefined();
+  });
+
+  it('throws when no API key for non-ollama provider', () => {
+    const config: FixedCodeConfig = {
+      ...baseConfig,
+      llm: { provider: 'openrouter', model: 'test' },
+    };
+    expect(() => resolveLlmConfig(config)).toThrow(/No API key found/);
   });
 });
 
