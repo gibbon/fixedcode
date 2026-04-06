@@ -1,0 +1,36 @@
+package io.pexa.gap.{{ nameKebab }}.application;
+
+import io.pexa.gap.{{ nameKebab }}.domain.{{ namePascal }};
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional(readOnly = true)
+public class {{ namePascal }}QueryService {
+
+    public Optional<{{ namePascal }}> findById(java.util.UUID id) {
+        // TODO: Implement query
+        return Optional.empty();
+    }
+
+    public List<{{ namePascal }}> findAll() {
+        // TODO: Implement query
+        return List.of();
+    }
+
+    {{#each queries}}
+    {{#if (eq returns "single")}}
+    public Optional<{{ ../namePascal }}> {{ name }}() {
+        // TODO: Implement {{ name }}
+        return Optional.empty();
+    }
+    {{ else }}
+    public List<{{ ../namePascal }}> {{ name }}() {
+        // TODO: Implement {{ name }}
+        return List.of();
+    }
+    {{/if}}
+    {{/each}}
+}

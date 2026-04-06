@@ -1,0 +1,13 @@
+FROM python:3.12-slim AS proxy-builder
+WORKDIR /proxy
+COPY proxy.py requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt --target /proxy/deps
+
+FROM {{ Image }}
+COPY --from=proxy-builder /proxy/deps /usr/local/lib/python3.12/site-packages/
+COPY --from=proxy-builder /proxy/proxy.py /proxy/proxy.py
+ENV PYTHONPATH=/usr/local/lib/python3.12/site-packages
+{{#each Env }}ENV {{ @key }}={{ this }}
+{{/each}}
+EXPOSE {{ Port }}
+CMD ["python3", "/proxy/proxy.py"]

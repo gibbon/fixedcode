@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MCP Wrapper Bundle Spec",
+  "type": "object",
+  "required": ["boundedContext", "mcpWrapper"],
+  "properties": {
+    "boundedContext": {
+      "type": "string",
+      "description": "Bounded context name"
+    },
+    "mcpWrapper": {
+      "type": "object",
+      "required": ["name", "description", "image"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "MCP wrapper name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description"
+        },
+        "image": {
+          "type": "string",
+          "description": "Source container image to wrap"
+        },
+        "port": {
+          "type": "integer",
+          "default": 8080,
+          "description": "Port to expose"
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Environment variables"
+        },
+        "healthPath": {
+          "type": "string",
+          "description": "Upstream health path"
+        }
+      }
+    }
+  }
+}

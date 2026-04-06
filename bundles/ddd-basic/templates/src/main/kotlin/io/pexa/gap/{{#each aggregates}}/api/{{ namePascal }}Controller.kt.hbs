@@ -1,0 +1,49 @@
+package io.pexa.gap.{{ nameKebab }}.api;
+
+import io.pexa.gap.{{ nameKebab }}.application.{{ namePascal }}CommandService;
+import io.pexa.gap.{{ nameKebab }}.application.{{ namePascal }}QueryService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/{{ nameKebab }}")
+public class {{ namePascal }}Controller {
+
+    private final {{ namePascal }}CommandService commandService;
+    private final {{ namePascal }}QueryService queryService;
+
+    public {{ namePascal }}Controller(
+            {{ namePascal }}CommandService commandService,
+            {{ namePascal }}QueryService queryService) {
+        this.commandService = commandService;
+        this.queryService = queryService;
+    }
+
+    {{#each queries}}
+    {{#if (eq returns "single")}}
+    @GetMapping("/{{ name }}")
+    public ResponseEntity<{{ ../namePascal }}> {{ name }}() {
+        return queryService.{{ name }}()
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+    {{ else }}
+    @GetMapping("/{{ name }}")
+    public ResponseEntity<List<{{ ../namePascal }}>> {{ name }}() {
+        return ResponseEntity.ok(queryService.{{ name }}());
+    }
+    {{/if}}
+    {{/each}}
+
+    {{#each commands}}
+    @PostMapping("/{{ nameKebab }}")
+    public ResponseEntity<{{ emitPascal }}> {{ name }}(@RequestBody {{ ../namePascal }}Command{{ namePascal }} cmd) {
+        {{ ../namePascal }} entity = new {{ ../namePascal }}();
+        {{#each params}}
+        entity.set{{ namePascal }}(cmd.get{{ namePascal }}());
+        {{/each}}
+        {{ emitPascal }} event = commandService.handle{{ namePascal }}(cmd);
+        return ResponseEntity.ok(event);
+    }
+    {{/each}}
+}

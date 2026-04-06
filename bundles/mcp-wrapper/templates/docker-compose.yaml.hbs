@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  {{ NameKebab }}-mcp:
+    build: .
+    ports:
+      - "{{ Port }}:{{ Port }}
+{{#if Env }}
+    environment:
+{{#each Env }}
+      {{ @key }}: "{{ this }}"
+{{/each}}
+{{/if}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:{{ Port }}/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

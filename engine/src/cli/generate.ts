@@ -12,6 +12,7 @@ export function createGenerateCommand() {
     .option('--dry-run', 'Preview changes without writing files')
     .option('--diff', 'Show differences between generated and existing files')
     .option('-o, --output <dir>', 'Output directory')
+    .option('-c, --config <path>', 'Explicit path to .fixedcode.yaml config')
     .action(async (name: string | undefined, output: string | undefined, opts) => {
       if (!name && !opts.spec) {
         console.error('Error: specify a spec name or use --spec');
@@ -22,7 +23,7 @@ export function createGenerateCommand() {
       const outputDir = opts.output ?? output;
 
       try {
-        await generate(specPath, { outputDir, dryRun: opts.dryRun, diff: opts.diff });
+        await generate(specPath, { outputDir, dryRun: opts.dryRun, diff: opts.diff, configPath: opts.config });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error';
         console.error(`Generate failed: ${message}`);

@@ -1,0 +1,13 @@
+apiVersion: fixedcode/v1
+kind: mcp-wrapper
+metadata:
+  name: mcp-server
+spec:
+  boundedContext: workspace
+  mcpWrapper:
+    name: mcp-server
+    description: MCP server wrapper
+    image: ghcr.io/anthropic/claude:latest
+    port: 8080
+    env:
+      API_KEY: test-key

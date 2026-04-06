@@ -31,9 +31,12 @@ export function findConfigFile(cwd: string): string | null {
   return null;
 }
 
-export function loadConfig(cwd: string = process.cwd()): FixedCodeConfig {
-  const configPath = findConfigFile(cwd);
-  
+export function loadConfig(cwd: string = process.cwd(), explicitPath?: string): FixedCodeConfig {
+  // Explicit path takes priority, then FIXEDCODE_CONFIG env var, then search
+  const configPath = explicitPath
+    ?? (process.env.FIXEDCODE_CONFIG && existsSync(process.env.FIXEDCODE_CONFIG) ? process.env.FIXEDCODE_CONFIG : null)
+    ?? findConfigFile(cwd);
+
   if (!configPath) {
     return { bundles: {}, configDir: cwd };
   }

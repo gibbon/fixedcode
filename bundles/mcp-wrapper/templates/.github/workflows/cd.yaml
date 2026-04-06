@@ -1,0 +1,15 @@
+---
+name: PIDP CD MCP Wrapper
+run-name: ${{ "{{" }} github.workflow {{ "}}" }}
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  cd:
+    uses: PEXA-AU/pidp-workflows/.github/workflows/service-cd.yaml@v5
+    secrets: inherit

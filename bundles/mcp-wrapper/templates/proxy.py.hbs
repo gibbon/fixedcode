@@ -1,0 +1,43 @@
+"""Health and auth proxy for {{ Name }} MCP server."""
+
+import os
+import httpx
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import JSONResponse
+
+app = FastAPI(title="{{ Name }} MCP Proxy")
+
+MCP_UPSTREAM = os.getenv("MCP_UPSTREAM", "http://localhost:{{ Port }}")
+{{#if HealthPath }}
+EXPECTED_KEY = os.getenv("MCP_API_KEY", "")
+{{/if}}
+
+@app.get("/health")
+async def health():
+{{#if HealthPath }}
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.get(f"{MCP_UPSTREAM}{{ HealthPath }}", timeout=5)
+            if r.status_code == 200:
+                return {"status": "ok", "upstream": "healthy"}
+            return JSONResponse({"status": "degraded", "upstream_status": r.status_code}, status_code=503)
+    except Exception as e:
+        return JSONResponse({"status": "unhealthy", "error": str(e)}, status_code=503)
+{{ else }}
+    return {"status": "ok"}
+{{/if}}
+
+{{#if HealthPath }}
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    if request.url.path == "/health":
+        return await call_next(request)
+    key = request.headers.get("X-API-Key", "")
+    if not EXPECTED_KEY or key != EXPECTED_KEY:
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return await call_next(request)
+{{/if}}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port={{ Port }})

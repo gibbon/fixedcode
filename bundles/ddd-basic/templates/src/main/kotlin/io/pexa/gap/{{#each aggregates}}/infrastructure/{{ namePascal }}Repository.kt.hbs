@@ -1,0 +1,10 @@
+package io.pexa.gap.{{ nameKebab }}.infrastructure;
+
+import io.pexa.gap.{{ nameKebab }}.domain.{{ namePascal }};
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.UUID;
+
+@Repository
+public interface {{ namePascal }}Repository extends JpaRepository<{{ namePascal }}, UUID> {
+}
