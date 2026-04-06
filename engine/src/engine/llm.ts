@@ -48,6 +48,10 @@ export function resolveLlmConfig(
   const baseUrl = process.env.FIXEDCODE_LLM_BASE_URL ?? config.llm?.baseUrl ?? DEFAULT_BASE_URLS[provider];
   const apiKey = process.env.FIXEDCODE_LLM_API_KEY ?? (config.llm?.apiKeyEnv ? process.env[config.llm.apiKeyEnv] : undefined);
 
+  if (provider !== 'ollama' && !apiKey) {
+    throw new LlmError(`No API key found for provider '${provider}'. Set ${config.llm?.apiKeyEnv ?? 'FIXEDCODE_LLM_API_KEY'} env var, or configure llm.apiKeyEnv in .fixedcode.yaml.`);
+  }
+
   return { provider: provider as ResolvedLlmConfig['provider'], model, baseUrl, apiKey };
 }
 

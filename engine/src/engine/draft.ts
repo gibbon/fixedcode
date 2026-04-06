@@ -6,7 +6,6 @@ import { loadConfig } from './config.js';
 import { resolveBundle } from './resolve.js';
 import { validateBody } from './validate.js';
 import { resolveLlmConfig, chatCompletion } from './llm.js';
-import { DraftError } from '../errors.js';
 import type { FixedCodeConfig } from '../types.js';
 
 export interface DraftOptions {
@@ -41,7 +40,7 @@ export function extractYaml(raw: string): string {
   if (fenceMatch) {
     return fenceMatch[1];
   }
-  return raw;
+  return trimmed;
 }
 
 /**
@@ -116,7 +115,8 @@ function loadConventions(configDir: string, kind: string): string | undefined {
   const content = readFileSync(claudeMdPath, 'utf-8');
 
   // Look for a kind-specific conventions section (e.g. "### spring-domain spec conventions")
-  const kindRegex = new RegExp(`### ${kind} spec conventions\\n([\\s\\S]*?)(?=\\n## |\\n### |$)`);
+  const escaped = kind.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const kindRegex = new RegExp(`### ${escaped} spec conventions\\n([\\s\\S]*?)(?=\\n## |\\n### |$)`);
   const kindMatch = content.match(kindRegex);
   if (kindMatch) {
     return kindMatch[1].trim();
