@@ -107,9 +107,17 @@ export interface Generator {
   generate(input: Record<string, unknown>): RenderedFile[];
 }
 
+export interface LlmConfig {
+  provider: 'openrouter' | 'ollama' | 'openai';
+  model: string;
+  baseUrl?: string;
+  apiKeyEnv?: string;
+}
+
 export interface FixedCodeConfig {
   bundles: Record<string, string>;
   generators?: Record<string, string>;
   /** Directory the config was loaded from — used to resolve relative bundle paths */
   configDir: string;
+  llm?: LlmConfig;
 }
