@@ -9,6 +9,7 @@ import { createVerifyCommand } from './verify-cmd.js';
 import { createRegistryCommand } from './registry-cmd.js';
 import { createCfrCommand } from './cfr-cmd.js';
 import { createDraftCommand } from './draft-cmd.js';
+import { createEnrichCommand } from './enrich-cmd.js';
 
 export function createProgram() {
   const program = new Command();
@@ -26,6 +27,7 @@ export function createProgram() {
   program.addCommand(createRegistryCommand());
   program.addCommand(createCfrCommand());
   program.addCommand(createDraftCommand());
+  program.addCommand(createEnrichCommand());
   program.addCommand(createInitCommand());
   program.addCommand(createBundleInitCommand());
 
