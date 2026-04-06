@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { findNeighbours, buildEnrichPrompt, extractCode } from '../src/engine/enrich.js';
-import type { Manifest } from '../src/engine/manifest.js';
+import { findNeighbours, buildEnrichPrompt, extractCode, enrich } from '../src/engine/enrich.js';
+import { writeManifest, type Manifest } from '../src/engine/manifest.js';
+import { mkdtempSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 describe('findNeighbours', () => {
   const manifest: Manifest = {
@@ -128,5 +131,98 @@ describe('buildEnrichPrompt', () => {
     });
     expect(result.user).toContain('src/Interface.kt');
     expect(result.user).toContain('interface Foo {}');
+  });
+});
+
+describe('enrich integration', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+  let tmpDir: string;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    tmpDir = mkdtempSync(join(tmpdir(), 'enrich-test-'));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete process.env.FIXEDCODE_LLM_PROVIDER;
+    delete process.env.FIXEDCODE_LLM_MODEL;
+    delete process.env.FIXEDCODE_LLM_API_KEY;
+  });
+
+  it('enriches an extension point file', async () => {
+    // Set up output directory with manifest and files
+    const domainDir = join(tmpDir, 'src', 'domain');
+    mkdirSync(domainDir, { recursive: true });
+
+    // Write a generated interface file
+    writeFileSync(join(domainDir, 'FooService.kt'), 'interface FooService {\n  fun doThing(): String\n}');
+
+    // Write an extension point stub
+    writeFileSync(join(domainDir, 'DefaultFooService.kt'), 'class DefaultFooService : FooService {\n  override fun doThing(): String {\n    // TODO: implement\n    throw NotImplementedError()\n  }\n}');
+
+    // Write a spec file
+    writeFileSync(join(tmpDir, 'spec.yaml'), 'apiVersion: "1.0"\nkind: test\nmetadata:\n  name: foo\nspec:\n  name: Foo');
+
+    // Write manifest
+    writeManifest(tmpDir, {
+      generatedAt: '2026-01-01',
+      engine: '0.1.0',
+      bundles: { test: '0.1.0' },
+      files: {
+        'src/domain/FooService.kt': {
+          hash: 'abc', bundle: 'test', overwrite: true, specFile: 'spec.yaml',
+        },
+        'src/domain/DefaultFooService.kt': {
+          hash: 'def', bundle: 'test', overwrite: false, specFile: 'spec.yaml',
+        },
+      },
+    });
+
+    // Mock LLM response
+    const enrichedCode = 'class DefaultFooService : FooService {\n  override fun doThing(): String {\n    return "Hello from Foo"\n  }\n}';
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        choices: [{ message: { content: enrichedCode } }],
+      }),
+    });
+
+    process.env.FIXEDCODE_LLM_PROVIDER = 'openrouter';
+    process.env.FIXEDCODE_LLM_MODEL = 'test-model';
+    process.env.FIXEDCODE_LLM_API_KEY = 'test-key';
+
+    const result = await enrich({
+      outputDir: tmpDir,
+      force: true,  // skip git check in test
+    });
+
+    expect(result.enriched).toContain('src/domain/DefaultFooService.kt');
+    expect(result.errors).toHaveLength(0);
+
+    // Verify file was written
+    const content = readFileSync(join(domainDir, 'DefaultFooService.kt'), 'utf-8');
+    expect(content).toContain('Hello from Foo');
+    expect(content).not.toContain('TODO');
+  });
+
+  it('reports when no extension points found', async () => {
+    writeManifest(tmpDir, {
+      generatedAt: '2026-01-01',
+      engine: '0.1.0',
+      bundles: { test: '0.1.0' },
+      files: {
+        'src/Foo.kt': { hash: 'abc', bundle: 'test', overwrite: true },
+      },
+    });
+
+    process.env.FIXEDCODE_LLM_PROVIDER = 'openrouter';
+    process.env.FIXEDCODE_LLM_MODEL = 'test-model';
+    process.env.FIXEDCODE_LLM_API_KEY = 'test-key';
+
+    const result = await enrich({ outputDir: tmpDir, force: true });
+    expect(result.enriched).toHaveLength(0);
+    expect(result.errors).toHaveLength(0);
   });
 });
