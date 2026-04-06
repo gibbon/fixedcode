@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { resolve, relative } from 'node:path';
 import { existsSync } from 'node:fs';
 import type { RawSpec, FixedCodeConfig, Context, RenderedFile } from '../types.js';
 import { EnrichmentError } from '../errors.js';
@@ -56,6 +56,7 @@ export async function generate(
   }
   const templatesDir = resolve(bundleDir, bundle.templates);
   const outputDir = options.outputDir ?? resolve(specDir, 'build');
+  const relativeSpecFile = relative(outputDir, resolve(specPath));
 
   // Load existing manifest and ignore patterns for regeneration awareness
   const existingManifest = readManifest(outputDir);
@@ -64,7 +65,7 @@ export async function generate(
   let skipped = 0;
   let warned = 0;
 
-  const writeWithManifest = (relPath: string, content: string, overwrite: boolean, bundleKind: string) => {
+  const writeWithManifest = (relPath: string, content: string, overwrite: boolean, bundleKind: string, specFile?: string) => {
     if (isIgnored(relPath, ignorePatterns)) {
       skipped++;
       return;
@@ -89,6 +90,7 @@ export async function generate(
       hash: hashContent(content),
       bundle: bundleKind,
       overwrite,
+      specFile,
     };
   };
 
@@ -102,7 +104,7 @@ export async function generate(
         partials: bundle.partials,
       });
       if (content.trim() !== '') {
-        writeWithManifest(entry.output, content, entry.overwrite !== false, rawSpec.kind);
+        writeWithManifest(entry.output, content, entry.overwrite !== false, rawSpec.kind, relativeSpecFile);
       }
     }
   } else {
@@ -112,7 +114,7 @@ export async function generate(
       partials: bundle.partials,
     });
     for (const file of rendered) {
-      writeWithManifest(file.path, file.content, true, rawSpec.kind);
+      writeWithManifest(file.path, file.content, true, rawSpec.kind, relativeSpecFile);
     }
   }
 
@@ -126,7 +128,7 @@ export async function generate(
       const input = adapter(context);
       const files = gen.generate(input);
       for (const file of files) {
-        writeWithManifest(file.path, file.content, true, `generator:${gen.name}`);
+        writeWithManifest(file.path, file.content, true, `generator:${gen.name}`, relativeSpecFile);
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
