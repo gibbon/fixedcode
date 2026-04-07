@@ -1,0 +1,21 @@
+services:
+  {{serviceName.kebab}}:
+    build: .
+    ports:
+      - "{{port}}:{{port}}"
+    env_file: .env
+{{#if hasDatabase}}
+  postgres:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: {{serviceName.snake}}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+{{/if}}

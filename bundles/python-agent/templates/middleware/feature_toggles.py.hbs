@@ -1,0 +1,36 @@
+import os
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
+from UnleashClient import UnleashClient
+
+TOGGLE_NAME = "{{middleware.config.toggleName}}"
+
+_client = None
+
+
+def _get_unleash_client():
+    global _client
+    if _client is None:
+        _client = UnleashClient(
+            url=os.getenv("UNLEASH_URL", ""),
+            app_name="{{serviceName.kebab}}",
+            api_token=os.getenv("UNLEASH_API_TOKEN", ""),
+        )
+        _client.initialize_client()
+    return _client
+
+
+class FeatureToggleMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        if request.url.path == "/health":
+            return await call_next(request)
+        try:
+            client = _get_unleash_client()
+            if not client.is_enabled(TOGGLE_NAME):
+                return JSONResponse(
+                    status_code=503,
+                    content={"detail": f"Feature '{TOGGLE_NAME}' is disabled"},
+                )
+        except Exception:
+            pass  # Fail open if Unleash unavailable
+        return await call_next(request)

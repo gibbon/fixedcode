@@ -8,6 +8,8 @@ bundles:
   rdan-tool-api: "./bundles/rdan-tool-api"
   rdan-agent-specialist: "./bundles/rdan-agent-specialist"
   rdan-infra-dashboard-page: "./bundles/rdan-infra-dashboard-page"
+  python-service: "./bundles/python-service"
+  python-agent: "./bundles/python-agent"
 
 generators:
   openapi: "./generators/openapi"

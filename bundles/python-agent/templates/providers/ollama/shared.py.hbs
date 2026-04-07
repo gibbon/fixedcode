@@ -1,0 +1,42 @@
+import os
+import json
+import logging
+from openai import OpenAI
+
+logger = logging.getLogger(__name__)
+
+
+def create_client():
+    host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    return OpenAI(base_url=f"{host}/v1", api_key="ollama")
+
+
+def query_agent(*, agent_name, tools, tool_handlers, system_prompt, max_turns, input_text, session_id=None):
+    client = create_client()
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": input_text},
+    ]
+    cycles = 0
+
+    while cycles < max_turns:
+        response = client.chat.completions.create(
+            model=os.getenv("OLLAMA_MODEL_ID", "llama3"),
+            messages=messages,
+            tools=tools if tools else None,
+        )
+        cycles += 1
+        choice = response.choices[0]
+
+        if not choice.message.tool_calls:
+            return {"output": choice.message.content or "", "status": "completed", "cycles": cycles, "agent": agent_name}
+
+        messages.append(choice.message)
+        for tool_call in choice.message.tool_calls:
+            handler = tool_handlers.get(tool_call.function.name)
+            if handler:
+                args = json.loads(tool_call.function.arguments)
+                result = handler(**args)
+                messages.append({"role": "tool", "tool_call_id": tool_call.id, "content": str(result)})
+
+    return {"output": "Max turns reached", "status": "max_turns", "cycles": cycles, "agent": agent_name}

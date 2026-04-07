@@ -1,0 +1,25 @@
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    model_config = {"env_file": ".env", "extra": "allow"}
+
+    app_environment: str = "dev"
+    port: int = {{port}}
+    llm_provider: str = "bedrock"
+    bedrock_model_id: str = "anthropic.claude-sonnet-4-20250514-v1:0"
+    anthropic_model_id: str = "claude-sonnet-4-20250514"
+    openai_model_id: str = "gpt-4o"
+    ollama_host: str = "http://localhost:11434"
+    ollama_model_id: str = "llama3"
+{{#if hasAuth}}
+    auth0_domain: str = ""
+    auth0_audience: str = ""
+{{/if}}
+{{#if hasFeatureToggles}}
+    unleash_url: str = ""
+    unleash_api_token: str = ""
+{{/if}}
+
+
+settings = Settings()
