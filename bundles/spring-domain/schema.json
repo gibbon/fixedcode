@@ -24,9 +24,36 @@
     "aggregate": {
       "type": "object",
       "properties": {
+        "plural": { "type": "string" },
         "attributes": { "type": "object" },
-        "commands": { "type": "array" },
-        "queries": { "type": "array" },
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "body": { "type": "array", "items": { "type": "string" } },
+              "path": { "type": "array", "items": { "type": "string" } },
+              "query": { "type": "array", "items": { "type": "string" } },
+              "emits": { "type": "string" },
+              "returns": { "type": "string" }
+            }
+          }
+        },
+        "queries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "returns"],
+            "properties": {
+              "name": { "type": "string" },
+              "path": { "type": "array", "items": { "type": "string" } },
+              "query": { "type": "array", "items": { "type": "string" } },
+              "returns": { "type": "string" }
+            }
+          }
+        },
         "events": { "type": "object" },
         "enumDefaults": { "type": "object" },
         "entities": { "type": "object" }

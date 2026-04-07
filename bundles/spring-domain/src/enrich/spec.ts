@@ -40,6 +40,10 @@ export function parseSpec(raw: Record<string, unknown>): RawDomainSpec {
   if (!raw.service || typeof raw.service !== 'object') {
     throw new Error('spec.service is required');
   }
+  const service = raw.service as Record<string, unknown>;
+  if (!service.package || typeof service.package !== 'string') {
+    throw new Error('spec.service.package is required and must be a string');
+  }
   if (!raw.aggregates || typeof raw.aggregates !== 'object') {
     throw new Error('spec.aggregates is required');
   }

@@ -1,26 +1,15 @@
-import { generateVariants, type NamingVariants } from './naming.js';
+import { generateVariants } from './naming.js';
 import { detectPattern, deriveHttp, deriveAuth, deriveResponse, type OperationPattern } from './conventions.js';
-import type { EnrichedParam } from './command.js';
+import { parseParam, type EnrichedParam, type AggCtx } from './shared.js';
 
 export interface EnrichedQuery {
   name: string;
-  names: NamingVariants;
+  names: ReturnType<typeof generateVariants>;
   pattern: OperationPattern;
   http: { method: string; path: string; statusCode: number };
   auth: { action: string; expression: string };
   response: { type: string; returnType: string };
   params: { path: EnrichedParam[]; query: EnrichedParam[] };
-}
-
-interface AggCtx {
-  names: { pluralKebab: string; pascal: string };
-  identityField: string;
-}
-
-function parseParam(raw: string): EnrichedParam {
-  const optional = raw.endsWith('?');
-  const name = optional ? raw.slice(0, -1) : raw;
-  return { name, names: generateVariants(name), required: !optional };
 }
 
 export function enrichQuery(raw: {

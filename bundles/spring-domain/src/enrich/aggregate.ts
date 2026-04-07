@@ -12,6 +12,11 @@ export function enrichAggregate(name: string, raw: RawAggregateSpec) {
   const names = generateVariants(name, raw.plural);
   const aggCtx = { names: { pluralKebab: names.pluralKebab, pascal: names.pascal }, identityField };
 
+  const attrTypeMap: Record<string, string> = {};
+  for (const a of attrs) {
+    attrTypeMap[a.name] = a.kotlinType;
+  }
+
   const entities = Object.entries(raw.entities ?? {}).map(([eName, eRaw]) =>
     enrichEntity(eName, eRaw, identityField)
   );
@@ -23,7 +28,7 @@ export function enrichAggregate(name: string, raw: RawAggregateSpec) {
     attributes: attrs,
     commands: (raw.commands ?? []).map(c => enrichCommand(c, aggCtx)),
     queries: (raw.queries ?? []).map(q => enrichQuery(q, aggCtx)),
-    events: enrichEvents(raw.events),
+    events: enrichEvents(raw.events, attrTypeMap),
     entities,
     enumDefaults: raw.enumDefaults ?? {},
   };

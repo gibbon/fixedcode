@@ -12,7 +12,7 @@ data class {{names.pascal}}(
     override val version: Long? = null,
     override val eventType: String = "{{names.snake}}",
 {{#each fields}}
-    val {{names.camel}}: UUID{{#unless @last}},{{/unless}}
+    val {{names.camel}}: {{kotlinType}}{{#unless @last}},{{/unless}}
 {{/each}}
 ) : DomainEvent {
     override fun getRootAggregateId(): UUID = {{#with (lookup fields 0)}}{{names.camel}}{{/with}}
