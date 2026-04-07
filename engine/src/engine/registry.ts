@@ -3,7 +3,7 @@
  * Fetches a JSON index from a URL, supports search and install.
  * Designed to be reusable across fixedcode and r.dan.
  */
-import { execSync, execFileSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
@@ -84,7 +84,8 @@ export function installPackage(
 
   // Run npm install
   console.log(`Installing ${pkg.name}...`);
-  execSync(pkg.install, { cwd: projectDir, stdio: 'inherit' });
+  const parts = pkg.install.split(' ');
+  execFileSync(parts[0], parts.slice(1), { cwd: projectDir, stdio: 'inherit' });
 
   // Update config file
   const configPath = resolve(projectDir, configFile);

@@ -68,13 +68,6 @@ export class LlmError extends FixedCodeError {
   }
 }
 
-export class DraftError extends FixedCodeError {
-  constructor(message: string) {
-    super(message, 'DRAFT_ERROR');
-    this.name = 'DraftError';
-  }
-}
-
 export class EnrichError extends FixedCodeError {
   constructor(message: string) {
     super(message, 'ENRICH_ERROR');

@@ -10,8 +10,6 @@ export interface DeployOptions {
   buildDir: string;
   /** Target project's src/ directory */
   targetDir: string;
-  /** Clean target package directory before deploying */
-  clean?: boolean;
   /** Preview without writing */
   dryRun?: boolean;
 }

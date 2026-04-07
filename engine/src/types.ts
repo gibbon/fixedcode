@@ -89,11 +89,6 @@ export interface FileEntry {
   overwrite?: boolean;
 }
 
-export interface RenderedFileWithMeta extends RenderedFile {
-  /** Whether to overwrite if file exists. Default: true. */
-  overwrite: boolean;
-}
-
 /**
  * A generator is a programmatic (non-template) file producer.
  * It defines a named input contract and produces files from that input.

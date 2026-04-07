@@ -1,4 +1,4 @@
-import { resolve, dirname } from 'node:path';
+import { resolve } from 'node:path';
 import { existsSync } from 'node:fs';
 
 const SPEC_PATTERNS = [
