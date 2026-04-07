@@ -1,24 +1,56 @@
+import json
+import logging
 import requests
-from strands import tool
+from strands import tool, ToolContext
 
+logger = logging.getLogger(__name__)
 
 BASE_URL = "{{tool.config.baseUrl}}"
 
 
-@tool
-def {{tool.name.snake}}_tool(endpoint: str, method: str = "GET", body: str = "") -> str:
-    """Call {{tool.name.original}} API. Base URL: {{tool.config.baseUrl}}"""
+def _get_headers(tool_context: ToolContext, extra: dict | None = None) -> dict:
+    headers = {"Content-Type": "application/json"}
+    auth_token = tool_context.agent.state.get("auth_token") if tool_context.agent.state else None
+    if auth_token:
+        headers["Authorization"] = f"Bearer {auth_token}"
+    if extra:
+        headers.update(extra)
+    return headers
+
+
+@tool(context=True)
+def {{tool.name.snake}}_tool(command_input: str, tool_context: ToolContext) -> str:
+    """{{tool.name.original}}: Call API at {{tool.config.baseUrl}}
+
+    Args:
+        command_input: JSON object with endpoint, method (GET/POST/PUT/DELETE), and optional body
+    """
+    try:
+        params = json.loads(command_input) if command_input.strip().startswith("{") else {"endpoint": command_input.strip()}
+    except json.JSONDecodeError:
+        params = {"endpoint": command_input.strip()}
+
+    endpoint = params.get("endpoint", params.get("path", ""))
+    method = params.get("method", "GET")
+    body = params.get("body", None)
+    headers = _get_headers(tool_context)
+
+    logger.info("[{{tool.name.original}}] %s %s%s", method, BASE_URL, endpoint)
     try:
         response = requests.request(
             method,
             f"{BASE_URL}{endpoint}",
-            data=body if body else None,
-            headers={"Content-Type": "application/json"},
-            timeout=30,
+            json=body if body else None,
+            headers=headers,
+            timeout={{tool.config.timeout}},
         )
         response.raise_for_status()
-        return response.text
+        try:
+            data = response.json()
+            return f"{{tool.name.original}} successful:\n{json.dumps(data, indent=2)}"
+        except ValueError:
+            return f"{{tool.name.original}} successful:\n{response.text}"
     except requests.HTTPError as e:
-        return f"ERROR: HTTP {e.response.status_code}: {e.response.text}"
+        return f"ERROR: {{tool.name.original}} failed (HTTP {e.response.status_code}): {e.response.text}"
     except Exception as e:
-        return f"ERROR: {e}"
+        return f"ERROR: {{tool.name.original}} failed: {e}"

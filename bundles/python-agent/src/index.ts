@@ -190,6 +190,12 @@ export const bundle: Bundle = {
   enrich: enrich as Bundle['enrich'],
   generateFiles: generateFiles as unknown as Bundle['generateFiles'],
   templates: 'templates',
+  helpers: {
+    eq: (a: unknown, b: unknown) => a === b,
+    neq: (a: unknown, b: unknown) => a !== b,
+    or: (a: unknown, b: unknown) => a || b,
+    and: (a: unknown, b: unknown) => a && b,
+  },
   cfrs: {
     provides: ['tracing', 'metrics', 'unit-tests', 'health-check'],
     files: {

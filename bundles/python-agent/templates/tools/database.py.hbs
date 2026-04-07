@@ -1,8 +1,24 @@
 import json
+import logging
 import os
+import time
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from strands import tool
+
+logger = logging.getLogger(__name__)
+
+DATABASES = {
+{{#each tool.config.databases}}
+    "{{this}}": {
+        "host": os.getenv("DB_{{this}}_HOST".upper().replace("-", "_"), "localhost"),
+        "port": int(os.getenv("DB_{{this}}_PORT".upper().replace("-", "_"), "5432")),
+        "database": os.getenv("DB_{{this}}_NAME".upper().replace("-", "_"), "{{this}}"),
+        "user": os.getenv("DB_{{this}}_USER".upper().replace("-", "_"), "postgres"),
+        "password": os.getenv("DB_{{this}}_PASSWORD".upper().replace("-", "_"), ""),
+    },
+{{/each}}
+}
 
 
 def _is_read_only(query: str) -> bool:
@@ -11,23 +27,47 @@ def _is_read_only(query: str) -> bool:
 
 
 @tool
-def {{tool.name.snake}}_tool(database_name: str, query: str, limit: int = 100) -> str:
-    """Query database (read-only). Available databases: {{#each tool.config.databases}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}"""
+def {{tool.name.snake}}_tool(database_name: str, query: str, limit: int = 100, format: str = "json") -> str:
+    """Query database (read-only, SELECT only).
+
+    Available databases: {{#each tool.config.databases}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+
+    Args:
+        database_name: One of the available database names
+        query: SQL SELECT query to execute
+        limit: Maximum rows to return (default 100)
+        format: Output format — json or table
+    """
     if not _is_read_only(query):
         return json.dumps({"error": "Read-only mode: only SELECT queries allowed"})
 
-    host = os.getenv(f"DB_{database_name.upper()}_HOST", "localhost")
-    port = int(os.getenv(f"DB_{database_name.upper()}_PORT", "5432"))
-    db = os.getenv(f"DB_{database_name.upper()}_NAME", database_name)
-    user = os.getenv(f"DB_{database_name.upper()}_USER", "postgres")
-    password = os.getenv(f"DB_{database_name.upper()}_PASSWORD", "")
+    if database_name not in DATABASES:
+        return json.dumps({"error": f"Unknown database '{database_name}'. Available: {list(DATABASES.keys())}"})
+
+    db_config = DATABASES[database_name]
+    conn = None
+    start = time.time()
 
     try:
-        conn = psycopg2.connect(host=host, port=port, database=db, user=user, password=password)
+        conn = psycopg2.connect(**db_config)
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query)
             rows = [dict(r) for r in cur.fetchmany(limit)]
-        conn.close()
-        return json.dumps({"success": True, "row_count": len(rows), "data": rows}, default=str)
+        elapsed = time.time() - start
+
+        logger.info("[{{tool.name.original}}] %s: %d rows in %.2fs", database_name, len(rows), elapsed)
+
+        return json.dumps({
+            "success": True,
+            "database": database_name,
+            "row_count": len(rows),
+            "execution_time_seconds": round(elapsed, 3),
+            "data": rows,
+            "format": format,
+        }, default=str)
     except Exception as e:
+        logger.error("[{{tool.name.original}}] %s failed: %s", database_name, e)
         return json.dumps({"success": False, "error": str(e)})
+    finally:
+        if conn:
+            conn.close()
