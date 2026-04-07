@@ -1,20 +1,50 @@
-import subprocess
+import json
+import logging
+import os
 import shlex
-from strands import tool
+import subprocess
+from strands import tool, ToolContext
+
+logger = logging.getLogger(__name__)
+
+WORK_DIR = os.getenv("AGENT_WORK_DIR", None)
+REPO = os.getenv("AGENT_REPO", "")
 
 
-@tool
-def {{tool.name.snake}}_tool(command_input: str) -> str:
-    """Execute {{tool.name.original}} command: {{tool.config.command}}"""
-    cmd = "{{tool.config.command}} " + command_input.strip()
+@tool(context=True)
+def {{tool.name.snake}}_tool(command_input: str, tool_context: ToolContext) -> str:
+    """{{tool.name.original}}: {{tool.config.description}}
 
+    Args:
+        command_input: The input for this tool
+    """
+    cmd = "{{tool.config.command}}"
+
+    if "{repo}" in cmd:
+        cmd = cmd.replace("{repo}", REPO)
+    if "{input}" in cmd:
+        cmd = cmd.replace("'{input}'", shlex.quote(command_input.strip()))
+        cmd = cmd.replace("{input}", shlex.quote(command_input.strip()))
+
+    logger.info("[{{tool.name.original}}] Running CLI: %s", cmd)
     try:
         result = subprocess.run(
             cmd, shell=True, capture_output=True, text=True,
-            timeout=30,
+            timeout={{tool.config.timeout}},
+            cwd=WORK_DIR,
         )
-        if result.returncode != 0:
-            return f"ERROR: exit {result.returncode}\n{result.stderr}"
-        return result.stdout
+        output = result.stdout.strip()
     except subprocess.TimeoutExpired:
-        return "ERROR: command timed out"
+        return "ERROR: {{tool.name.original}} timed out after {{tool.config.timeout}}s"
+
+    if result.returncode != 0:
+        return f"ERROR: {{tool.name.original}} failed (exit code {result.returncode})\nstderr: {result.stderr}\nstdout: {output}"
+
+    if not output:
+        return "{{tool.name.original}} completed successfully (no output)"
+
+    try:
+        data = json.loads(output)
+        return f"{{tool.name.original}} successful:\n{json.dumps(data, indent=2)}"
+    except json.JSONDecodeError:
+        return f"{{tool.name.original}} successful:\n{output}"
