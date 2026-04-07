@@ -42,15 +42,69 @@ app.add_middleware(FeatureToggleMiddleware)
 {{/if}}
 
 AGENT_NAME = "{{serviceName.pascal}}"
-SYSTEM_PROMPT = """You are {{serviceName.pascal}}.
+{{#if hasOutputSchema}}
+_STRUCTURED_PROMPT = """
+IMPORTANT: Your final response MUST include a structured data block in the following format.
+Place this block at the END of your response, after your narrative summary:
+
+```structured_output
+{{#each outputSchema}}
+{{this.name}}: <{{this.type}} - {{this.description}}>
+{{/each}}
+```
+
+All required fields are mandatory. Use exact field names as shown."""
+{{else}}
+_STRUCTURED_PROMPT = ""
+{{/if}}
+
+SYSTEM_PROMPT = f"""You are {{serviceName.pascal}}.
 
 Use the tools available to you to complete the task. Call tools as needed.
 When you have completed the task, provide a clear summary of what you did and the results.
 
-{{prompt}}""".strip()
+{{prompt}}
+
+{_STRUCTURED_PROMPT}""".strip()
 MAX_TURNS = 10
 CONTEXT_WINDOW = 40
 TOOLS = [{{#each tools}}{{this.name.snake}}_tool{{#unless @last}}, {{/unless}}{{/each}}]
+{{#if hasOutputSchema}}
+
+_STRUCTURED_FIELDS = [
+{{#each outputSchema}}
+    dict(name="{{this.name}}", type="{{this.type}}", required={{#if this.required}}True{{else}}False{{/if}}),
+{{/each}}
+]
+
+
+def _extract_structured_output(text: str) -> dict:
+    """Extract structured fields from the agent's output text."""
+    fields: dict = {}
+    block_match = re.search(r"```structured_output\s*\n(.*?)```", text, re.DOTALL)
+    search_text = block_match.group(1) if block_match else text
+
+    for field in _STRUCTURED_FIELDS:
+        name = field["name"]
+        pattern = rf"(?:^|\n)\s*{re.escape(name)}\s*:\s*(.+?)(?:\n|$)"
+        match = re.search(pattern, search_text, re.IGNORECASE)
+        if match:
+            raw = match.group(1).strip()
+            if field["type"] == "int":
+                try:
+                    fields[name] = int(re.sub(r"[^\d-]", "", raw))
+                except ValueError:
+                    fields[name] = raw
+            elif field["type"] == "bool":
+                fields[name] = raw.lower() in ("true", "yes", "1")
+            elif field["type"] == "list":
+                fields[name] = [item.strip() for item in raw.split(",")]
+            else:
+                fields[name] = raw
+        elif field.get("required"):
+            logger.warning("[%s] Required structured field %r not found in output", AGENT_NAME, name)
+    return fields
+{{/if}}
 
 
 # --- Request validation ---
@@ -90,6 +144,15 @@ async def query_endpoint(chat_message: ChatMessage{{#if hasAuth}}, auth=Depends(
         session_id=chat_message.session_id,
         auth_token=chat_message.auth_token,
     )
+{{#if hasOutputSchema}}
+
+    if result.get("status") == "completed" and result.get("output"):
+        structured = _extract_structured_output(result["output"])
+        if structured:
+            result["structured_output"] = structured
+            logger.info("[%s] Structured output: %s", AGENT_NAME, structured)
+{{/if}}
+
     return result
 {{#if streaming}}
 

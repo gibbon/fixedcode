@@ -2,7 +2,7 @@ import type { Bundle, Context, FileEntry, SpecMetadata } from '@fixedcode/engine
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { parseSpec, parseMiddleware } from './enrich/spec.js';
+import { parseSpec, parseMiddleware, type OutputSchemaField } from './enrich/spec.js';
 import { generateVariants, type NamingVariants } from './enrich/naming.js';
 import { enrichTool, type EnrichedTool } from './enrich/tool.js';
 import { enrichProvider, type ProviderConfig } from './enrich/provider.js';
@@ -43,6 +43,8 @@ export interface PythonAgentContext extends Context {
   prompt?: string;
   agents?: EnrichedAgent[];
   routing?: string;
+  outputSchema?: OutputSchemaField[];
+  hasOutputSchema: boolean;
   port: number;
   session: SessionConfig;
 }
@@ -82,6 +84,8 @@ export function enrich(raw: Record<string, unknown>, metadata: SpecMetadata): Py
     prompt: spec.prompt,
     agents,
     routing: spec.routing,
+    outputSchema: spec.outputSchema,
+    hasOutputSchema: !!spec.outputSchema && spec.outputSchema.length > 0,
     port: 8000,
     session: {
       hasSession,
@@ -100,6 +104,7 @@ export function generateFiles(ctx: PythonAgentContext): FileEntry[] {
   // Common infrastructure files
   files.push({ template: 'pyproject.toml.hbs', output: 'pyproject.toml', ctx: baseCtx });
   files.push({ template: 'Dockerfile.hbs', output: 'Dockerfile', ctx: baseCtx });
+  files.push({ template: 'README.md.hbs', output: 'README.md', ctx: baseCtx });
   files.push({ template: 'settings.py.hbs', output: `src/${pkg}/settings.py`, ctx: baseCtx });
   files.push({ template: 'tests/conftest.py.hbs', output: 'tests/conftest.py', ctx: baseCtx });
 
