@@ -1,0 +1,85 @@
+import asyncio
+import json
+import logging
+from openai import OpenAI
+from fastapi import FastAPI{{#if hasAuth}}, Depends{{/if}}
+from pydantic import BaseModel
+from .settings import settings
+{{#each tools}}
+from .tools.{{this.name.snake}}_tools import {{this.name.snake}}_tool_def, handle_{{this.name.snake}}
+{{/each}}
+{{#if hasAuth}}
+from .middleware.auth.middleware import require_auth
+{{/if}}
+{{#if hasCorrelationId}}
+from .middleware.correlation_id import CorrelationIdMiddleware
+{{/if}}
+{{#if hasFeatureToggles}}
+from .middleware.feature_toggles import FeatureToggleMiddleware
+{{/if}}
+
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="{{serviceName.pascal}}")
+
+{{#if hasCorrelationId}}
+app.add_middleware(CorrelationIdMiddleware)
+{{/if}}
+{{#if hasFeatureToggles}}
+app.add_middleware(FeatureToggleMiddleware)
+{{/if}}
+
+AGENT_NAME = "{{serviceName.kebab}}"
+SYSTEM_PROMPT = """{{prompt}}"""
+MAX_TURNS = 10
+
+TOOL_DEFS = [{{#each tools}}{{this.name.snake}}_tool_def{{#unless @last}}, {{/unless}}{{/each}}]
+TOOL_HANDLERS = {
+{{#each tools}}
+    "{{this.name.snake}}": handle_{{this.name.snake}},
+{{/each}}
+}
+
+client = OpenAI()
+
+
+class ChatMessage(BaseModel):
+    message: str
+    session_id: str | None = None
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok", "agent": AGENT_NAME}
+
+
+@app.post("/query")
+async def query_endpoint(chat_message: ChatMessage{{#if hasAuth}}, auth=Depends(require_auth()){{/if}}):
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": chat_message.message},
+    ]
+    cycles = 0
+
+    while cycles < MAX_TURNS:
+        response = await asyncio.to_thread(
+            client.chat.completions.create,
+            model=settings.openai_model_id,
+            messages=messages,
+            tools=TOOL_DEFS,
+        )
+        cycles += 1
+        choice = response.choices[0]
+
+        if choice.finish_reason != "tool_calls":
+            return {"output": choice.message.content or "", "status": "completed", "cycles": cycles, "agent": AGENT_NAME}
+
+        messages.append(choice.message)
+        for tool_call in choice.message.tool_calls:
+            handler = TOOL_HANDLERS.get(tool_call.function.name)
+            if handler:
+                args = json.loads(tool_call.function.arguments)
+                result = handler(**args)
+                messages.append({"role": "tool", "tool_call_id": tool_call.id, "content": str(result)})
+
+    return {"output": "Max turns reached", "status": "max_turns", "cycles": cycles, "agent": AGENT_NAME}

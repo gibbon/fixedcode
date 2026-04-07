@@ -1,0 +1,20 @@
+import subprocess
+import shlex
+from strands import tool
+
+
+@tool
+def {{tool.name.snake}}_tool(command_input: str) -> str:
+    """Execute {{tool.name.original}} command: {{tool.config.command}}"""
+    cmd = "{{tool.config.command}} " + command_input.strip()
+
+    try:
+        result = subprocess.run(
+            cmd, shell=True, capture_output=True, text=True,
+            timeout=30,
+        )
+        if result.returncode != 0:
+            return f"ERROR: exit {result.returncode}\n{result.stderr}"
+        return result.stdout
+    except subprocess.TimeoutExpired:
+        return "ERROR: command timed out"

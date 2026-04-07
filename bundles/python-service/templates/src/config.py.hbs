@@ -1,0 +1,11 @@
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    model_config = {"env_file": ".env", "extra": "allow"}
+
+    app_environment: str = "dev"
+    port: int = {{port}}
+
+
+settings = Settings()
