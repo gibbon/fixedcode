@@ -1,0 +1,9 @@
+from strands.tools.mcp import MCPClient
+from mcp import stdio_client, StdioServerParameters
+
+# MCP server: {{tool.name.original}}
+mcp_client = MCPClient(lambda: stdio_client(
+    StdioServerParameters(command="{{tool.config.server}}")
+))
+
+{{tool.name.snake}}_tool = mcp_client

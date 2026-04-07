@@ -1,0 +1,14 @@
+import uuid
+from contextvars import ContextVar
+from starlette.middleware.base import BaseHTTPMiddleware
+
+correlation_id_var: ContextVar[str] = ContextVar("correlation_id", default="")
+
+
+class CorrelationIdMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        cid = request.headers.get("x-correlation-id", str(uuid.uuid4()))
+        correlation_id_var.set(cid)
+        response = await call_next(request)
+        response.headers["x-correlation-id"] = cid
+        return response
