@@ -91,7 +91,8 @@ describe('python-agent e2e (single mode)', () => {
     const files = generateFiles(ctx);
     const paths = files.map(f => f.output);
 
-    expect(paths).not.toContain('src/ops_agent/orchestrator.py');
+    expect(paths).not.toContain('src/ops_agent/main.py');
+    expect(paths.filter(p => p.includes('orchestrator/'))).toHaveLength(0);
     expect(paths.filter(p => p.includes('agents/'))).toHaveLength(0);
   });
 
@@ -112,12 +113,22 @@ describe('python-agent e2e (single mode)', () => {
 });
 
 describe('python-agent e2e (orchestrator mode)', () => {
-  it('generates orchestrator + per-agent files', () => {
+  it('generates orchestrator module files', () => {
     const ctx = enrich(orchSpec.spec, { name: orchSpec.metadata.name, apiVersion: orchSpec.apiVersion });
     const files = generateFiles(ctx);
     const paths = files.map(f => f.output);
 
-    expect(paths).toContain('src/ops_orchestrator/orchestrator.py');
+    // Main app
+    expect(paths).toContain('src/ops_orchestrator/main.py');
+
+    // Orchestrator module
+    expect(paths).toContain('src/ops_orchestrator/orchestrator/__init__.py');
+    expect(paths).toContain('src/ops_orchestrator/orchestrator/app.py');
+    expect(paths).toContain('src/ops_orchestrator/orchestrator/service.py');
+    expect(paths).toContain('src/ops_orchestrator/orchestrator/routing.py');
+    expect(paths).toContain('src/ops_orchestrator/orchestrator/schemas.py');
+    expect(paths).toContain('src/ops_orchestrator/orchestrator/context.py');
+    expect(paths).toContain('src/ops_orchestrator/orchestrator/discovery.py');
 
     // Per-agent files (3 agents: planner, enricher, executor)
     expect(paths).toContain('src/ops_orchestrator/agents/__init__.py');
@@ -136,11 +147,18 @@ describe('python-agent e2e (orchestrator mode)', () => {
     expect(orchExtPoints).toHaveLength(3);
   });
 
-  it('uses provider-specific orchestrator template', () => {
+  it('uses provider-agnostic orchestrator templates', () => {
     const ctx = enrich(orchSpec.spec, { name: orchSpec.metadata.name, apiVersion: orchSpec.apiVersion });
     const files = generateFiles(ctx);
-    const orchFile = files.find(f => f.output === 'src/ops_orchestrator/orchestrator.py');
-    expect(orchFile?.template).toBe('providers/strands/orchestrator.py.hbs');
+
+    const mainFile = files.find(f => f.output === 'src/ops_orchestrator/main.py');
+    expect(mainFile?.template).toBe('orchestrator/main.py.hbs');
+
+    const appFile = files.find(f => f.output === 'src/ops_orchestrator/orchestrator/app.py');
+    expect(appFile?.template).toBe('orchestrator/app.py.hbs');
+
+    const routingFile = files.find(f => f.output === 'src/ops_orchestrator/orchestrator/routing.py');
+    expect(routingFile?.template).toBe('orchestrator/routing.py.hbs');
   });
 
   it('marks non-critical agents in context', () => {

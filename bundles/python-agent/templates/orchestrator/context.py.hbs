@@ -1,0 +1,58 @@
+"""Context store for sharing data between agents in a pipeline."""
+import json
+import logging
+import os
+from abc import ABC, abstractmethod
+
+logger = logging.getLogger(__name__)
+
+class ContextStore(ABC):
+    @abstractmethod
+    def write(self, session_id: str, agent_name: str, output: str) -> None: ...
+    @abstractmethod
+    def read(self, session_id: str, agent_name: str) -> str | None: ...
+    @abstractmethod
+    def read_all(self, session_id: str) -> dict[str, str]: ...
+
+class MemoryContextStore(ContextStore):
+    def __init__(self):
+        self._store: dict[str, dict[str, str]] = {}
+    def write(self, session_id, agent_name, output):
+        self._store.setdefault(session_id, {})[agent_name] = output
+    def read(self, session_id, agent_name):
+        return self._store.get(session_id, {}).get(agent_name)
+    def read_all(self, session_id):
+        return dict(self._store.get(session_id, {}))
+
+class FileContextStore(ContextStore):
+    def __init__(self, base_dir: str = "./context"):
+        self._base = base_dir
+        os.makedirs(base_dir, exist_ok=True)
+    def write(self, session_id, agent_name, output):
+        path = os.path.join(self._base, session_id)
+        os.makedirs(path, exist_ok=True)
+        with open(os.path.join(path, f"{agent_name}.json"), "w") as f:
+            json.dump({"output": output}, f)
+    def read(self, session_id, agent_name):
+        path = os.path.join(self._base, session_id, f"{agent_name}.json")
+        if not os.path.exists(path):
+            return None
+        with open(path) as f:
+            return json.load(f).get("output")
+    def read_all(self, session_id):
+        path = os.path.join(self._base, session_id)
+        if not os.path.exists(path):
+            return {}
+        result = {}
+        for fn in os.listdir(path):
+            if fn.endswith(".json"):
+                agent = fn[:-5]
+                with open(os.path.join(path, fn)) as f:
+                    result[agent] = json.load(f).get("output", "")
+        return result
+
+def create_context_store() -> ContextStore:
+    mode = os.getenv("CONTEXT_MODE", "memory").lower()
+    if mode == "file":
+        return FileContextStore()
+    return MemoryContextStore()

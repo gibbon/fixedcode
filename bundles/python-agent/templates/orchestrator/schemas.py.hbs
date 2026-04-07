@@ -1,0 +1,65 @@
+"""Pydantic schemas for orchestrator API."""
+from datetime import datetime
+from enum import Enum
+from pydantic import BaseModel, Field
+
+class SessionStatus(str, Enum):
+    CREATED = "CREATED"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    TIMED_OUT = "TIMED_OUT"
+
+class CreateSessionRequest(BaseModel):
+    input: str = Field(default="", description="Input text for the agent pipeline")
+    file: dict | None = Field(default=None, description="Optional file upload")
+    subscriberId: str | None = Field(default=None, description="Subscriber ID")
+    metadata: dict | None = Field(default=None, description="Optional metadata")
+
+class ToolCall(BaseModel):
+    tool: str
+    input: str = ""
+
+class TokenUsage(BaseModel):
+    input_tokens: int = 0
+    output_tokens: int = 0
+    total_tokens: int = 0
+    estimated_cost_usd: float = 0.0
+
+class AgentMetrics(BaseModel):
+    cycles: int = 0
+    duration_s: float = 0.0
+
+class AgentResult(BaseModel):
+    agent_name: str
+    status: str
+    output: str | None = None
+    structured_output: dict | None = None
+    error: str | None = None
+    tool_calls: list[ToolCall] = Field(default_factory=list)
+    usage: TokenUsage | None = None
+    metrics: AgentMetrics | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    duration_ms: int | None = None
+
+class SessionReport(BaseModel):
+    session_id: str
+    status: SessionStatus
+    routing_mode: str
+    agent_results: list[AgentResult]
+    total_usage: TokenUsage | None = None
+    summary: str | None = None
+    created_at: datetime
+    completed_at: datetime | None = None
+    total_duration_ms: int | None = None
+    model_id: str | None = None
+
+class ResumeSessionRequest(BaseModel):
+    session_id: str
+
+class SessionSummary(BaseModel):
+    session_id: str
+    status: SessionStatus
+    agents: list[str]
+    created_at: datetime

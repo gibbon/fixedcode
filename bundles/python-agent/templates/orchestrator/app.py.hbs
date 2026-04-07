@@ -1,0 +1,37 @@
+"""Orchestrator API — create sessions, get reports, manage pipeline."""
+import logging
+from fastapi import FastAPI, BackgroundTasks, HTTPException
+
+from .service import OrchestratorService
+from .schemas import CreateSessionRequest, ResumeSessionRequest
+
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="{{serviceName.pascal}} Orchestrator")
+_service = OrchestratorService()
+
+@app.get("/health")
+async def health():
+    return {"status": "ok", "component": "orchestrator"}
+
+@app.post("/create")
+async def create_session(request: CreateSessionRequest, background_tasks: BackgroundTasks):
+    session_id = _service.create_session(
+        input_text=request.input, file_data=request.file,
+        subscriber_id=request.subscriberId, metadata=request.metadata,
+    )
+    background_tasks.add_task(_service.process_session, session_id)
+    return {"session_id": session_id, "status": "RUNNING"}
+
+@app.get("/report/{session_id}")
+async def get_report(session_id: str):
+    try:
+        return await _service.get_report(session_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@app.post("/resume")
+async def resume_session(request: ResumeSessionRequest, background_tasks: BackgroundTasks):
+    session_id = _service.create_session(input_text="(resumed)")
+    background_tasks.add_task(_service.process_session, session_id)
+    return {"session_id": session_id, "status": "RUNNING"}
