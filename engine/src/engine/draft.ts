@@ -1,6 +1,7 @@
-import { resolve, dirname, basename, extname } from 'node:path';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { resolve, dirname, basename, extname, join, relative } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { writeFileSync, mkdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { parse as parseYaml } from 'yaml';
 import { loadConfig } from './config.js';
 import { resolveBundle } from './resolve.js';
@@ -133,24 +134,77 @@ function loadConventions(configDir: string, kind: string): string | undefined {
 }
 
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
-const BINARY_EXTENSIONS = new Set([...IMAGE_EXTENSIONS, '.pdf', '.zip', '.tar', '.gz']);
+const SKIP_EXTENSIONS = new Set(['.pdf', '.tar', '.gz', '.bin', '.exe', '.class', '.o']);
+const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '__pycache__', '.venv', 'venv']);
+
+/**
+ * Expand a list of paths into individual files.
+ * Handles: individual files, directories (recursive), and .zip files.
+ */
+export function expandPaths(paths: string[]): string[] {
+  const files: string[] = [];
+
+  for (const p of paths) {
+    const absPath = resolve(p);
+    if (!existsSync(absPath)) {
+      console.warn(`Warning: context path not found, skipping: ${p}`);
+      continue;
+    }
+
+    const stat = statSync(absPath);
+
+    if (stat.isDirectory()) {
+      collectFilesFromDir(absPath, files);
+    } else if (extname(absPath).toLowerCase() === '.zip') {
+      collectFilesFromZip(absPath, files);
+    } else {
+      files.push(absPath);
+    }
+  }
+
+  return files;
+}
+
+function collectFilesFromDir(dir: string, out: string[]): void {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (SKIP_DIRS.has(entry.name) || entry.name.startsWith('.')) continue;
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      collectFilesFromDir(fullPath, out);
+    } else {
+      out.push(fullPath);
+    }
+  }
+}
+
+function collectFilesFromZip(zipPath: string, out: string[]): void {
+  const tmpDir = join(dirname(zipPath), `.fixedcode-unzip-${Date.now()}`);
+  try {
+    mkdirSync(tmpDir, { recursive: true });
+    execFileSync('unzip', ['-qo', zipPath, '-d', tmpDir], { stdio: 'pipe' });
+    collectFilesFromDir(tmpDir, out);
+  } catch (err) {
+    console.warn(`Warning: failed to unzip ${zipPath}: ${err instanceof Error ? err.message : 'unknown error'}`);
+  }
+}
 
 /**
  * Load context files and return them as chat content parts.
  * Text files become text parts, images become image_url parts (base64 data URI).
+ * Accepts individual files, directories, or zip archives.
  */
-export function loadContextFiles(filePaths: string[]): ChatContentPart[] {
+export function loadContextFiles(inputPaths: string[]): ChatContentPart[] {
+  const filePaths = expandPaths(inputPaths);
   const parts: ChatContentPart[] = [];
 
-  for (const filePath of filePaths) {
-    const absPath = resolve(filePath);
-    if (!existsSync(absPath)) {
-      console.warn(`Warning: context file not found, skipping: ${filePath}`);
-      continue;
-    }
+  // Find common root for relative display names
+  const commonRoot = filePaths.length > 1
+    ? findCommonDir(filePaths)
+    : dirname(filePaths[0] ?? '');
 
+  for (const absPath of filePaths) {
     const ext = extname(absPath).toLowerCase();
-    const name = basename(absPath);
+    const displayName = relative(commonRoot, absPath) || basename(absPath);
 
     if (IMAGE_EXTENSIONS.has(ext)) {
       const data = readFileSync(absPath);
@@ -163,16 +217,33 @@ export function loadContextFiles(filePaths: string[]): ChatContentPart[] {
         type: 'image_url',
         image_url: { url: `data:${mime};base64,${base64}` },
       });
-      parts.push({ type: 'text', text: `[Image: ${name}]` });
-    } else if (BINARY_EXTENSIONS.has(ext)) {
-      console.warn(`Warning: skipping binary file: ${filePath}`);
+      parts.push({ type: 'text', text: `[Image: ${displayName}]` });
+    } else if (SKIP_EXTENSIONS.has(ext) || ext === '.zip') {
+      // already handled zip at expand time; skip other binaries
+      continue;
     } else {
-      const content = readFileSync(absPath, 'utf-8');
-      parts.push({ type: 'text', text: `### ${name}\n\n\`\`\`\n${content}\n\`\`\`` });
+      try {
+        const content = readFileSync(absPath, 'utf-8');
+        parts.push({ type: 'text', text: `### ${displayName}\n\n\`\`\`\n${content}\n\`\`\`` });
+      } catch {
+        // binary file that lacks a known extension — skip
+        continue;
+      }
     }
   }
 
   return parts;
+}
+
+function findCommonDir(paths: string[]): string {
+  if (paths.length === 0) return '';
+  let common = dirname(paths[0]);
+  for (const p of paths.slice(1)) {
+    while (!dirname(p).startsWith(common)) {
+      common = dirname(common);
+    }
+  }
+  return common;
 }
 
 /**
