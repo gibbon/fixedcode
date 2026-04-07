@@ -23,6 +23,8 @@ DATABASES = {
 
 def _is_read_only(query: str) -> bool:
     q = query.strip().upper()
+    if ";" in query:
+        return False  # Reject multi-statement queries
     return q.startswith("SELECT") or q.startswith("WITH") or q.startswith("EXPLAIN")
 
 
@@ -50,6 +52,7 @@ def {{tool.name.snake}}_tool(database_name: str, query: str, limit: int = 100, f
 
     try:
         conn = psycopg2.connect(**db_config)
+        conn.set_session(readonly=True, autocommit=True)
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query)
             rows = [dict(r) for r in cur.fetchmany(limit)]

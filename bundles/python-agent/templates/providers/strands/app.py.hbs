@@ -180,6 +180,7 @@ async def stream_endpoint(chat_message: ChatMessage{{#if hasAuth}}, auth=Depends
 
 # --- Interactive CLI mode ---
 def _chat_loop():
+    from .shared import create_agent
     print(f"\n{AGENT_NAME} Agent")
     print("  Type 'quit' to exit.\n")
 

@@ -4,4 +4,8 @@ COPY pyproject.toml .
 RUN pip install --no-cache-dir .
 COPY src/ src/
 EXPOSE {{port}}
+{{#if (eq mode "orchestrator")}}
+CMD ["python", "-m", "uvicorn", "{{packageName}}.main:app", "--host", "0.0.0.0", "--port", "{{port}}"]
+{{else}}
 CMD ["python", "-m", "uvicorn", "{{packageName}}.app:app", "--host", "0.0.0.0", "--port", "{{port}}"]
+{{/if}}

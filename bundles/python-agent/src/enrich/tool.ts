@@ -14,10 +14,12 @@ export interface EnrichedTool {
 }
 
 export function enrichTool(raw: RawTool): EnrichedTool {
+  const config = raw.config ?? {};
+  if (!config.timeout) config.timeout = 30;
   return {
     name: generateVariants(raw.name),
     type: raw.type,
-    config: raw.config ?? {},
+    config,
     templatePath: `tools/${raw.type}.py.hbs`,
   };
 }
