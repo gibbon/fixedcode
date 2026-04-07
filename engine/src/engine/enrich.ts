@@ -1,5 +1,6 @@
-import { resolve, dirname, relative, basename } from 'node:path';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve, dirname, join, relative, basename } from 'node:path';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { loadConfig } from './config.js';
 import { readManifest, hashContent, type Manifest } from './manifest.js';
 import { resolveLlmConfig, chatCompletion } from './llm.js';
@@ -200,6 +201,10 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
 
   const result: EnrichResult = { enriched: [], skipped: [], errors: [] };
 
+  // Create backup directory for original stubs
+  const backupDir = join(outputDir, '.fixedcode-enrich-backup');
+  mkdirSync(backupDir, { recursive: true });
+
   // Group by specFile for efficient spec loading
   const bySpec = new Map<string, typeof extensionPoints>();
   for (const ep of extensionPoints) {
@@ -268,7 +273,12 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
 
         const code = extractCode(response);
 
-        // Write in place
+        // Backup original stub
+        const backupPath = join(backupDir, ep.path);
+        mkdirSync(dirname(backupPath), { recursive: true });
+        writeFileSync(backupPath, stubContent, 'utf-8');
+
+        // Write enriched version in place
         writeFileSync(absPath, code, 'utf-8');
         result.enriched.push(ep.path);
         console.log(`  Enriched: ${ep.path}`);
@@ -281,7 +291,29 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
   }
 
   if (result.enriched.length > 0) {
-    console.log(`\nEnriched ${result.enriched.length} extension point(s). Run \`git diff ${options.outputDir}\` to review.`);
+    console.log(`\nEnriched ${result.enriched.length} extension point(s).\n`);
+
+    // Show diffs
+    for (const ep of result.enriched) {
+      const backupPath = join(backupDir, ep);
+      const enrichedPath = resolve(outputDir, ep);
+      console.log(`--- ${ep} ---`);
+      try {
+        const diff = execFileSync('diff', ['-u', '--color=always', backupPath, enrichedPath], {
+          encoding: 'utf-8',
+          stdio: ['pipe', 'pipe', 'pipe'],
+        });
+        console.log(diff || '  (no changes)');
+      } catch (err: any) {
+        // diff exits 1 when files differ — that's the normal case
+        if (err.stdout) {
+          console.log(err.stdout);
+        }
+      }
+      console.log('');
+    }
+
+    console.log(`Backups saved to ${backupDir}`);
   }
 
   return result;
