@@ -161,21 +161,23 @@ export function generateFiles(ctx: PythonAgentContext): FileEntry[] {
 
   // Orchestrator mode
   if (ctx.mode === 'orchestrator' && ctx.agents) {
-    files.push({
-      template: `providers/${ctx.provider}/orchestrator.py.hbs`,
-      output: `src/${pkg}/orchestrator.py`,
-      ctx: baseCtx,
-    });
+    // Main app (mounts orchestrator + agents)
+    files.push({ template: 'orchestrator/main.py.hbs', output: `src/${pkg}/main.py`, ctx: baseCtx });
 
+    // Orchestrator module
+    files.push({ template: '__init__.py.hbs', output: `src/${pkg}/orchestrator/__init__.py`, ctx: baseCtx });
+    files.push({ template: 'orchestrator/app.py.hbs', output: `src/${pkg}/orchestrator/app.py`, ctx: baseCtx });
+    files.push({ template: 'orchestrator/service.py.hbs', output: `src/${pkg}/orchestrator/service.py`, ctx: baseCtx });
+    files.push({ template: 'orchestrator/routing.py.hbs', output: `src/${pkg}/orchestrator/routing.py`, ctx: baseCtx });
+    files.push({ template: 'orchestrator/schemas.py.hbs', output: `src/${pkg}/orchestrator/schemas.py`, ctx: baseCtx });
+    files.push({ template: 'orchestrator/context.py.hbs', output: `src/${pkg}/orchestrator/context.py`, ctx: baseCtx });
+    files.push({ template: 'orchestrator/discovery.py.hbs', output: `src/${pkg}/orchestrator/discovery.py`, ctx: baseCtx });
+
+    // Per-agent wrappers
     files.push({ template: '__init__.py.hbs', output: `src/${pkg}/agents/__init__.py`, ctx: baseCtx });
-
     for (const agent of ctx.agents) {
       const agentCtx = { ...baseCtx, agent } as Record<string, unknown>;
-      files.push({
-        template: 'agents/agent.py.hbs',
-        output: `src/${pkg}/agents/${agent.name.snake}/agent.py`,
-        ctx: agentCtx,
-      });
+      files.push({ template: 'agents/agent.py.hbs', output: `src/${pkg}/agents/${agent.name.snake}/agent.py`, ctx: agentCtx });
       files.push({ template: '__init__.py.hbs', output: `src/${pkg}/agents/${agent.name.snake}/__init__.py`, ctx: agentCtx });
       files.push({
         template: 'agents/default_agent.py.hbs',
