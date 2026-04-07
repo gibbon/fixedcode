@@ -11,6 +11,7 @@ export function createDraftCommand() {
     .option('--provider <provider>', 'LLM provider (openrouter, ollama, openai)')
     .option('--model <model>', 'LLM model name')
     .option('--no-retry', 'Disable auto-retry on validation failure')
+    .option('--context <files...>', 'Context files (code, markdown, images) to include in the prompt')
     .action(async (kind: string, description: string, opts) => {
       try {
         const yaml = await draft({
@@ -19,6 +20,7 @@ export function createDraftCommand() {
           output: opts.output,
           retry: opts.retry,
           configPath: opts.config,
+          contextFiles: opts.context,
           llmOverrides: {
             provider: opts.provider,
             model: opts.model,
