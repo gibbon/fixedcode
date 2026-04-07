@@ -7,7 +7,8 @@ export function createEnrichCommand() {
     .argument('<outputDir>', 'Generated output directory (contains .fixedcode-manifest.json)')
     .option('--spec <path>', 'Path to the original spec YAML')
     .option('--file <path>', 'Enrich only this specific extension point file (relative to outputDir)')
-    .option('--force', 'Skip git safety check (allow enriching uncommitted files)')
+    .option('--force', 'Skip safety check (allow enriching modified files)')
+    .option('--context <files...>', 'Context files (requirements, examples, images) to guide the AI')
     .option('-c, --config <path>', 'Explicit path to .fixedcode.yaml config')
     .option('--provider <provider>', 'LLM provider (openrouter, ollama, openai)')
     .option('--model <model>', 'LLM model name')
@@ -19,6 +20,7 @@ export function createEnrichCommand() {
           file: opts.file,
           force: opts.force,
           configPath: opts.config,
+          contextFiles: opts.context,
           llmOverrides: {
             provider: opts.provider,
             model: opts.model,

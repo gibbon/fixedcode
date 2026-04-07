@@ -3,7 +3,8 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { loadConfig } from './config.js';
 import { readManifest, hashContent, type Manifest } from './manifest.js';
-import { resolveLlmConfig, chatCompletion } from './llm.js';
+import { resolveLlmConfig, chatCompletion, type ChatContentPart } from './llm.js';
+import { loadContextFiles } from './draft.js';
 import { EnrichError } from '../errors.js';
 import type { FixedCodeConfig } from '../types.js';
 
@@ -13,6 +14,7 @@ export interface EnrichOptions {
   file?: string;
   force?: boolean;
   configPath?: string;
+  contextFiles?: string[];
   llmOverrides?: { provider?: string; model?: string };
 }
 
@@ -201,6 +203,11 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
 
   const result: EnrichResult = { enriched: [], skipped: [], errors: [] };
 
+  // Load context files once (shared across all extension points)
+  const contextParts = options.contextFiles?.length
+    ? loadContextFiles(options.contextFiles)
+    : [];
+
   // Create backup directory for original stubs
   const backupDir = join(outputDir, '.fixedcode-enrich-backup');
   mkdirSync(backupDir, { recursive: true });
@@ -265,10 +272,19 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
           neighbours,
         });
 
+        // Build user message — prompt + optional context files
+        const userContent = contextParts.length > 0
+          ? [
+              { type: 'text' as const, text: prompt.user },
+              { type: 'text' as const, text: '\n## Additional Context\n' },
+              ...contextParts,
+            ]
+          : prompt.user;
+
         // Call LLM
         const response = await chatCompletion(llmConfig, [
           { role: 'system', content: prompt.system },
-          { role: 'user', content: prompt.user },
+          { role: 'user', content: userContent },
         ], { maxTokens: 8192 });
 
         const code = extractCode(response);
