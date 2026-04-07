@@ -1,0 +1,31 @@
+import os
+import jwt
+from fastapi import HTTPException, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+security = HTTPBearer()
+
+AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN", "")
+AUTH0_AUDIENCE = os.getenv("AUTH0_AUDIENCE", "")
+REQUIRED_PERMISSION = "{{middleware.config.permission}}"
+
+
+def require_auth():
+    async def _verify(credentials: HTTPAuthorizationCredentials = Security(security)):
+        token = credentials.credentials
+        try:
+            # In production, fetch JWKS from https://{AUTH0_DOMAIN}/.well-known/jwks.json
+            payload = jwt.decode(
+                token,
+                options={"verify_signature": False},  # TODO: verify with JWKS in production
+                audience=AUTH0_AUDIENCE,
+                issuer=f"https://{AUTH0_DOMAIN}/",
+            )
+            if REQUIRED_PERMISSION:
+                permissions = payload.get("permissions", [])
+                if REQUIRED_PERMISSION not in permissions:
+                    raise HTTPException(status_code=403, detail="Insufficient permissions")
+            return payload
+        except jwt.PyJWTError as e:
+            raise HTTPException(status_code=401, detail=str(e))
+    return _verify

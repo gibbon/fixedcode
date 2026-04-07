@@ -1,0 +1,37 @@
+import logging
+from ..shared import create_agent, query_agent
+from .default_{{agent.name.snake}} import customize_agent
+
+logger = logging.getLogger(__name__)
+
+
+AGENT_NAME = "{{agent.name.kebab}}"
+SYSTEM_PROMPT = """{{agent.prompt}}"""
+MAX_TURNS = 10
+CONTEXT_WINDOW = 40
+
+
+def run_agent(input_text: str, *, tools=None, session_id: str | None = None) -> dict:
+    logger.info(f"Running agent: {AGENT_NAME}")
+
+    agent = create_agent(
+        tools=tools or [],
+        system_prompt=SYSTEM_PROMPT,
+        context_window=CONTEXT_WINDOW,
+        session_id=session_id,
+    )
+    customize_agent(agent)
+
+    result = agent(input_text)
+    cycles = 1
+
+    while cycles < MAX_TURNS and result.state.last_invocation_had_tool_use:
+        result = agent("Continue executing the plan.")
+        cycles += 1
+
+    return {
+        "output": str(result),
+        "status": "completed",
+        "cycles": cycles,
+        "agent": AGENT_NAME,
+    }

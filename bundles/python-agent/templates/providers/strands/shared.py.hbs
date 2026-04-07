@@ -1,0 +1,104 @@
+import os
+import logging
+from strands import Agent
+from strands.agent.conversation_manager import SlidingWindowConversationManager
+{{#if session.hasSession}}
+{{#if session.sessionDevFile}}
+from strands.agent.session_manager import FileSessionManager
+{{/if}}
+{{#if session.sessionProdS3}}
+import boto3
+from strands.agent.session_manager import S3SessionManager
+{{/if}}
+{{/if}}
+
+logger = logging.getLogger(__name__)
+
+
+def _create_model():
+    provider = os.getenv("LLM_PROVIDER", "bedrock")
+    if provider == "bedrock":
+        from strands.models import BedrockModel
+        return BedrockModel(
+            model_id=os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-sonnet-4-20250514-v1:0"),
+        )
+    elif provider == "anthropic":
+        from strands.models import AnthropicModel
+        return AnthropicModel(
+            model_id=os.getenv("ANTHROPIC_MODEL_ID", "claude-sonnet-4-20250514"),
+        )
+    elif provider == "openai":
+        from strands.models import OpenAIModel
+        return OpenAIModel(
+            model_id=os.getenv("OPENAI_MODEL_ID", "gpt-4o"),
+        )
+    elif provider == "ollama":
+        from strands.models import OllamaModel
+        return OllamaModel(
+            host=os.getenv("OLLAMA_HOST", "http://localhost:11434"),
+            model_id=os.getenv("OLLAMA_MODEL_ID", "llama3"),
+        )
+    else:
+        raise ValueError(f"Unknown LLM provider: {provider}")
+
+
+def create_agent(*, tools, system_prompt, context_window, session_id=None):
+    model = _create_model()
+    conversation_manager = SlidingWindowConversationManager(window_size=context_window)
+
+    kwargs = {
+        "model": model,
+        "tools": tools,
+        "system_prompt": system_prompt,
+        "conversation_manager": conversation_manager,
+    }
+{{#if session.hasSession}}
+
+    if session_id:
+        kwargs["session_manager"] = _create_session_manager(session_id)
+{{/if}}
+
+    return Agent(**kwargs)
+
+
+def query_agent(*, agent_name, tools, system_prompt, max_turns, context_window, input_text, session_id=None):
+    agent = create_agent(
+        tools=tools,
+        system_prompt=system_prompt,
+        context_window=context_window,
+        session_id=session_id,
+    )
+
+    result = agent(input_text)
+    cycles = 1
+
+    while cycles < max_turns and result.state.last_invocation_had_tool_use:
+        result = agent("Continue executing the plan.")
+        cycles += 1
+
+    return {
+        "output": str(result),
+        "status": "completed",
+        "cycles": cycles,
+        "agent": agent_name,
+    }
+{{#if session.hasSession}}
+
+
+def _create_session_manager(session_id: str):
+    from .settings import settings
+    env = settings.app_environment.lower()
+
+    if env in ("dev", "local"):
+        return FileSessionManager(session_id=session_id, storage_dir="./sessions")
+    else:
+{{#if session.sessionProdS3}}
+        return S3SessionManager(
+            session_id=session_id,
+            bucket="{{session.prodBucket}}",
+            boto_session=boto3.Session(region_name="ap-southeast-2"),
+        )
+{{else}}
+        return FileSessionManager(session_id=session_id, storage_dir="./sessions")
+{{/if}}
+{{/if}}
