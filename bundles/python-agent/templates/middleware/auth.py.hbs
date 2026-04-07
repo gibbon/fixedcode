@@ -1,4 +1,5 @@
 import os
+import warnings
 import jwt
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -7,6 +8,13 @@ security = HTTPBearer()
 
 AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN", "")
 AUTH0_AUDIENCE = os.getenv("AUTH0_AUDIENCE", "")
+
+if not AUTH0_DOMAIN:
+    warnings.warn(
+        "AUTH0_DOMAIN not set — JWT signature verification is DISABLED. "
+        "Set AUTH0_DOMAIN and AUTH0_AUDIENCE for production.",
+        stacklevel=2,
+    )
 REQUIRED_PERMISSION = "{{middleware.config.permission}}"
 
 

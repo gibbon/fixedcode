@@ -21,7 +21,7 @@ def {{tool.name.snake}}_tool(command_input: str, tool_context: ToolContext) -> s
     cmd = "{{tool.config.command}}"
 
     if "{repo}" in cmd:
-        cmd = cmd.replace("{repo}", REPO)
+        cmd = cmd.replace("{repo}", shlex.quote(REPO))
     if "{input}" in cmd:
         cmd = cmd.replace("'{input}'", shlex.quote(command_input.strip()))
         cmd = cmd.replace("{input}", shlex.quote(command_input.strip()))

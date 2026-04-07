@@ -139,3 +139,48 @@ async def route(*, agents: list[AgentInfo], input_text: str, session_id: str,
 
     return results
 {{/if}}
+{{#if (eq routing "llm-decided")}}
+async def route(*, agents, input_text, session_id, context_store, file_data=None,
+                subscriber_id=None, auth_token=None, on_agent_complete=None, resume_from=None):
+    """LLM-decided routing: use an LLM to pick which agents to invoke."""
+    # For now, fall back to sequential routing with all agents.
+    # A full implementation would use an LLM to analyze the input
+    # and select the relevant agents.
+    logger.info("LLM-decided routing: executing all agents sequentially")
+    results = []
+    async with httpx.AsyncClient(timeout=300) as client:
+        for agent in agents:
+            started_at = datetime.now(timezone.utc)
+            enriched_input = _build_enriched_input(input_text, agent.name, context_store, session_id)
+            try:
+                payload = {"message": enriched_input, "session_id": session_id}
+                if auth_token:
+                    payload["auth_token"] = auth_token
+                response = await client.post(f"{agent.url}/query", json=payload)
+                response.raise_for_status()
+                data = response.json()
+                completed_at = datetime.now(timezone.utc)
+                duration_ms = int((completed_at - started_at).total_seconds() * 1000)
+                usage = None
+                if data.get("usage"):
+                    u = data["usage"]
+                    usage = TokenUsage(input_tokens=u.get("input_tokens", 0), output_tokens=u.get("output_tokens", 0), total_tokens=u.get("total_tokens", 0), estimated_cost_usd=data.get("metrics", {}).get("estimated_cost_usd", 0))
+                result = AgentResult(agent_name=agent.name, status="completed", output=data.get("output"), structured_output=data.get("structured_output"), usage=usage, started_at=started_at, completed_at=completed_at, duration_ms=duration_ms)
+                results.append(result)
+                context_store.write(session_id, agent.name, data.get("output", ""))
+                if on_agent_complete:
+                    on_agent_complete(result)
+            except Exception as e:
+                completed_at = datetime.now(timezone.utc)
+                duration_ms = int((completed_at - started_at).total_seconds() * 1000)
+                error_result = AgentResult(agent_name=agent.name, status="failed", error=str(e), started_at=started_at, completed_at=completed_at, duration_ms=duration_ms)
+                results.append(error_result)
+                if on_agent_complete:
+                    on_agent_complete(error_result)
+                if agent.critical:
+                    logger.error("[%s] Critical agent %s failed: %s", session_id[:8], agent.name, e)
+                    break
+                else:
+                    logger.warning("[%s] Non-critical agent %s failed: %s", session_id[:8], agent.name, e)
+    return results
+{{/if}}
