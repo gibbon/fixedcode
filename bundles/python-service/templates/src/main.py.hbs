@@ -1,0 +1,26 @@
+import logging
+from fastapi import FastAPI
+from pythonjsonlogger import json as json_log
+from .config import settings
+from .routes.health import router as health_router
+
+handler = logging.StreamHandler()
+handler.setFormatter(json_log.JsonFormatter())
+logging.basicConfig(handlers=[handler], level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="{{serviceName.pascal}}", version="0.1.0")
+
+app.include_router(health_router)
+
+# Extension point: add custom routes in defaults/custom_routes.py
+try:
+    from .defaults.custom_routes import register_routes
+    register_routes(app)
+except ImportError:
+    pass
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port={{port}})
