@@ -143,7 +143,7 @@ function enrich(spec: LibrarySpec, _metadata: SpecMetadata): LibraryContext {
   const packagePath = packageName.replace(/\./g, '/');
 
   const version = lib.version || '0.1.0';
-  const group = lib.group || 'io.pexa.gap';
+  const group = lib.group || 'com.example';
 
   const dbName = database.name || `gap_${domainSnake}_db`;
   const dbPort = database.port || 5433;

@@ -7,7 +7,7 @@ spec:
   boundedContext: Workspace
   service:
     port: 8081
-    package: io.pexa.gap.workspace
+    package: com.example.workspace
 
   aggregates:
     Workspace:
