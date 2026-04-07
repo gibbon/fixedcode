@@ -14,9 +14,17 @@ export interface ResolvedLlmConfig {
   apiKey?: string;
 }
 
+export type ChatContent = string | ChatContentPart[];
+
+export interface ChatContentPart {
+  type: 'text' | 'image_url';
+  text?: string;
+  image_url?: { url: string };
+}
+
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
-  content: string;
+  content: ChatContent;
 }
 
 export interface ChatOptions {
