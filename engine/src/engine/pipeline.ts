@@ -1,13 +1,13 @@
 import { resolve, relative } from 'node:path';
 import { existsSync } from 'node:fs';
-import type { RawSpec, FixedCodeConfig, Context, RenderedFile } from '../types.js';
+import type { Context } from '../types.js';
 import { EnrichmentError } from '../errors.js';
 import { parseSpec, validateEnvelope } from './parse.js';
 import { loadConfig } from './config.js';
 import { resolveBundle, resolveGenerators } from './resolve.js';
 import { validateBody } from './validate.js';
-import { renderTemplates, renderFile } from './render.js';
-import { writeFiles, writeSingleFile, type WriteOptions } from './write.js';
+import { renderTemplates, renderFile, createHandlebarsEnv } from './render.js';
+import { writeSingleFile } from './write.js';
 import { readManifest, writeManifest, hashContent, shouldWrite, loadIgnorePatterns, isIgnored, type Manifest, type ManifestEntry } from './manifest.js';
 
 export interface GenerateOptions {
@@ -96,13 +96,14 @@ export async function generate(
 
   if (bundle.generateFiles) {
     const entries = bundle.generateFiles(context);
+    const hb = createHandlebarsEnv({
+      noEscape: true,
+      helpers: bundle.helpers,
+      partials: bundle.partials,
+    });
     for (const entry of entries) {
       const absTemplatePath = resolve(bundleDir, bundle.templates, entry.template);
-      const content = renderFile(absTemplatePath, entry.ctx, {
-        noEscape: true,
-        helpers: bundle.helpers,
-        partials: bundle.partials,
-      });
+      const content = renderFile(absTemplatePath, entry.ctx, { noEscape: true }, hb);
       if (content.trim() !== '') {
         writeWithManifest(entry.output, content, entry.overwrite !== false, rawSpec.kind, relativeSpecFile);
       }

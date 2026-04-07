@@ -7,6 +7,8 @@
  * Bundles declare which CFRs they provide. Specs configure which are enabled.
  * Verify checks they're present. The framework makes the invisible visible.
  */
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 /**
  * Standard CFR categories. Bundles declare which they implement.
@@ -100,9 +102,6 @@ export function verifyCfrs(
   specCfrs: SpecCfrConfig | undefined,
   outputDir: string
 ): CfrVerifyResult {
-  const { existsSync } = require('node:fs') as typeof import('node:fs');
-  const { resolve } = require('node:path') as typeof import('node:path');
-
   const results: CfrVerifyResult['cfrs'] = [];
 
   for (const cfrId of bundleCfrs.provides) {
