@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { buildDraftPrompt, extractYaml, draft } from '../src/engine/draft.js';
-import { mkdtempSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs';
+import { parse as parseYaml } from 'yaml';
+import { mkdtempSync, writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -143,5 +144,86 @@ describe('draft integration', () => {
     // Verify file was written
     const written = readFileSync(outputPath, 'utf-8');
     expect(written).toContain('apiVersion');
+  });
+
+  it('retries when enrich() rejects the spec', async () => {
+    // Set up a bundle where enrich() rejects specs missing a "required" field
+    const bundleDir = join(tmpDir, 'strict-bundle');
+    mkdirSync(join(bundleDir, 'templates'), { recursive: true });
+    writeFileSync(join(bundleDir, 'schema.json'), JSON.stringify({
+      type: 'object',
+      properties: { name: { type: 'string' } },
+    }));
+    writeFileSync(join(bundleDir, 'package.json'), JSON.stringify({ name: 'strict-bundle', type: 'module', main: 'index.js' }));
+    writeFileSync(join(bundleDir, 'index.js'), `
+      import { readFileSync } from 'node:fs';
+      import { fileURLToPath } from 'node:url';
+      import { dirname, join } from 'node:path';
+      const __dirname = dirname(fileURLToPath(import.meta.url));
+      const schema = JSON.parse(readFileSync(join(__dirname, 'schema.json'), 'utf-8'));
+      export default {
+        kind: 'strict-bundle',
+        specSchema: schema,
+        enrich: (spec) => {
+          if (!spec.name) throw new Error('spec.name is required');
+          if (!spec.name.includes('-')) throw new Error('spec.name must contain a hyphen');
+          return spec;
+        },
+        templates: 'templates',
+      };
+    `);
+
+    const configPath = join(tmpDir, '.fixedcode-strict.yaml');
+    writeFileSync(configPath, `bundles:\n  strict-bundle: "${bundleDir}"\n`);
+
+    // First response: schema-valid but enrich() rejects (no hyphen in name)
+    const badYaml = 'apiVersion: "1.0"\nkind: strict-bundle\nmetadata:\n  name: test\nspec:\n  name: nohyphen';
+    // Second response (retry): passes both schema and enrich()
+    const goodYaml = 'apiVersion: "1.0"\nkind: strict-bundle\nmetadata:\n  name: test\nspec:\n  name: has-hyphen';
+
+    let callCount = 0;
+    fetchSpy.mockImplementation(async () => {
+      callCount++;
+      const content = callCount === 1 ? badYaml : goodYaml;
+      return {
+        ok: true,
+        json: async () => ({ choices: [{ message: { content } }] }),
+      };
+    });
+
+    const result = await draft({
+      kind: 'strict-bundle',
+      description: 'test service',
+      configPath,
+      retry: true,
+    });
+
+    // Should have retried and returned the good spec
+    expect(callCount).toBe(2);
+    expect(result).toContain('has-hyphen');
+  });
+});
+
+describe('draft round-trip with spring-domain', () => {
+  it('example spec survives enrich()', async () => {
+    // Load the actual example spec and verify it passes through spring-domain enrich()
+    const examplePath = join(process.cwd(), '..', 'bundles', 'spring-domain', 'examples', 'order-domain.yaml');
+    if (!existsSync(examplePath)) {
+      // Skip if running from a different cwd
+      return;
+    }
+
+    const yaml = readFileSync(examplePath, 'utf-8');
+    const parsed = parseYaml(yaml) as any;
+
+    // Dynamically import the spring-domain bundle
+    const bundlePath = join(process.cwd(), '..', 'bundles', 'spring-domain');
+    const bundleMod = await import(join(bundlePath, 'dist', 'index.js'));
+    const bundle = bundleMod.default ?? bundleMod;
+
+    // This is what draft's tryValidate does — schema check + enrich()
+    expect(() => {
+      bundle.enrich(parsed.spec, { name: parsed.metadata.name, apiVersion: parsed.apiVersion });
+    }).not.toThrow();
   });
 });
