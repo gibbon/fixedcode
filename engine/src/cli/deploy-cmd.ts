@@ -7,14 +7,12 @@ export function createDeployCommand() {
     .description('Deploy build output into a target project source tree')
     .argument('<buildDir>', 'Build output directory')
     .argument('<targetDir>', 'Target project root directory')
-    .option('--clean', 'Clean target package directory before deploying')
     .option('--dry-run', 'Preview changes without writing files')
     .action((buildDir: string, targetDir: string, opts) => {
       try {
         const result = deploy({
           buildDir,
           targetDir,
-          clean: opts.clean,
           dryRun: opts.dryRun,
         });
 

@@ -1,6 +1,6 @@
 import { resolve, dirname, basename, extname, join, relative } from 'node:path';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { parse as parseYaml } from 'yaml';
 import { loadConfig } from './config.js';
@@ -185,6 +185,8 @@ function collectFilesFromZip(zipPath: string, out: string[]): void {
     collectFilesFromDir(tmpDir, out);
   } catch (err) {
     console.warn(`Warning: failed to unzip ${zipPath}: ${err instanceof Error ? err.message : 'unknown error'}`);
+  } finally {
+    try { rmSync(tmpDir, { recursive: true, force: true }); } catch { /* ignore */ }
   }
 }
 
@@ -237,13 +239,16 @@ export function loadContextFiles(inputPaths: string[]): ChatContentPart[] {
 
 function findCommonDir(paths: string[]): string {
   if (paths.length === 0) return '';
-  let common = dirname(paths[0]);
+  const segments = (p: string) => dirname(p).split('/');
+  let commonParts = segments(paths[0]);
   for (const p of paths.slice(1)) {
-    while (!dirname(p).startsWith(common)) {
-      common = dirname(common);
-    }
+    const parts = segments(p);
+    const len = Math.min(commonParts.length, parts.length);
+    let i = 0;
+    while (i < len && commonParts[i] === parts[i]) i++;
+    commonParts = commonParts.slice(0, i);
   }
-  return common;
+  return commonParts.join('/') || '/';
 }
 
 /**

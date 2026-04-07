@@ -33,18 +33,10 @@ export async function renderTemplates(
 }
 
 /**
- * Render a single Handlebars template file to a string.
- * Used by the generateFiles pipeline branch.
- *
- * @param absTemplatePath - Absolute path to the .hbs file
- * @param ctx - Context for rendering
- * @param options - Handlebars options (helpers, partials)
+ * Create a configured Handlebars environment from TemplateOptions.
+ * Returns a reusable instance — call this once per bundle, then pass it to renderFile.
  */
-export function renderFile(
-  absTemplatePath: string,
-  ctx: Record<string, unknown>,
-  options: TemplateOptions = {}
-): string {
+export function createHandlebarsEnv(options: TemplateOptions = {}): typeof Handlebars {
   const hb = Handlebars.create();
 
   if (options.helpers) {
@@ -58,9 +50,29 @@ export function renderFile(
     }
   }
 
+  return hb;
+}
+
+/**
+ * Render a single Handlebars template file to a string.
+ * Used by the generateFiles pipeline branch.
+ *
+ * @param absTemplatePath - Absolute path to the .hbs file
+ * @param ctx - Context for rendering
+ * @param options - Handlebars options (helpers, partials). If hb is not provided, a new instance is created.
+ * @param hb - Optional pre-configured Handlebars instance (preferred: pass one created via createHandlebarsEnv)
+ */
+export function renderFile(
+  absTemplatePath: string,
+  ctx: Record<string, unknown>,
+  options: TemplateOptions = {},
+  hb?: typeof Handlebars
+): string {
+  const instance = hb ?? createHandlebarsEnv(options);
+
   try {
     const content = readFileSync(absTemplatePath, 'utf-8');
-    return hb.compile(content, { noEscape: options.noEscape })(ctx);
+    return instance.compile(content, { noEscape: options.noEscape })(ctx);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     throw new RenderError(absTemplatePath, msg);
