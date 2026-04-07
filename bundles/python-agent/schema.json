@@ -49,6 +49,19 @@
       }
     },
     "routing": { "enum": ["sequential", "parallel", "llm-decided"], "default": "sequential" },
+    "outputSchema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "enum": ["string", "int", "bool", "list"] },
+          "description": { "type": "string" },
+          "required": { "type": "boolean", "default": true }
+        }
+      }
+    },
     "cfrs": { "type": "object", "additionalProperties": { "type": "boolean" } }
   },
   "if": { "properties": { "mode": { "const": "orchestrator" } } },

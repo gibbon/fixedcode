@@ -3,6 +3,13 @@ export interface RawMiddlewareEntry {
   config: Record<string, unknown>;
 }
 
+export interface OutputSchemaField {
+  name: string;
+  type: 'string' | 'int' | 'bool' | 'list';
+  description?: string;
+  required?: boolean;
+}
+
 export interface RawPythonAgentSpec {
   mode: 'single' | 'orchestrator';
   provider: string;
@@ -16,6 +23,7 @@ export interface RawPythonAgentSpec {
   tools?: Array<{ name: string; type: string; config?: Record<string, unknown> }>;
   agents?: Array<{ name: string; prompt: string; tools?: string[]; critical?: boolean }>;
   routing?: string;
+  outputSchema?: OutputSchemaField[];
   cfrs?: Record<string, boolean>;
 }
 
@@ -43,6 +51,7 @@ export function parseSpec(raw: Record<string, unknown>): RawPythonAgentSpec {
     tools: spec.tools ?? [],
     agents: spec.agents,
     routing: spec.routing ?? 'sequential',
+    outputSchema: spec.outputSchema,
     cfrs: spec.cfrs,
   };
 }
