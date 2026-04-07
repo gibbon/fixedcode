@@ -1,3 +1,5 @@
+import pluralize from 'pluralize';
+
 export type OperationPattern = 'Create' | 'Update' | 'Delete' | 'Archive' | 'Add' | 'Remove' | 'Get' | 'Search' | 'Find';
 
 export function detectPattern(name: string): OperationPattern {
@@ -36,7 +38,7 @@ function deriveFindSuffix(operationName: string, entityPluralKebab: string): str
   let remainder = operationName.slice(4); // remove "Find"
 
   const entityPluralPascal = toPascal(entityPluralKebab);
-  const entitySingularPascal = entityPluralPascal.replace(/s$/, '');
+  const entitySingularPascal = pluralize.singular(entityPluralPascal);
 
   if (remainder.startsWith(entityPluralPascal)) {
     remainder = remainder.slice(entityPluralPascal.length);

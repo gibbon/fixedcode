@@ -4,6 +4,7 @@ export interface EnrichedEventField {
   name: string;
   names: NamingVariants;
   required: boolean;
+  kotlinType: string;
 }
 
 export interface EnrichedEvent {
@@ -13,7 +14,8 @@ export interface EnrichedEvent {
 }
 
 export function enrichEvents(
-  raw: Record<string, { fields: string[] }> | undefined
+  raw: Record<string, { fields: string[] }> | undefined,
+  attributeTypeMap?: Record<string, string>
 ): EnrichedEvent[] {
   if (!raw) return [];
   return Object.entries(raw).map(([name, def]) => ({
@@ -22,7 +24,8 @@ export function enrichEvents(
     fields: (def.fields ?? []).map(f => {
       const optional = f.endsWith('?');
       const fieldName = optional ? f.slice(0, -1) : f;
-      return { name: fieldName, names: generateVariants(fieldName), required: !optional };
+      const kotlinType = attributeTypeMap?.[fieldName] ?? 'UUID';
+      return { name: fieldName, names: generateVariants(fieldName), required: !optional, kotlinType };
     }),
   }));
 }
