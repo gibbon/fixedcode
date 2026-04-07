@@ -1,8 +1,7 @@
 import { resolve, dirname, relative, basename } from 'node:path';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
 import { loadConfig } from './config.js';
-import { readManifest, type Manifest } from './manifest.js';
+import { readManifest, hashContent, type Manifest } from './manifest.js';
 import { resolveLlmConfig, chatCompletion } from './llm.js';
 import { EnrichError } from '../errors.js';
 import type { FixedCodeConfig } from '../types.js';
@@ -135,29 +134,26 @@ Rules:
 }
 
 /**
- * Check if files have uncommitted changes.
- * Returns list of dirty file paths.
+ * Check if extension point files have been modified since generation.
+ * Compares current file content hash against the manifest hash.
+ * If they match, the file is still the original stub — safe to overwrite.
+ * If they differ, the user has edited it — refuse unless --force.
  */
-function checkGitDirty(outputDir: string, files: string[]): string[] {
-  const dirty: string[] = [];
+function checkModified(outputDir: string, files: string[], manifest: Manifest): string[] {
+  const modified: string[] = [];
   for (const file of files) {
     const absPath = resolve(outputDir, file);
     if (!existsSync(absPath)) continue;
 
-    try {
-      const status = execFileSync('git', ['status', '--porcelain', absPath], {
-        encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'pipe'],
-      }).trim();
+    const entry = manifest.files[file];
+    if (!entry) continue;
 
-      if (status.length > 0) {
-        dirty.push(file);
-      }
-    } catch {
-      // git not available or not a repo — skip check
+    const currentHash = hashContent(readFileSync(absPath, 'utf-8'));
+    if (currentHash !== entry.hash) {
+      modified.push(file);
     }
   }
-  return dirty;
+  return modified;
 }
 
 /**
@@ -192,12 +188,12 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
     }
   }
 
-  // Git safety check
+  // Safety check: refuse to overwrite user-modified extension points
   if (!options.force) {
-    const dirty = checkGitDirty(outputDir, extensionPoints.map(ep => ep.path));
-    if (dirty.length > 0) {
+    const modified = checkModified(outputDir, extensionPoints.map(ep => ep.path), manifest);
+    if (modified.length > 0) {
       throw new EnrichError(
-        `Extension point files have uncommitted changes. Commit first or use --force.\nDirty files:\n  ${dirty.join('\n  ')}`
+        `Extension point files have been modified since generation. Use --force to overwrite.\nModified files:\n  ${modified.join('\n  ')}`
       );
     }
   }
