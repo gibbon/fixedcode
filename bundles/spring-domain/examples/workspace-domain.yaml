@@ -1,0 +1,87 @@
+apiVersion: "1.0"
+kind: spring-domain
+metadata:
+  name: order-service
+
+spec:
+  boundedContext: Order
+  service:
+    port: 8081
+    package: com.example.order
+
+  aggregates:
+    Order:
+      attributes:
+        orderId: uuid
+        status: string = Status
+        channel: string = Channel
+        currency: string
+        placedAt?: date
+        labels?: object
+
+      commands:
+        - name: CreateOrder
+          body: [channel, currency, placedAt?]
+          emits: OrderCreated
+        - name: UpdateOrderStatus
+          body: [status]
+          emits: OrderStatusUpdated
+        - name: DeleteOrder
+          emits: OrderDeleted
+
+      queries:
+        - name: GetOrder
+          returns: Order
+        - name: SearchOrder
+          returns: PagedOrderList
+        - name: FindOrdersByStatus
+          query: [status]
+          returns: OrderList
+
+      events:
+        OrderCreated:
+          fields: [orderId, status, channel, currency]
+        OrderStatusUpdated:
+          fields: [orderId, status]
+        OrderDeleted:
+          fields: [orderId]
+
+      enumDefaults:
+        Status: [CREATED, PREPARED, APPROVED, CLOSED]
+        Channel: [TRANSFER, MORTGAGE, CAVEAT]
+
+      entities:
+        LineItem:
+          attributes:
+            lineItemId: uuid
+            orderId: uuid
+            productSku: string = ProductSku
+            role: string = Role
+            pricing: object
+            description?: object
+
+          commands:
+            - name: AddLineItem
+              body: [productSku, role, pricing, description?]
+              emits: LineItemAdded
+            - name: UpdateLineItem
+              body: [pricing?, description?]
+              emits: LineItemUpdated
+            - name: RemoveLineItem
+              emits: LineItemRemoved
+
+          queries:
+            - name: SearchLineItem
+              returns: PagedLineItemList
+
+          events:
+            LineItemAdded:
+              fields: [orderId, lineItemId, productSku, role]
+            LineItemUpdated:
+              fields: [orderId, lineItemId]
+            LineItemRemoved:
+              fields: [orderId, lineItemId]
+
+          enumDefaults:
+            ProductSku: [INDIVIDUAL, COMPANY, TRUST]
+            Role: [BUYER, SELLER, BORROWER, LENDER]
