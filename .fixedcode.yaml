@@ -11,3 +11,8 @@ bundles:
 
 generators:
   openapi: "./generators/openapi"
+
+llm:
+  provider: openrouter
+  model: google/gemini-2.5-flash
+  apiKeyEnv: OPENROUTER_API_KEY
