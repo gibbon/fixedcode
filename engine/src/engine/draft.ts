@@ -7,7 +7,7 @@ import { loadConfig } from './config.js';
 import { resolveBundle } from './resolve.js';
 import { validateBody } from './validate.js';
 import { resolveLlmConfig, chatCompletion, type ChatContentPart } from './llm.js';
-import type { FixedCodeConfig } from '../types.js';
+import type { Bundle, FixedCodeConfig } from '../types.js';
 
 export interface DraftOptions {
   kind: string;
@@ -295,7 +295,7 @@ export async function draft(options: DraftOptions): Promise<string> {
   let yaml = extractYaml(response);
 
   // Validate
-  let validationError = tryValidate(yaml, bundle.specSchema);
+  let validationError = tryValidate(yaml, bundle);
 
   // Retry once if invalid and retry is enabled (default true)
   if (validationError && options.retry !== false) {
@@ -307,7 +307,7 @@ export async function draft(options: DraftOptions): Promise<string> {
     ]);
 
     yaml = extractYaml(retryResponse);
-    validationError = tryValidate(yaml, bundle.specSchema);
+    validationError = tryValidate(yaml, bundle);
   }
 
   if (validationError) {
@@ -326,22 +326,34 @@ export async function draft(options: DraftOptions): Promise<string> {
 }
 
 /**
- * Try to validate a YAML string against a bundle schema.
+ * Try to validate a YAML string against a bundle's schema AND enrich function.
+ * Schema validation catches structural issues, enrich() catches semantic issues
+ * (e.g. commands must be objects with a name field, not plain strings).
  * Returns error message if invalid, undefined if valid.
  */
-function tryValidate(yaml: string, schema: Record<string, unknown>): string | undefined {
+function tryValidate(yaml: string, bundle: Bundle): string | undefined {
   try {
     const parsed = parseYaml(yaml);
     if (!parsed || typeof parsed !== 'object') {
       return 'Invalid YAML: not an object';
     }
 
-    const spec = (parsed as any).spec;
-    if (!spec) {
+    const envelope = parsed as Record<string, unknown>;
+    const spec = envelope.spec;
+    if (!spec || typeof spec !== 'object') {
       return 'Missing spec: field in YAML';
     }
 
-    validateBody(spec, schema);
+    // Schema validation
+    validateBody(spec as Record<string, unknown>, bundle.specSchema);
+
+    // Enrich validation — this catches what the schema misses
+    const metadata = {
+      name: ((envelope.metadata as any)?.name as string) ?? 'draft',
+      apiVersion: ((envelope.apiVersion as string) ?? '1.0'),
+    };
+    bundle.enrich(spec as Record<string, unknown>, metadata);
+
     return undefined;
   } catch (err) {
     return err instanceof Error ? err.message : 'Validation failed';
