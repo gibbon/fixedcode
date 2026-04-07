@@ -1,0 +1,87 @@
+apiVersion: "1.0"
+kind: spring-domain
+metadata:
+  name: workspace-service
+
+spec:
+  boundedContext: Workspace
+  service:
+    port: 8081
+    package: io.pexa.gap.workspace
+
+  aggregates:
+    Workspace:
+      attributes:
+        workspaceId: uuid
+        status: string = Status
+        transactionType: string = TransactionType
+        jurisdiction: string
+        completionDate?: date
+        labels?: object
+
+      commands:
+        - name: CreateWorkspace
+          body: [transactionType, jurisdiction, completionDate?]
+          emits: WorkspaceCreated
+        - name: UpdateWorkspaceStatus
+          body: [status]
+          emits: WorkspaceStatusUpdated
+        - name: DeleteWorkspace
+          emits: WorkspaceDeleted
+
+      queries:
+        - name: GetWorkspace
+          returns: Workspace
+        - name: SearchWorkspace
+          returns: PagedWorkspaceList
+        - name: FindWorkspacesByStatus
+          query: [status]
+          returns: WorkspaceList
+
+      events:
+        WorkspaceCreated:
+          fields: [workspaceId, status, transactionType, jurisdiction]
+        WorkspaceStatusUpdated:
+          fields: [workspaceId, status]
+        WorkspaceDeleted:
+          fields: [workspaceId]
+
+      enumDefaults:
+        Status: [CREATED, PREPARED, APPROVED, CLOSED]
+        TransactionType: [TRANSFER, MORTGAGE, CAVEAT]
+
+      entities:
+        Party:
+          attributes:
+            partyId: uuid
+            workspaceId: uuid
+            partyType: string = PartyType
+            role: string = Role
+            partyDetails: object
+            representationDetails?: object
+
+          commands:
+            - name: AddParty
+              body: [partyType, role, partyDetails, representationDetails?]
+              emits: PartyAdded
+            - name: UpdateParty
+              body: [partyDetails?, representationDetails?]
+              emits: PartyUpdated
+            - name: RemoveParty
+              emits: PartyRemoved
+
+          queries:
+            - name: SearchParty
+              returns: PagedPartyList
+
+          events:
+            PartyAdded:
+              fields: [workspaceId, partyId, partyType, role]
+            PartyUpdated:
+              fields: [workspaceId, partyId]
+            PartyRemoved:
+              fields: [workspaceId, partyId]
+
+          enumDefaults:
+            PartyType: [INDIVIDUAL, COMPANY, TRUST]
+            Role: [BUYER, SELLER, BORROWER, LENDER]
