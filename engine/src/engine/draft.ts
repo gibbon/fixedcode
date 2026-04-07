@@ -1,11 +1,11 @@
-import { resolve, dirname } from 'node:path';
+import { resolve, dirname, basename, extname } from 'node:path';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { parse as parseYaml } from 'yaml';
 import { loadConfig } from './config.js';
 import { resolveBundle } from './resolve.js';
 import { validateBody } from './validate.js';
-import { resolveLlmConfig, chatCompletion } from './llm.js';
+import { resolveLlmConfig, chatCompletion, type ChatContentPart } from './llm.js';
 import type { FixedCodeConfig } from '../types.js';
 
 export interface DraftOptions {
@@ -14,6 +14,7 @@ export interface DraftOptions {
   output?: string;
   retry?: boolean;
   configPath?: string;
+  contextFiles?: string[];
   llmOverrides?: { provider?: string; model?: string };
 }
 
@@ -131,6 +132,49 @@ function loadConventions(configDir: string, kind: string): string | undefined {
   return undefined;
 }
 
+const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
+const BINARY_EXTENSIONS = new Set([...IMAGE_EXTENSIONS, '.pdf', '.zip', '.tar', '.gz']);
+
+/**
+ * Load context files and return them as chat content parts.
+ * Text files become text parts, images become image_url parts (base64 data URI).
+ */
+export function loadContextFiles(filePaths: string[]): ChatContentPart[] {
+  const parts: ChatContentPart[] = [];
+
+  for (const filePath of filePaths) {
+    const absPath = resolve(filePath);
+    if (!existsSync(absPath)) {
+      console.warn(`Warning: context file not found, skipping: ${filePath}`);
+      continue;
+    }
+
+    const ext = extname(absPath).toLowerCase();
+    const name = basename(absPath);
+
+    if (IMAGE_EXTENSIONS.has(ext)) {
+      const data = readFileSync(absPath);
+      const base64 = data.toString('base64');
+      const mime = ext === '.png' ? 'image/png'
+        : ext === '.gif' ? 'image/gif'
+        : ext === '.webp' ? 'image/webp'
+        : 'image/jpeg';
+      parts.push({
+        type: 'image_url',
+        image_url: { url: `data:${mime};base64,${base64}` },
+      });
+      parts.push({ type: 'text', text: `[Image: ${name}]` });
+    } else if (BINARY_EXTENSIONS.has(ext)) {
+      console.warn(`Warning: skipping binary file: ${filePath}`);
+    } else {
+      const content = readFileSync(absPath, 'utf-8');
+      parts.push({ type: 'text', text: `### ${name}\n\n\`\`\`\n${content}\n\`\`\`` });
+    }
+  }
+
+  return parts;
+}
+
 /**
  * Draft a YAML spec from a natural language description.
  */
@@ -158,10 +202,23 @@ export async function draft(options: DraftOptions): Promise<string> {
     example,
   });
 
+  // Build user message — text description + optional context files
+  const contextParts = options.contextFiles?.length
+    ? loadContextFiles(options.contextFiles)
+    : [];
+
+  const userContent = contextParts.length > 0
+    ? [
+        { type: 'text' as const, text: prompt.user },
+        { type: 'text' as const, text: '\n## Context Files\n' },
+        ...contextParts,
+      ]
+    : prompt.user;
+
   // Call LLM
   const response = await chatCompletion(llmConfig, [
     { role: 'system', content: prompt.system },
-    { role: 'user', content: prompt.user },
+    { role: 'user', content: userContent },
   ]);
 
   let yaml = extractYaml(response);
@@ -173,7 +230,7 @@ export async function draft(options: DraftOptions): Promise<string> {
   if (validationError && options.retry !== false) {
     const retryResponse = await chatCompletion(llmConfig, [
       { role: 'system', content: prompt.system },
-      { role: 'user', content: prompt.user },
+      { role: 'user', content: userContent },
       { role: 'assistant', content: response },
       { role: 'user', content: `The YAML spec has validation errors:\n${validationError}\n\nPlease fix the errors and output the corrected YAML spec only.` },
     ]);
