@@ -1,3 +1,5 @@
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { Command } from 'commander';
 
 export function createInitCommand() {
@@ -7,8 +9,6 @@ export function createInitCommand() {
     .option('-n, --name <name>', 'Name for the spec')
     .option('-o, --output <dir>', 'Output directory', '.')
     .action(async (opts) => {
-      const { writeFileSync, mkdirSync, existsSync } = await import('node:fs');
-      const { join } = await import('node:path');
       
       const kind = opts.kind || 'ddd-domain';
       const name = opts.name || 'my-service';

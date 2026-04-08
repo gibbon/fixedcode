@@ -9,18 +9,13 @@ const DEFAULT_CONFIG_NAME = '.fixedcode.yaml';
 export function findConfigFile(cwd: string): string | null {
   let current = resolve(cwd);
   const root = parse(resolve(cwd)).root;
-  
+
   while (current !== root) {
     const configPath = resolve(current, DEFAULT_CONFIG_NAME);
     if (existsSync(configPath)) {
       return configPath;
     }
     current = resolve(current, '..');
-  }
-  
-  const projectConfig = resolve(cwd, DEFAULT_CONFIG_NAME);
-  if (existsSync(projectConfig)) {
-    return projectConfig;
   }
 
   const userConfig = resolve(process.env.HOME ?? '', '.config/fixedcode/config.yaml');
@@ -43,17 +38,30 @@ export function loadConfig(cwd: string = process.cwd(), explicitPath?: string): 
 
   try {
     const content = readFileSync(configPath, 'utf-8');
-    const parsed = parseYaml(content) as { bundles?: Record<string, string>; generators?: Record<string, string>; llm?: { provider?: string; model?: string; baseUrl?: string; apiKeyEnv?: string; } };
+    const parsed = parseYaml(content);
+    if (!parsed || typeof parsed !== 'object') {
+      console.warn(`Warning: ${configPath} is empty or not a valid YAML object, using defaults`);
+      return { bundles: {}, configDir: cwd };
+    }
+    const cfg = parsed as Record<string, unknown>;
     const configDir = resolve(configPath, '..');
 
+    if (cfg.bundles && typeof cfg.bundles !== 'object') {
+      console.warn(`Warning: 'bundles' in ${configPath} must be an object, ignoring`);
+    }
+    if (cfg.generators && typeof cfg.generators !== 'object') {
+      console.warn(`Warning: 'generators' in ${configPath} must be an object, ignoring`);
+    }
+
     return {
-      bundles: parsed.bundles ?? {},
-      generators: parsed.generators ?? {},
+      bundles: (typeof cfg.bundles === 'object' && cfg.bundles !== null ? cfg.bundles : {}) as Record<string, string>,
+      generators: (typeof cfg.generators === 'object' && cfg.generators !== null ? cfg.generators : {}) as Record<string, string>,
       configDir,
-      llm: parsed.llm as FixedCodeConfig['llm'],
+      llm: cfg.llm as FixedCodeConfig['llm'],
     };
   } catch (err) {
-    console.error(`Warning: Failed to load config from ${configPath}:`, err);
+    const msg = err instanceof Error ? err.message : 'unknown error';
+    console.warn(`Warning: Failed to load config from ${configPath}: ${msg}`);
     return { bundles: {}, configDir: cwd };
   }
 }

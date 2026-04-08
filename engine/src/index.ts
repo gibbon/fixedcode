@@ -2,6 +2,7 @@ export type { Bundle, SpecMetadata, Context, RawSpec, RenderedFile, FixedCodeCon
 export {
   FixedCodeError, SpecParseError, EnvelopeError, BundleNotFoundError,
   BundleLoadError, SpecValidationError, EnrichmentError, RenderError, WriteError,
+  LlmError, EnrichError,
 } from './errors.js';
 
 export { generate, validate } from './engine/pipeline.js';
