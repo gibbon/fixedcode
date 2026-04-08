@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { loadConfig } from './config.js';
 import { readManifest, hashContent, type Manifest } from './manifest.js';
 import { resolveLlmConfig, chatCompletion, type ChatContentPart } from './llm.js';
-import { loadContextFiles } from './draft.js';
+import { loadContextFiles } from './context-files.js';
 import { EnrichError } from '../errors.js';
 import type { FixedCodeConfig } from '../types.js';
 
