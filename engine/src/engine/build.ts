@@ -49,13 +49,12 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
   // Library specs should go first (project skeleton), then domain specs (DDD code)
   // Read the kind field from each spec YAML to determine ordering
   const specKinds = specFiles.map(f => {
-    try {
-      const content = readFileSync(f, 'utf-8');
-      const parsed = parseYaml(content);
-      return { path: f, kind: parsed?.kind as string ?? '' };
-    } catch {
-      return { path: f, kind: '' };
+    const content = readFileSync(f, 'utf-8');
+    const parsed = parseYaml(content);
+    if (!parsed || typeof parsed !== 'object') {
+      throw new Error(`Failed to parse spec file ${f}: empty or not a valid YAML object`);
     }
+    return { path: f, kind: (parsed as Record<string, unknown>).kind as string ?? '' };
   });
 
   const orderedSpecs = [

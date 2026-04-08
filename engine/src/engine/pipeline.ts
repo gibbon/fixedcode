@@ -125,15 +125,10 @@ export async function generate(
     const adapter = bundle.adapters?.[gen.name];
     if (!adapter) continue;
 
-    try {
-      const input = adapter(context);
-      const files = gen.generate(input);
-      for (const file of files) {
-        writeWithManifest(file.path, file.content, true, `generator:${gen.name}`, relativeSpecFile);
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      console.warn(`Generator '${gen.name}' failed: ${message}`);
+    const input = adapter(context);
+    const files = gen.generate(input);
+    for (const file of files) {
+      writeWithManifest(file.path, file.content, true, `generator:${gen.name}`, relativeSpecFile);
     }
   }
 
