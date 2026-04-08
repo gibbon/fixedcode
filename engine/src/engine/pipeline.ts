@@ -1,7 +1,7 @@
-import { resolve, relative } from 'node:path';
+import { resolve, relative, sep } from 'node:path';
 import { existsSync } from 'node:fs';
 import type { Context } from '../types.js';
-import { EnrichmentError } from '../errors.js';
+import { EnrichmentError, WriteError } from '../errors.js';
 import { parseSpec, validateEnvelope } from './parse.js';
 import { loadConfig } from './config.js';
 import { resolveBundle, resolveGenerators } from './resolve.js';
@@ -66,6 +66,12 @@ export async function generate(
   let warned = 0;
 
   const writeWithManifest = (relPath: string, content: string, overwrite: boolean, bundleKind: string, specFile?: string) => {
+    // Path containment check: ensure resolved path stays within outputDir
+    const absOut = resolve(outputDir, relPath);
+    if (!absOut.startsWith(resolve(outputDir) + sep)) {
+      throw new WriteError(relPath, 'Path escapes output directory');
+    }
+
     if (isIgnored(relPath, ignorePatterns)) {
       skipped++;
       return;
