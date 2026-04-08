@@ -1,6 +1,10 @@
 import { Command } from 'commander';
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = resolve(fileURLToPath(import.meta.url), '..');
+const enginePkg = JSON.parse(readFileSync(resolve(__dirname, '../../package.json'), 'utf-8'));
 
 export function createBundleInitCommand() {
   return new Command('bundle')
@@ -26,7 +30,7 @@ export function createBundleInitCommand() {
         
         const pkgJson = {
           name: `@fixedcode/bundle-${name}`,
-          version: '0.1.0',
+          version: enginePkg.version,
           type: 'module',
           main: 'dist/index.js',
           types: 'dist/index.d.ts',
