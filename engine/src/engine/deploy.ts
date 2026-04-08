@@ -5,7 +5,7 @@
  * any particular project layout.
  */
 import { resolve, relative, dirname } from 'node:path';
-import { existsSync, readdirSync, mkdirSync, statSync, copyFileSync } from 'node:fs';
+import { existsSync, readdirSync, mkdirSync, copyFileSync } from 'node:fs';
 
 export interface DeployOptions {
   /** Build output directory (source) */
