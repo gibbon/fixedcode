@@ -17,6 +17,8 @@ export interface BuildOptions {
   dryRun?: boolean;
   /** Show diffs */
   diff?: boolean;
+  /** Path to .fixedcode.yaml config file */
+  configPath?: string;
 }
 
 export interface BuildResult {
@@ -68,6 +70,7 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
       outputDir,
       dryRun: options.dryRun,
       diff: options.diff,
+      configPath: options.configPath,
     });
   }
 
