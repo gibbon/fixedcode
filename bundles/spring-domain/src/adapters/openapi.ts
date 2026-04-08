@@ -28,27 +28,29 @@ export function toOpenApi(ctx: Context): OpenApiInput {
   const schemas: OpenApiSchema[] = [];
 
   for (const agg of aggregates) {
+    const attrTypeMap = buildAttrTypeMap(agg.attributes);
     // Entity schema
     schemas.push(mapSchema(agg));
 
     // Commands → operations
     for (const cmd of agg.commands ?? []) {
-      operations.push(mapCommand(cmd, agg.names.pascal));
+      operations.push(mapCommand(cmd, agg.names.pascal, attrTypeMap));
     }
 
     // Queries → operations
     for (const q of agg.queries ?? []) {
-      operations.push(mapQuery(q, agg.names.pascal));
+      operations.push(mapQuery(q, agg.names.pascal, attrTypeMap));
     }
 
     // Child entities
     for (const entity of agg.entities ?? []) {
+      const entityAttrTypeMap = buildAttrTypeMap(entity.attributes);
       schemas.push(mapSchema(entity));
       for (const cmd of entity.commands ?? []) {
-        operations.push(mapCommand(cmd, entity.names.pascal));
+        operations.push(mapCommand(cmd, entity.names.pascal, entityAttrTypeMap));
       }
       for (const q of entity.queries ?? []) {
-        operations.push(mapQuery(q, entity.names.pascal));
+        operations.push(mapQuery(q, entity.names.pascal, entityAttrTypeMap));
       }
     }
   }
@@ -77,7 +79,7 @@ function mapSchema(entity: any): OpenApiSchema {
   };
 }
 
-function mapCommand(cmd: any, entityName: string): OpenApiOperation {
+function mapCommand(cmd: any, entityName: string, attrTypeMap: Map<string, string>): OpenApiOperation {
   return {
     name: cmd.names.pascal,
     operationId: cmd.names.camel,
@@ -86,9 +88,9 @@ function mapCommand(cmd: any, entityName: string): OpenApiOperation {
     statusCode: cmd.http.statusCode,
     tag: entityName,
     params: {
-      path: (cmd.params.path ?? []).map(mapParam),
-      body: (cmd.params.body ?? []).map(mapParam),
-      query: (cmd.params.query ?? []).map(mapParam),
+      path: (cmd.params.path ?? []).map((p: any) => mapParam(p, attrTypeMap)),
+      body: (cmd.params.body ?? []).map((p: any) => mapParam(p, attrTypeMap)),
+      query: (cmd.params.query ?? []).map((p: any) => mapParam(p, attrTypeMap)),
     },
     response: {
       type: cmd.response.type,
@@ -97,7 +99,7 @@ function mapCommand(cmd: any, entityName: string): OpenApiOperation {
   };
 }
 
-function mapQuery(q: any, entityName: string): OpenApiOperation {
+function mapQuery(q: any, entityName: string, attrTypeMap: Map<string, string>): OpenApiOperation {
   return {
     name: q.names.pascal,
     operationId: q.names.camel,
@@ -106,9 +108,9 @@ function mapQuery(q: any, entityName: string): OpenApiOperation {
     statusCode: q.http.statusCode,
     tag: entityName,
     params: {
-      path: (q.params.path ?? []).map(mapParam),
+      path: (q.params.path ?? []).map((p: any) => mapParam(p, attrTypeMap)),
       body: [],
-      query: (q.params.query ?? []).map(mapParam),
+      query: (q.params.query ?? []).map((p: any) => mapParam(p, attrTypeMap)),
     },
     response: {
       type: q.response.type,
@@ -117,7 +119,20 @@ function mapQuery(q: any, entityName: string): OpenApiOperation {
   };
 }
 
-function mapParam(p: any): OpenApiParam {
+function buildAttrTypeMap(attributes: any[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const attr of attributes ?? []) {
+    map.set(attr.name, attr.kotlinType);
+  }
+  return map;
+}
+
+function mapParam(p: any, attrTypeMap: Map<string, string>): OpenApiParam {
+  const kotlinType = attrTypeMap.get(p.name);
+  if (kotlinType) {
+    const mapped = OPENAPI_TYPE_MAP[kotlinType];
+    if (mapped) return { name: p.names.camel, type: mapped.type, format: mapped.format, required: p.required };
+  }
   return {
     name: p.names.camel,
     type: 'string',

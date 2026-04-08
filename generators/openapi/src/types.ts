@@ -25,8 +25,7 @@ export interface OpenApiOperation {
     query: OpenApiParam[];
   };
   response: {
-    /** entity, paged, list, or void */
-    type: string;
+    type: 'entity' | 'paged' | 'list' | 'void';
     schemaRef: string;
   };
 }
