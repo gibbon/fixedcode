@@ -1,5 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import { createGenerateCommand } from './generate.js';
+
+const __dirname = resolve(fileURLToPath(import.meta.url), '..');
+const pkgVersion = JSON.parse(readFileSync(resolve(__dirname, '../../package.json'), 'utf-8')).version as string;
 import { createValidateCommand } from './validate-cmd.js';
 import { createInitCommand } from './init.js';
 import { createBundleInitCommand } from './bundle-init.js';
@@ -17,7 +23,7 @@ export function createProgram() {
   program
     .name('fixedcode')
     .description('Pluggable, spec-driven code generation engine')
-    .version('0.1.0');
+    .version(pkgVersion);
 
   program.addCommand(createGenerateCommand());
   program.addCommand(createValidateCommand());

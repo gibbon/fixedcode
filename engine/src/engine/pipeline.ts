@@ -1,5 +1,10 @@
 import { resolve, relative, sep } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import type { Context } from '../types.js';
+
+const __dirname = resolve(fileURLToPath(import.meta.url), '..');
+const engineVersion = JSON.parse(readFileSync(resolve(__dirname, '../../package.json'), 'utf-8')).version as string;
 import { EnrichmentError, WriteError } from '../errors.js';
 import { parseSpec, validateEnvelope } from './parse.js';
 import { loadConfig } from './config.js';
@@ -134,8 +139,8 @@ export async function generate(
   if (!options.dryRun) {
     writeManifest(outputDir, {
       generatedAt: new Date().toISOString(),
-      engine: '0.1.0',
-      bundles: { [rawSpec.kind]: '0.1.0' },
+      engine: engineVersion,
+      bundles: { [rawSpec.kind]: engineVersion },
       files: mergedFiles,
     });
   }
