@@ -7,6 +7,9 @@ export function parseSpec(filePath: string): RawSpec {
   try {
     const content = readFileSync(filePath, 'utf-8');
     const parsed = parseYaml(content);
+    if (!parsed || typeof parsed !== 'object') {
+      throw new SpecParseError(`${filePath} is empty or not a valid YAML object`);
+    }
     return parsed as RawSpec;
   } catch (err) {
     if (err instanceof SpecParseError) throw err;
@@ -15,7 +18,7 @@ export function parseSpec(filePath: string): RawSpec {
   }
 }
 
-export function validateEnvelope(spec: RawSpec): { valid: boolean; errors: string[] } {
+export function validateEnvelope(spec: RawSpec): void {
   const errors: string[] = [];
 
   if (!spec.apiVersion) {
@@ -37,6 +40,4 @@ export function validateEnvelope(spec: RawSpec): { valid: boolean; errors: strin
   if (errors.length > 0) {
     throw new EnvelopeError(errors.join('; '));
   }
-
-  return { valid: true, errors: [] };
 }
