@@ -1,7 +1,7 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { parse as parseYaml } from 'yaml';
 import { resolve, parse } from 'node:path';
-import { existsSync } from 'node:fs';
 import type { FixedCodeConfig } from '../types.js';
 
 const DEFAULT_CONFIG_NAME = '.fixedcode.yaml';
@@ -18,7 +18,7 @@ export function findConfigFile(cwd: string): string | null {
     current = resolve(current, '..');
   }
 
-  const userConfig = resolve(process.env.HOME ?? '', '.config/fixedcode/config.yaml');
+  const userConfig = resolve(homedir(), '.config/fixedcode/config.yaml');
   if (existsSync(userConfig)) {
     return userConfig;
   }
