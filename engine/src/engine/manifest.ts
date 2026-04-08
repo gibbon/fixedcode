@@ -101,10 +101,13 @@ export function isIgnored(relPath: string, patterns: string[]): boolean {
   return false;
 }
 
+/**
+ * Simple glob matcher. Supports `*` (single segment) and `**` (any depth).
+ * Limitation: does not support `?`, character classes `[abc]`, or negation `!`.
+ */
 function matchGlob(path: string, pattern: string): boolean {
-  // Convert simple glob to regex
   const regex = pattern
-    .replace(/\./g, '\\.')
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')  // escape all regex specials except * and ?
     .replace(/\*\*/g, '{{DOUBLESTAR}}')
     .replace(/\*/g, '[^/]*')
     .replace(/\{\{DOUBLESTAR\}\}/g, '.*');
