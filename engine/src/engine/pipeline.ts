@@ -1,10 +1,9 @@
 import { resolve, relative, sep } from 'node:path';
-import { existsSync } from 'node:fs';
 import type { Context } from '../types.js';
 import { EnrichmentError, WriteError } from '../errors.js';
 import { parseSpec, validateEnvelope } from './parse.js';
 import { loadConfig } from './config.js';
-import { resolveBundle, resolveGenerators } from './resolve.js';
+import { resolveBundle, resolveGenerators, resolveBundleDir } from './resolve.js';
 import { validateBody } from './validate.js';
 import { renderTemplates, renderFile, createHandlebarsEnv } from './render.js';
 import { writeSingleFile } from './write.js';
@@ -45,15 +44,7 @@ export async function generate(
     throw new EnrichmentError(rawSpec.kind, message);
   }
 
-  const bundlePath = config.bundles[bundle.kind];
-  let bundleDir: string;
-  if (bundlePath.startsWith('@')) {
-    // npm scoped package — resolve from project's node_modules
-    const fromNodeModules = resolve(config.configDir, 'node_modules', ...bundlePath.split('/'));
-    bundleDir = existsSync(fromNodeModules) ? fromNodeModules : resolve(config.configDir, bundlePath);
-  } else {
-    bundleDir = resolve(config.configDir, bundlePath);
-  }
+  const bundleDir = resolveBundleDir(config.bundles[bundle.kind], config.configDir);
   const templatesDir = resolve(bundleDir, bundle.templates);
   const outputDir = options.outputDir ?? resolve(specDir, 'build');
   const relativeSpecFile = relative(outputDir, resolve(specPath));

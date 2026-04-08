@@ -1,6 +1,20 @@
+import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 import { dynamicImport } from './dynamicImport.js';
 import type { Bundle, Generator, FixedCodeConfig } from '../types.js';
 import { BundleNotFoundError, BundleLoadError } from '../errors.js';
+
+/**
+ * Resolve the on-disk directory for a bundle given its config path.
+ * Handles npm scoped packages (@scope/name) and relative paths.
+ */
+export function resolveBundleDir(bundlePath: string, configDir: string): string {
+  if (bundlePath.startsWith('@')) {
+    const fromNodeModules = resolve(configDir, 'node_modules', ...bundlePath.split('/'));
+    return existsSync(fromNodeModules) ? fromNodeModules : resolve(configDir, bundlePath);
+  }
+  return resolve(configDir, bundlePath);
+}
 
 export async function resolveBundle(kind: string, config: FixedCodeConfig): Promise<Bundle> {
   const bundlePath = config.bundles[kind];
