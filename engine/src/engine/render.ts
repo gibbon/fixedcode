@@ -15,20 +15,7 @@ export async function renderTemplates(
   context: Context,
   options: TemplateOptions = {}
 ): Promise<RenderedFile[]> {
-  const hb = Handlebars.create();
-
-  if (options.helpers) {
-    for (const [name, fn] of Object.entries(options.helpers)) {
-      hb.registerHelper(name, fn);
-    }
-  }
-
-  if (options.partials) {
-    for (const [name, source] of Object.entries(options.partials)) {
-      hb.registerPartial(name, source);
-    }
-  }
-
+  const hb = createHandlebarsEnv(options);
   return renderDirectory(hb, templatesDir, '', context, '');
 }
 
@@ -118,7 +105,8 @@ function renderDirectory(
             if (innerDir) {
               try {
                 innerDir = hb.compile(innerDir)(itemContext);
-              } catch {
+              } catch (err) {
+                console.warn(`Warning: failed to render directory name '${innerDir}', using fallback: ${err instanceof Error ? err.message : 'unknown error'}`);
                 innerDir = item.names?.pascal || item.name || key;
               }
             } else {
@@ -141,8 +129,8 @@ function renderDirectory(
             const innerResults = renderDirectory(hb, baseDir, join(relDir, entry), context, outputRelDir ? join(outputRelDir, cleanDir) : cleanDir);
             results.push(...innerResults);
           }
-        } catch {
-          // Skip directories that fail to render
+        } catch (err) {
+          console.warn(`Warning: failed to render directory '${entry}': ${err instanceof Error ? err.message : 'unknown error'}`);
         }
       } else {
         const innerResults = renderDirectory(hb, baseDir, join(relDir, entry), context, outputRelDir ? join(outputRelDir, entry) : entry);

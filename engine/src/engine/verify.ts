@@ -46,13 +46,21 @@ export function verify(options: VerifyOptions): VerifyResult {
   };
 }
 
+interface DomainService { package: string }
+interface DomainCommand { name: string }
+interface DomainAggregate {
+  commands?: DomainCommand[];
+  entities?: Record<string, DomainAggregate>;
+}
+
 function verifyDomainSpec(
   spec: Record<string, unknown>,
   outputDir: string,
   checks: VerifyResult['checks']
 ): void {
-  const pkg = (spec.service as any)?.package?.replace(/\./g, '/') ?? '';
-  const aggregates = spec.aggregates as Record<string, any> ?? {};
+  const service = spec.service as DomainService | undefined;
+  const pkg = service?.package?.replace(/\./g, '/') ?? '';
+  const aggregates = (spec.aggregates ?? {}) as Record<string, DomainAggregate>;
 
   // Shared files
   check(checks, outputDir, `src/main/kotlin/${pkg}/domain/shared/DomainEvent.kt`, 'shared');
@@ -77,20 +85,20 @@ function verifyDomainSpec(
     check(checks, outputDir, `src/test/kotlin/${pkg}/api/${kebab}/${pascal}ApiDelegateImplTest.kt`, 'test');
 
     // Per-command files
-    for (const cmd of (agg.commands ?? []) as any[]) {
-      const cmdPascal = cmd.name as string;
+    for (const cmd of agg.commands ?? []) {
+      const cmdPascal = cmd.name;
       check(checks, outputDir, `src/main/kotlin/${pkg}/domain/${kebab}/commands/${cmdPascal}Command.kt`, 'command');
     }
 
     // Per-entity files
-    for (const [entityName, entity] of Object.entries((agg.entities ?? {}) as Record<string, any>)) {
+    for (const [entityName, entity] of Object.entries(agg.entities ?? {})) {
       const entityPascal = entityName;
       check(checks, outputDir, `src/main/kotlin/${pkg}/domain/${kebab}/entities/${entityPascal}.kt`, 'entity');
       check(checks, outputDir, `src/main/kotlin/${pkg}/domain/${kebab}/entities/${entityPascal}Events.kt`, 'entity');
 
       // Entity commands
-      for (const cmd of (entity.commands ?? []) as any[]) {
-        const cmdPascal = cmd.name as string;
+      for (const cmd of entity.commands ?? []) {
+        const cmdPascal = cmd.name;
         check(checks, outputDir, `src/main/kotlin/${pkg}/domain/${kebab}/entities/commands/${cmdPascal}Command.kt`, 'entity-command');
       }
     }
