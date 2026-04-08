@@ -12,7 +12,8 @@ export function detectPattern(name: string): OperationPattern {
   if (name.startsWith('Get')) return 'Get';
   if (name.startsWith('Search') || name.startsWith('List')) return 'Search';
   if (name.startsWith('Find')) return 'Find';
-  return 'Get'; // fallback
+  console.warn(`Warning: unrecognized operation pattern '${name}', defaulting to 'Get'`);
+  return 'Get';
 }
 
 export interface HttpMetadata {
@@ -62,7 +63,7 @@ export function deriveHttp(
   pathPrefix = '',
   operationName = ''
 ): HttpMetadata {
-  const base = `${pathPrefix}/${resourcePlural}`;
+  const base = pathPrefix ? `${pathPrefix}/${resourcePlural}` : `/${resourcePlural}`;
   const withId = `${base}/{${idParamName ?? 'id'}}`;
 
   switch (pattern) {
