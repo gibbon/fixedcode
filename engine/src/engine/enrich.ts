@@ -289,6 +289,19 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
 
         const code = extractCode(response);
 
+        // Validate LLM response before writing
+        if (!code || code.trim().length === 0) {
+          result.errors.push(ep.path);
+          console.error(`  Error enriching ${ep.path}: LLM returned empty response`);
+          continue;
+        }
+        const MAX_RESPONSE_SIZE = 512 * 1024; // 512KB
+        if (code.length > MAX_RESPONSE_SIZE) {
+          result.errors.push(ep.path);
+          console.error(`  Error enriching ${ep.path}: LLM response exceeds ${MAX_RESPONSE_SIZE} bytes`);
+          continue;
+        }
+
         // Backup original stub
         const backupPath = join(backupDir, ep.path);
         mkdirSync(dirname(backupPath), { recursive: true });
@@ -320,10 +333,10 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
           stdio: ['pipe', 'pipe', 'pipe'],
         });
         console.log(diff || '  (no changes)');
-      } catch (err: any) {
+      } catch (err) {
         // diff exits 1 when files differ — that's the normal case
-        if (err.stdout) {
-          console.log(err.stdout);
+        if (err instanceof Error && 'stdout' in err) {
+          console.log((err as { stdout: string }).stdout);
         }
       }
       console.log('');
