@@ -5,6 +5,7 @@
 import { resolve } from 'node:path';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { parse as parseYaml } from 'yaml';
+import { readManifest } from './manifest.js';
 
 export interface VerifyOptions {
   /** Path to the domain spec YAML */
@@ -28,12 +29,30 @@ export function verify(options: VerifyOptions): VerifyResult {
   const checks: VerifyResult['checks'] = [];
   const kind = spec.kind as string;
 
-  if (kind === 'spring-domain') {
-    verifyDomainSpec(spec.spec, outputDir, checks);
-  } else if (kind === 'spring-library') {
-    verifyLibrarySpec(outputDir, checks);
-  } else {
-    console.warn(`Warning: no verification rules for bundle kind '${kind}'. Skipping.`);
+  // Prefer manifest-based verification (works for any bundle kind)
+  const manifest = readManifest(outputDir);
+  if (manifest) {
+    const specName = spec.metadata?.name as string | undefined;
+    for (const [filePath, entry] of Object.entries(manifest.files)) {
+      // Only check files from matching bundle kind
+      if (entry.bundle !== kind) continue;
+      checks.push({
+        file: filePath,
+        exists: existsSync(resolve(outputDir, filePath)),
+        category: entry.overwrite ? 'generated' : 'extension-point',
+      });
+    }
+  }
+
+  // Fall back to bundle-specific rules if no manifest or no manifest entries found
+  if (checks.length === 0) {
+    if (kind === 'spring-domain') {
+      verifyDomainSpec(spec.spec, outputDir, checks);
+    } else if (kind === 'spring-library') {
+      verifyLibrarySpec(outputDir, checks);
+    } else {
+      console.warn(`Warning: no manifest found and no verification rules for bundle kind '${kind}'.`);
+    }
   }
 
   const missing = checks.filter(c => !c.exists).map(c => c.file);
