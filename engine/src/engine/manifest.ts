@@ -5,6 +5,7 @@
  */
 import { createHash } from 'node:crypto';
 import { resolve, relative } from 'node:path';
+import picomatch from 'picomatch';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 
 const MANIFEST_FILE = '.fixedcode-manifest.json';
@@ -102,14 +103,8 @@ export function isIgnored(relPath: string, patterns: string[]): boolean {
 }
 
 /**
- * Simple glob matcher. Supports `*` (single segment) and `**` (any depth).
- * Limitation: does not support `?`, character classes `[abc]`, or negation `!`.
+ * Glob matcher using picomatch. Supports *, **, ?, character classes, and negation.
  */
 function matchGlob(path: string, pattern: string): boolean {
-  const regex = pattern
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&')  // escape all regex specials except * and ?
-    .replace(/\*\*/g, '{{DOUBLESTAR}}')
-    .replace(/\*/g, '[^/]*')
-    .replace(/\{\{DOUBLESTAR\}\}/g, '.*');
-  return new RegExp(`^${regex}$`).test(path);
+  return picomatch(pattern)(path);
 }
