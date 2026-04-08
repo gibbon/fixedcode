@@ -44,7 +44,7 @@ export function enrichCommand(raw: {
   const auth = deriveAuth(pattern, agg.names.pascal);
   const response = deriveResponse(pattern, agg.names.pascal);
 
-  const allParams = [...pathParams, ...bodyParams].map(p => `${p.names.camel}: ${p.required ? 'String' : 'String?'}`).join(', ');
+  const allParams = [...pathParams, ...bodyParams, ...queryParams].map(p => `${p.names.camel}: ${p.required ? 'String' : 'String?'}`).join(', ');
   const methodSignature = `fun ${names.camel}(${allParams}): ${response.returnType}`;
 
   return {
