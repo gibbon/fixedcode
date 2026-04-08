@@ -9,12 +9,13 @@
       "required": ["package"],
       "properties": {
         "port": { "type": "number" },
-        "package": { "type": "string" }
+        "package": { "type": "string", "pattern": "^[a-zA-Z][a-zA-Z0-9.]*$" }
       }
     },
     "aggregates": {
       "type": "object",
-      "additionalProperties": { "$ref": "#/definitions/aggregate" }
+      "additionalProperties": { "$ref": "#/definitions/aggregate" },
+      "propertyNames": { "pattern": "^[A-Z][a-zA-Z0-9]*$" }
     },
     "remote_aggregates": {
       "type": "object"
