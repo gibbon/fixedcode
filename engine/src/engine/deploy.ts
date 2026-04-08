@@ -1,6 +1,8 @@
 /**
  * Deploy pipeline: copies build output into a downstream project's source tree.
- * Smart migration handling — skips V002 if already deployed (incremental mode).
+ * Smart migration handling — skips versioned migrations if already deployed.
+ * Bundle-agnostic: copies the full build directory structure without assuming
+ * any particular project layout.
  */
 import { resolve, relative, dirname } from 'node:path';
 import { existsSync, readdirSync, mkdirSync, statSync, copyFileSync } from 'node:fs';
@@ -8,7 +10,7 @@ import { existsSync, readdirSync, mkdirSync, statSync, copyFileSync } from 'node
 export interface DeployOptions {
   /** Build output directory (source) */
   buildDir: string;
-  /** Target project's src/ directory */
+  /** Target project directory */
   targetDir: string;
   /** Preview without writing */
   dryRun?: boolean;
@@ -28,83 +30,16 @@ export function deploy(options: DeployOptions): DeployResult {
     throw new Error(`Build directory not found: ${buildDir}`);
   }
 
-  let filesCopied = 0;
-  let filesSkipped = 0;
+  const result = copyDirectoryWithMigrationAwareness(buildDir, targetDir, options.dryRun ?? false);
 
-  // Copy plan: source → target mappings
-  const copyPlan: Array<{ src: string; dst: string; label: string }> = [
-    { src: resolve(buildDir, 'src/main/kotlin'), dst: resolve(targetDir, 'src/main/kotlin'), label: 'main sources' },
-    { src: resolve(buildDir, 'src/test/kotlin'), dst: resolve(targetDir, 'src/test/kotlin'), label: 'test sources' },
-    { src: resolve(buildDir, 'src/testIntegration'), dst: resolve(targetDir, 'src/testIntegration'), label: 'integration tests' },
-    { src: resolve(buildDir, 'src/main/resources'), dst: resolve(targetDir, 'src/main/resources'), label: 'resources' },
-    { src: resolve(buildDir, 'src/test/resources'), dst: resolve(targetDir, 'src/test/resources'), label: 'test resources' },
-  ];
-
-  // Also copy root project files (build.gradle.kts, docker-compose, etc.)
-  const rootFiles = readdirSync(buildDir, { withFileTypes: true });
-  for (const entry of rootFiles) {
-    if (entry.isFile()) {
-      copyPlan.push({
-        src: resolve(buildDir, entry.name),
-        dst: resolve(targetDir, entry.name),
-        label: entry.name,
-      });
-    } else if (entry.isDirectory() && entry.name !== 'src') {
-      // Copy non-src directories (gradle, scripts, config, docs, etc.)
-      copyPlan.push({
-        src: resolve(buildDir, entry.name),
-        dst: resolve(targetDir, entry.name),
-        label: entry.name,
-      });
-    }
+  if (result.copied > 0) {
+    console.log(`  Deployed ${result.copied} files to ${targetDir}`);
+  }
+  if (result.skipped > 0) {
+    console.log(`  Skipped ${result.skipped} files (migration already exists)`);
   }
 
-  for (const { src, dst, label } of copyPlan) {
-    if (!existsSync(src)) continue;
-
-    const srcStat = statSync(src);
-    if (srcStat.isFile()) {
-      // Single file copy
-      if (options.dryRun) {
-        console.log(`[DRY RUN] Would copy: ${label}`);
-        filesCopied++;
-      } else {
-        mkdirSync(dirname(dst), { recursive: true });
-        copyFileSync(src, dst);
-        filesCopied++;
-      }
-      continue;
-    }
-
-    // Directory copy with migration awareness
-    const result = copyDirectoryWithMigrationAwareness(src, dst, options.dryRun ?? false);
-    filesCopied += result.copied;
-    filesSkipped += result.skipped;
-
-    if (result.copied > 0) {
-      console.log(`  Deployed ${result.copied} ${label} files`);
-    }
-    if (result.skipped > 0) {
-      console.log(`  Skipped ${result.skipped} ${label} files (already exist)`);
-    }
-  }
-
-  // Copy OpenAPI spec to static resources if present
-  const openapiFiles = readdirSync(buildDir).filter(f => f.includes('openapi') && f.endsWith('.yaml'));
-  for (const file of openapiFiles) {
-    const specSrc = resolve(buildDir, file);
-    const specDst = resolve(targetDir, 'src/main/resources/static/api-core', file);
-    if (options.dryRun) {
-      console.log(`[DRY RUN] Would deploy OpenAPI spec: ${file}`);
-    } else {
-      mkdirSync(dirname(specDst), { recursive: true });
-      copyFileSync(specSrc, specDst);
-      console.log(`  Deployed OpenAPI spec: ${file}`);
-    }
-    filesCopied++;
-  }
-
-  return { targetDir, filesCopied, filesSkipped };
+  return { targetDir, filesCopied: result.copied, filesSkipped: result.skipped };
 }
 
 function copyDirectoryWithMigrationAwareness(
@@ -127,7 +62,7 @@ function copyDirectoryWithMigrationAwareness(
       if (entry.isDirectory()) {
         walk(srcPath);
       } else if (entry.isFile()) {
-        // Smart migration handling: skip V002 if target already has it
+        // Smart migration handling: skip versioned SQL migrations if target already has them
         if (relPath.includes('migration') && entry.name.startsWith('V0') && entry.name.endsWith('.sql')) {
           if (existsSync(dstPath)) {
             skipped++;
@@ -136,6 +71,7 @@ function copyDirectoryWithMigrationAwareness(
         }
 
         if (dryRun) {
+          console.log(`[DRY RUN] Would copy: ${relPath}`);
           copied++;
         } else {
           mkdirSync(dirname(dstPath), { recursive: true });
