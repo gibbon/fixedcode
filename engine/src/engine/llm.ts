@@ -79,13 +79,22 @@ export async function chatCompletion(
     max_tokens: options?.maxTokens ?? 4096,
   });
 
+  const LLM_TIMEOUT_MS = 120_000; // 2 minutes
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LLM_TIMEOUT_MS);
+
   let response: Response;
   try {
-    response = await fetch(url, { method: 'POST', headers, body });
+    response = await fetch(url, { method: 'POST', headers, body, signal: controller.signal });
   } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new LlmError(`LLM request timed out after ${LLM_TIMEOUT_MS / 1000}s`);
+    }
     const message = err instanceof Error ? err.message : 'Unknown error';
     throw new LlmError(`LLM request failed (network error): ${message}`);
   }
+
+  clearTimeout(timeout);
 
   if (!response.ok) {
     const text = await response.text().catch(() => 'No response body');
@@ -95,7 +104,7 @@ export async function chatCompletion(
   let data: unknown;
   try { data = await response.json(); } catch { throw new LlmError('LLM request failed: response is not valid JSON'); }
 
-  const choices = (data as any)?.choices;
+  const choices = (data as { choices?: Array<{ message?: { content?: string } }> })?.choices;
   if (!Array.isArray(choices) || choices.length === 0) {
     throw new LlmError('LLM request failed: empty choices in response');
   }
