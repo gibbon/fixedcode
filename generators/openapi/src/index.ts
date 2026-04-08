@@ -156,6 +156,13 @@ function buildOperation(op: OpenApiOperation): string {
     lines.push(`            application/json:`);
     lines.push(`              schema:`);
     lines.push(`                $ref: '#/components/schemas/Paged${op.response.schemaRef}List'`);
+  } else if (op.response.type === 'list') {
+    lines.push(`        '200':`);
+    lines.push(`          description: Retrieved successfully`);
+    lines.push(`          content:`);
+    lines.push(`            application/json:`);
+    lines.push(`              schema:`);
+    lines.push(`                $ref: '#/components/schemas/${op.response.schemaRef}List'`);
   } else if (op.response.type === 'void') {
     lines.push(`        '200':`);
     lines.push(`          description: Success`);
