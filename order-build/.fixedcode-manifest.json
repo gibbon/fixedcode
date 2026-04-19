@@ -1,0 +1,153 @@
+{
+  "generatedAt": "2026-04-07T12:52:42.478Z",
+  "engine": "0.1.0",
+  "bundles": {
+    "spring-domain": "0.1.0"
+  },
+  "files": {
+    "src/main/kotlin/com/example/ordermanagement/domain/shared/DomainEvent.kt": {
+      "hash": "3f414b6932c7bb6e",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/shared/ValidationResult.kt": {
+      "hash": "537370899f84f22f",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/Order.kt": {
+      "hash": "3f1d29cc9a122c48",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/OrderEvents.kt": {
+      "hash": "b3b5cf4d97fe23b3",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/application/order/OrderCommandService.kt": {
+      "hash": "3fbc651dd24047f0",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/application/order/OrderQueryService.kt": {
+      "hash": "5f223e7d88103ec7",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/api/order/OrderApiDelegateImpl.kt": {
+      "hash": "cb84584836df3de8",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/infrastructure/order/OrderReadRepositoryImpl.kt": {
+      "hash": "4a4ae05e78eca3bc",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/infrastructure/order/OrderWriteRepositoryImpl.kt": {
+      "hash": "8480bfa490f721f9",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/test/kotlin/com/example/ordermanagement/domain/order/OrderTest.kt": {
+      "hash": "af3d204a05de4576",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/test/kotlin/com/example/ordermanagement/application/order/OrderCommandServiceTest.kt": {
+      "hash": "93e1d0e7f8835087",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/test/kotlin/com/example/ordermanagement/api/order/OrderApiDelegateImplTest.kt": {
+      "hash": "ab30ce6be118deb0",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/OrderBusinessService.kt": {
+      "hash": "608e3b79654f9780",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/DefaultOrderBusinessService.kt": {
+      "hash": "d9b1b410d8bb33be",
+      "bundle": "spring-domain",
+      "overwrite": false,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/DefaultOrderValidator.kt": {
+      "hash": "efd4a4859ff38768",
+      "bundle": "spring-domain",
+      "overwrite": false,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/commands/CreateOrderCommand.kt": {
+      "hash": "3a7b8988a99af3f7",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/commands/UpdateOrderStatusCommand.kt": {
+      "hash": "47f9a0922743f133",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/commands/CancelOrderCommand.kt": {
+      "hash": "571c7a8cf53b82bf",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/entities/LineItem.kt": {
+      "hash": "a151b365b3bc6ae8",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/entities/LineItemEvents.kt": {
+      "hash": "943fdbe02f75f6b1",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/entities/commands/AddLineItemCommand.kt": {
+      "hash": "8280aad07433a71d",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/entities/commands/UpdateLineItemQuantityCommand.kt": {
+      "hash": "118ace69412366eb",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "src/main/kotlin/com/example/ordermanagement/domain/order/entities/commands/RemoveLineItemCommand.kt": {
+      "hash": "1ac46cb1d990dc6d",
+      "bundle": "spring-domain",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    },
+    "ordermanagement-domain-api-openapi.yaml": {
+      "hash": "81625f328b38085a",
+      "bundle": "generator:openapi",
+      "overwrite": true,
+      "specFile": "../order-domain.yaml"
+    }
+  }
+}
