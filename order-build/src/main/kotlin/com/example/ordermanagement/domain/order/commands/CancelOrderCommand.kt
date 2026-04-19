@@ -1,0 +1,7 @@
+package com.example.ordermanagement.domain.order.commands
+
+import java.util.UUID
+
+data class CancelOrderCommand(
+    val orderId: UUID,
+)
