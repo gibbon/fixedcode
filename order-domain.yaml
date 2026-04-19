@@ -1,0 +1,86 @@
+apiVersion: "1.0"
+kind: spring-domain
+metadata:
+  name: order-management-service
+  description: order management service with orders and line items
+spec:
+  boundedContext: OrderManagement
+  service:
+    port: 8080
+    package: com.example.ordermanagement
+
+  aggregates:
+    Order:
+      attributes:
+        orderId: uuid
+        customerId: uuid
+        orderDate: date
+        status: string = OrderStatus
+        totalAmount: double
+        shippingAddress: object
+        billingAddress: object
+
+      commands:
+        - name: CreateOrder
+          body: [customerId, shippingAddress, billingAddress]
+          emits: OrderCreated
+        - name: UpdateOrderStatus
+          body: [status]
+          emits: OrderStatusUpdated
+        - name: CancelOrder
+          emits: OrderCancelled
+
+      queries:
+        - name: GetOrder
+          returns: Order
+        - name: SearchOrders
+          returns: PagedOrderList
+        - name: FindOrdersByCustomerId
+          query: [customerId]
+          returns: OrderList
+
+      events:
+        OrderCreated:
+          fields: [orderId, customerId, orderDate, status, shippingAddress, billingAddress]
+        OrderStatusUpdated:
+          fields: [orderId, status]
+        OrderCancelled:
+          fields: [orderId]
+
+      enumDefaults:
+        OrderStatus: [PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED]
+
+      entities:
+        LineItem:
+          attributes:
+            lineItemId: uuid
+            orderId: uuid
+            productId: uuid
+            quantity: integer
+            unitPrice: double
+            subtotal: double
+
+          commands:
+            - name: AddLineItem
+              body: [productId, quantity, unitPrice]
+              emits: LineItemAdded
+            - name: UpdateLineItemQuantity
+              body: [quantity]
+              emits: LineItemQuantityUpdated
+            - name: RemoveLineItem
+              emits: LineItemRemoved
+
+          queries:
+            - name: GetLineItem
+              returns: LineItem
+            - name: FindLineItemsByOrderId
+              query: [orderId]
+              returns: LineItemList
+
+          events:
+            LineItemAdded:
+              fields: [orderId, lineItemId, productId, quantity, unitPrice]
+            LineItemQuantityUpdated:
+              fields: [orderId, lineItemId, quantity]
+            LineItemRemoved:
+              fields: [orderId, lineItemId]
