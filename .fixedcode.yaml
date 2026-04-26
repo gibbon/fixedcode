@@ -10,6 +10,7 @@ bundles:
   rdan-tool-state-crud: "./bundles/rdan-tool-state-crud"
   rdan-tool-compute: "./bundles/rdan-tool-compute"
   rdan-dashboard-page-crud: "./bundles/rdan-dashboard-page-crud"
+  rdan-dashboard-nextjs-page: "./bundles/rdan-dashboard-nextjs-page"
   rdan-agent-specialist: "./bundles/rdan-agent-specialist"
   rdan-infra-dashboard-page: "./bundles/rdan-infra-dashboard-page"
   python-service: "./bundles/python-service"
