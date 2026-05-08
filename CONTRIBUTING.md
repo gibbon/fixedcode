@@ -40,10 +40,10 @@ Each bundle and generator is a self-contained npm package with its own `package.
 cd engine && npm run build && cd ..
 
 # run a generation against an example
-node engine/bin/fixedcode.js generate examples/workspace-service/workspace-domain.yaml -o /tmp/out
+node engine/bin/fixedcode.js generate path/to/your-spec.yaml -o /tmp/out
 
 # verify the output matches the spec's expectations
-node engine/bin/fixedcode.js verify examples/workspace-service/workspace-domain.yaml /tmp/out
+node engine/bin/fixedcode.js verify path/to/your-spec.yaml /tmp/out
 
 # run tests
 cd engine && npm test

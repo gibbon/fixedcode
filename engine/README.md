@@ -45,8 +45,8 @@ npm install -g fixedcode
 fixedcode registry install spring-domain
 
 # generate
-fixedcode generate workspace-domain.yaml -o build
-fixedcode verify workspace-domain.yaml build
+fixedcode generate my-domain.yaml -o build
+fixedcode verify my-domain.yaml build
 
 # (optional) deploy into an existing project
 fixedcode deploy build /path/to/your/project
@@ -69,7 +69,7 @@ import {
 } from 'fixedcode';
 
 await generate({
-  specPath: './workspace-domain.yaml',
+  specPath: './my-domain.yaml',
   outputDir: './build',
 });
 ```

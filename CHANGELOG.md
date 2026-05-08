@@ -4,6 +4,15 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Removed
+- `bundles/spring-library` — replaced with a generic project-skeleton bundle in a future release.
+- `bundles/mcp-wrapper` — to be reintroduced with cleaner external references.
+- `examples/workspace-service` — replaced with simpler examples.
+- `docs/archive/` and `docs/business-plan.md`.
+
+### Notes
+- Repo history rewritten to remove unrelated content. Force-push pre-v0.2.1.
+
 ## [0.2.0] — 2026-05-09
 
 First public OSS release.

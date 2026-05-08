@@ -12,7 +12,7 @@ YAML in. Production code out. Same spec → same code, every time.
 
 ```bash
 npm install -g fixedcode
-fixedcode generate workspace-domain.yaml -o build
+fixedcode generate my-domain.yaml -o build
 fixedcode deploy build /path/to/your/project
 ```
 
@@ -35,13 +35,13 @@ You get the speed of "write me a service that does X" with the auditability of "
 npm install -g fixedcode
 
 # (optional) draft a spec from a description using your configured LLM
-fixedcode draft spring-domain "workspace service with workspaces and parties" -o workspace-domain.yaml
+fixedcode draft spring-domain "order service with orders and line items" -o my-domain.yaml
 
 # generate code
-fixedcode generate workspace-domain.yaml -o build
+fixedcode generate my-domain.yaml -o build
 
 # verify every expected file landed
-fixedcode verify workspace-domain.yaml build
+fixedcode verify my-domain.yaml build
 
 # (optional) deploy into an existing project
 fixedcode deploy build /path/to/your/project
@@ -87,13 +87,11 @@ A `.fixedcode-manifest.json` in the output dir tracks every generated file with 
 | Package | Kind | What it generates |
 |---|---|---|
 | [`spring-domain`](bundles/spring-domain) | bundle | Spring Boot DDD domain code in Kotlin: aggregates, commands, queries, controllers, repositories, events. |
-| [`spring-library`](bundles/spring-library) | bundle | Spring Boot project skeleton: Gradle, Docker, configs, common infra. |
 | [`ts-service`](bundles/ts-service) | bundle | TypeScript + Express service skeleton with structured logging, config, tests. |
 | [`ts-agent`](bundles/ts-agent) | bundle | TypeScript AI-agent service: tool registry, LLM loop, HTTP server. |
 | [`python-service`](bundles/python-service) | bundle | Python + FastAPI service skeleton. |
 | [`python-agent`](bundles/python-agent) | bundle | Python AI-agent service. |
 | [`crud-api`](bundles/crud-api) | bundle | Minimal CRUD REST API (template-only). |
-| [`mcp-wrapper`](bundles/mcp-wrapper) | bundle | Wraps an existing service as an MCP server. |
 | [`ddd-spike`](bundles/ddd-spike) | bundle | Original DDD reference bundle. |
 | [`openapi`](generators/openapi) | generator | OpenAPI 3.0.3 spec from a domain context (used by `spring-domain`). |
 
