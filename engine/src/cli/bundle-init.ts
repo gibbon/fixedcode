@@ -53,7 +53,7 @@ export function createBundleInitCommand() {
             test: 'vitest run',
           },
           dependencies: {
-            '@fixedcode/engine': 'file:../../engine',
+            fixedcode: 'file:../../engine',
           },
           devDependencies: {
             '@types/node': '^22.0.0',
@@ -80,8 +80,8 @@ export function createBundleInitCommand() {
           exclude: ['node_modules', 'dist', 'test'],
         };
 
-        const bundleCode = `import type { Bundle, SpecMetadata } from '@fixedcode/engine';
-import type { Context } from '@fixedcode/engine';
+        const bundleCode = `import type { Bundle, SpecMetadata } from 'fixedcode';
+import type { Context } from 'fixedcode';
 import { enrich } from './enrich/index.js';
 
 const schema = {
@@ -102,8 +102,8 @@ export const bundle: Bundle = {
 export default bundle;
 `;
 
-        const enrichCode = `import type { Context } from '@fixedcode/engine';
-import type { SpecMetadata } from '@fixedcode/engine';
+        const enrichCode = `import type { Context } from 'fixedcode';
+import type { SpecMetadata } from 'fixedcode';
 
 export function enrich(spec: Record<string, unknown>, _metadata: SpecMetadata): Context {
   // TODO: Implement enrichment

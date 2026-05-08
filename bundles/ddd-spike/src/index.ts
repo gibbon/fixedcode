@@ -1,5 +1,5 @@
-import type { Bundle, SpecMetadata } from '@fixedcode/engine';
-import type { Context } from '@fixedcode/engine';
+import type { Bundle, SpecMetadata } from 'fixedcode';
+import type { Context } from 'fixedcode';
 import { enrich } from './enrich/index.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

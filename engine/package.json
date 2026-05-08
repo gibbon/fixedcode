@@ -1,5 +1,5 @@
 {
-  "name": "@fixedcode/engine",
+  "name": "fixedcode",
   "version": "0.2.0",
   "description": "Spec-driven, deterministic code generation engine. Same spec → same code, every time.",
   "type": "module",

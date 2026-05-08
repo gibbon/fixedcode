@@ -228,8 +228,8 @@ spec:
 All CLI commands map to importable TypeScript functions:
 
 ```typescript
-import { generate, validate, build, deploy, verify } from '@fixedcode/engine';
-import { fetchRegistry, searchRegistry, installPackage, publishPackage } from '@fixedcode/engine';
+import { generate, validate, build, deploy, verify } from 'fixedcode';
+import { fetchRegistry, searchRegistry, installPackage, publishPackage } from 'fixedcode';
 ```
 
 ## AI Sandwich Workflow

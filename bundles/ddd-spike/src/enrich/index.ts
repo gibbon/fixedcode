@@ -1,4 +1,4 @@
-import type { SpecMetadata } from '@fixedcode/engine';
+import type { SpecMetadata } from 'fixedcode';
 import type { DddContext, AggregateContext } from '../context.js';
 import { toNameVariants } from './names.js';
 import { toTypeMapping } from './types.js';
