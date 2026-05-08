@@ -179,6 +179,13 @@ grep -n rdan registry.json || echo "OK: no rdan refs"
 ```
 Expected: empty.
 
+- [ ] **Step 3b: Sweep examples/ for rdan refs**
+
+```bash
+grep -rn rdan examples/ 2>/dev/null && echo "FAIL: examples reference rdan" || echo "OK: examples clean"
+```
+If any matches, edit them out before continuing.
+
 - [ ] **Step 4: Delete the one-shot script (it's not part of the product)**
 
 ```bash
@@ -671,7 +678,7 @@ We aim to acknowledge within 72 hours and ship a fix within 30 days for high-sev
   names from the registry; arguments are passed as an array, never a shell string.
 ```
 
-- [ ] **Step 2: Ask user for the security contact email** *(or default to `security@fixedcode.dev` placeholder, ack in commit)*
+- [ ] **Step 2: Use placeholder `security@fixedcode.dev`** (the user's autonomous-execution rule says don't pause; the placeholder can be swapped later in a follow-up commit if a real address differs).
 
 - [ ] **Step 3: Commit**
 
