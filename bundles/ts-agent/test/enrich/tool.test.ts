@@ -3,7 +3,11 @@ import { enrichTool } from '../../src/enrich/tool.js';
 
 describe('enrichTool', () => {
   it('enriches an HTTP tool with naming variants', () => {
-    const tool = enrichTool({ name: 'call-api', type: 'http', config: { baseUrl: 'https://api.example.com' } });
+    const tool = enrichTool({
+      name: 'call-api',
+      type: 'http',
+      config: { baseUrl: 'https://api.example.com' },
+    });
     expect(tool.name.pascal).toBe('CallApi');
     expect(tool.name.camel).toBe('callApi');
     expect(tool.name.kebab).toBe('call-api');
@@ -20,7 +24,11 @@ describe('enrichTool', () => {
   });
 
   it('enriches a function tool', () => {
-    const tool = enrichTool({ name: 'write-file', type: 'function', config: { handler: 'write-file' } });
+    const tool = enrichTool({
+      name: 'write-file',
+      type: 'function',
+      config: { handler: 'write-file' },
+    });
     expect(tool.type).toBe('function');
     expect(tool.templatePath).toBe('tools/function.ts.hbs');
   });
@@ -32,7 +40,11 @@ describe('enrichTool', () => {
   });
 
   it('enriches an MCP tool', () => {
-    const tool = enrichTool({ name: 'external', type: 'mcp', config: { server: 'localhost:3001' } });
+    const tool = enrichTool({
+      name: 'external',
+      type: 'mcp',
+      config: { server: 'localhost:3001' },
+    });
     expect(tool.type).toBe('mcp');
     expect(tool.templatePath).toBe('tools/mcp.ts.hbs');
   });

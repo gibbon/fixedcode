@@ -81,7 +81,7 @@ describe('verify with manifest — all files exist', () => {
     expect(result.missing).toEqual([]);
     expect(result.total).toBe(2);
     expect(result.checks).toHaveLength(2);
-    expect(result.checks.every(c => c.exists)).toBe(true);
+    expect(result.checks.every((c) => c.exists)).toBe(true);
   });
 
   it('exposes the category for each check entry', () => {
@@ -99,8 +99,8 @@ describe('verify with manifest — all files exist', () => {
 
     const result = verify({ specPath, outputDir });
 
-    const generated = result.checks.find(c => c.file === 'src/Generated.kt');
-    const ext = result.checks.find(c => c.file === 'src/DefaultExtension.kt');
+    const generated = result.checks.find((c) => c.file === 'src/Generated.kt');
+    const ext = result.checks.find((c) => c.file === 'src/DefaultExtension.kt');
 
     expect(generated?.category).toBe('generated');
     expect(ext?.category).toBe('extension-point');
@@ -198,7 +198,7 @@ describe('verify with manifest — kind filtering', () => {
     // spring-library file not on disk but should not be checked
     expect(result.passed).toBe(true);
     expect(result.total).toBe(1);
-    expect(result.checks.map(c => c.file)).toEqual(['src/domain/Order.kt']);
+    expect(result.checks.map((c) => c.file)).toEqual(['src/domain/Order.kt']);
   });
 });
 

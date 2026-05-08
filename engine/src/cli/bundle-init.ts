@@ -21,9 +21,8 @@ export function validateBundleName(name: string): string {
 }
 
 export function createBundleInitCommand() {
-  return new Command('bundle')
-    .description('Bundle management commands')
-    .addCommand(new Command('init')
+  return new Command('bundle').description('Bundle management commands').addCommand(
+    new Command('init')
       .description('Scaffold a new bundle project')
       .argument('<name>', 'Bundle name (e.g., my-bundle)')
       .option('-k, --kind <kind>', 'Bundle kind (e.g., my-domain)', 'my-domain')
@@ -31,18 +30,18 @@ export function createBundleInitCommand() {
       .action(async (name: string, opts) => {
         validateBundleName(name);
         const outputDir = join(opts.output, name);
-        
+
         if (existsSync(outputDir)) {
           console.error(`Error: Directory ${outputDir} already exists`);
           process.exit(1);
         }
-        
+
         mkdirSync(outputDir, { recursive: true });
         mkdirSync(join(outputDir, 'src/enrich'), { recursive: true });
         mkdirSync(join(outputDir, 'templates'), { recursive: true });
         mkdirSync(join(outputDir, 'test/enrich'), { recursive: true });
         mkdirSync(join(outputDir, 'test/fixtures'), { recursive: true });
-        
+
         const pkgJson = {
           name: `@fixedcode/bundle-${name}`,
           version: enginePkg.version,
@@ -63,7 +62,7 @@ export function createBundleInitCommand() {
             vitest: '^3.0.0',
           },
         };
-        
+
         const tsConfig = {
           compilerOptions: {
             target: 'ES2022',
@@ -80,7 +79,7 @@ export function createBundleInitCommand() {
           include: ['src'],
           exclude: ['node_modules', 'dist', 'test'],
         };
-        
+
         const bundleCode = `import type { Bundle, SpecMetadata } from '@fixedcode/engine';
 import type { Context } from '@fixedcode/engine';
 import { enrich } from './enrich/index.js';
@@ -102,7 +101,7 @@ export const bundle: Bundle = {
 
 export default bundle;
 `;
-        
+
         const enrichCode = `import type { Context } from '@fixedcode/engine';
 import type { SpecMetadata } from '@fixedcode/engine';
 
@@ -111,12 +110,12 @@ export function enrich(spec: Record<string, unknown>, _metadata: SpecMetadata): 
   return spec as unknown as Context;
 }
 `;
-        
+
         writeFileSync(join(outputDir, 'package.json'), JSON.stringify(pkgJson, null, 2));
         writeFileSync(join(outputDir, 'tsconfig.json'), JSON.stringify(tsConfig, null, 2));
         writeFileSync(join(outputDir, 'src/index.ts'), bundleCode);
         writeFileSync(join(outputDir, 'src/enrich/index.ts'), enrichCode);
-        
+
         console.log(`Created bundle at ${outputDir}`);
         console.log(`  - package.json`);
         console.log(`  - tsconfig.json`);
@@ -130,6 +129,6 @@ export function enrich(spec: Record<string, unknown>, _metadata: SpecMetadata): 
         console.log('  # Edit src/index.ts to set your bundle kind');
         console.log('  # Add spec schema to src/index.ts');
         console.log('  # Add templates to templates/');
-      })
-    );
+      }),
+  );
 }

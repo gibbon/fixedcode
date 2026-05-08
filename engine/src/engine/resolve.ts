@@ -24,8 +24,10 @@ export async function resolveBundle(kind: string, config: FixedCodeConfig): Prom
   }
 
   try {
-    const module = await dynamicImport(bundlePath, config.configDir) as { default?: Record<string, unknown> };
-    const bundle = module.default ?? module as Record<string, unknown>;
+    const module = (await dynamicImport(bundlePath, config.configDir)) as {
+      default?: Record<string, unknown>;
+    };
+    const bundle = module.default ?? (module as Record<string, unknown>);
 
     if (!bundle.kind) {
       throw new BundleLoadError(bundlePath, "Bundle must have a 'kind' property");
@@ -51,13 +53,18 @@ export async function resolveGenerators(config: FixedCodeConfig): Promise<Genera
   const generators: Generator[] = [];
   for (const [name, genPath] of Object.entries(config.generators ?? {})) {
     try {
-      const module = await dynamicImport(genPath, config.configDir) as { default?: Record<string, unknown> };
-      const gen = module.default ?? module as Record<string, unknown>;
+      const module = (await dynamicImport(genPath, config.configDir)) as {
+        default?: Record<string, unknown>;
+      };
+      const gen = module.default ?? (module as Record<string, unknown>);
       if (typeof gen.generate !== 'function') {
         console.warn(`Generator '${name}' at ${genPath} has no generate() function, skipping`);
         continue;
       }
-      generators.push({ name: (gen.name as string) ?? name, generate: gen.generate as Generator['generate'] });
+      generators.push({
+        name: (gen.name as string) ?? name,
+        generate: gen.generate as Generator['generate'],
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       console.warn(`Failed to load generator '${name}' from ${genPath}: ${message}`);

@@ -41,7 +41,12 @@ export function generateFiles(ctx: TsServiceContext): FileEntry[] {
     { template: 'src/server.ts.hbs', output: 'src/server.ts', ctx: c },
     { template: 'src/logger.ts.hbs', output: 'src/logger.ts', ctx: c },
     { template: 'src/routes/health.ts.hbs', output: 'src/routes/health.ts', ctx: c },
-    { template: 'defaults/custom-routes.ts.hbs', output: 'src/defaults/custom-routes.ts', ctx: c, overwrite: false },
+    {
+      template: 'defaults/custom-routes.ts.hbs',
+      output: 'src/defaults/custom-routes.ts',
+      ctx: c,
+      overwrite: false,
+    },
     { template: 'tests/health.test.ts.hbs', output: 'tests/health.test.ts', ctx: c },
   ];
 
@@ -65,7 +70,7 @@ export const bundle: Bundle = {
     provides: ['logging', 'health-check', 'error-handling', 'docker'],
     files: {
       'health-check': ['src/routes/health.ts'],
-      'docker': ['Dockerfile', 'docker-compose.yml'],
+      docker: ['Dockerfile', 'docker-compose.yml'],
     },
   },
 };

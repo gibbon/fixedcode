@@ -13,7 +13,7 @@ export interface TemplateOptions {
 export async function renderTemplates(
   templatesDir: string,
   context: Context,
-  options: TemplateOptions = {}
+  options: TemplateOptions = {},
 ): Promise<RenderedFile[]> {
   const hb = createHandlebarsEnv(options);
   return renderDirectory(hb, templatesDir, '', context, '');
@@ -53,7 +53,7 @@ export function renderFile(
   absTemplatePath: string,
   ctx: Record<string, unknown>,
   options: TemplateOptions = {},
-  hb?: typeof Handlebars
+  hb?: typeof Handlebars,
 ): string {
   const instance = hb ?? createHandlebarsEnv(options);
 
@@ -71,19 +71,19 @@ function renderDirectory(
   baseDir: string,
   relDir: string,
   context: Context,
-  outputRelDir: string
+  outputRelDir: string,
 ): RenderedFile[] {
   const results: RenderedFile[] = [];
   const fullDir = join(baseDir, relDir);
-  
+
   if (!existsSync(fullDir)) return results;
-  
+
   const entries = readdirSync(fullDir);
-  
+
   for (const rawEntry of entries) {
     const entry = rawEntry.replace(/\n/g, '').trim();
     if (!entry) continue;
-    
+
     const entryPath = join(fullDir, entry);
     const stat = statSync(entryPath);
 
@@ -94,7 +94,7 @@ function renderDirectory(
         if (match) {
           const key = match[1];
           const items = context[key];
-          
+
           if (!Array.isArray(items)) {
             throw new RenderError(join(relDir, entry), `'${key}' is not an array in context`);
           }
@@ -106,17 +106,25 @@ function renderDirectory(
               try {
                 innerDir = hb.compile(innerDir)(itemContext);
               } catch (err) {
-                console.warn(`Warning: failed to render directory name '${innerDir}', using fallback: ${err instanceof Error ? err.message : 'unknown error'}`);
+                console.warn(
+                  `Warning: failed to render directory name '${innerDir}', using fallback: ${err instanceof Error ? err.message : 'unknown error'}`,
+                );
                 innerDir = item.names?.pascal || item.name || key;
               }
             } else {
               innerDir = item.names?.pascal || item.name || key;
             }
-            
+
             const templateReadDir = join(relDir, entry);
             const outputWriteDir = outputRelDir ? join(outputRelDir, innerDir) : innerDir;
-            
-            const innerResults = renderDirectory(hb, baseDir, templateReadDir, itemContext, outputWriteDir);
+
+            const innerResults = renderDirectory(
+              hb,
+              baseDir,
+              templateReadDir,
+              itemContext,
+              outputWriteDir,
+            );
             results.push(...innerResults);
           }
         }
@@ -126,14 +134,28 @@ function renderDirectory(
           const renderedDir = hb.compile(entry)(context);
           const cleanDir = renderedDir.replace(/\n/g, '').trim();
           if (cleanDir && cleanDir !== entry) {
-            const innerResults = renderDirectory(hb, baseDir, join(relDir, entry), context, outputRelDir ? join(outputRelDir, cleanDir) : cleanDir);
+            const innerResults = renderDirectory(
+              hb,
+              baseDir,
+              join(relDir, entry),
+              context,
+              outputRelDir ? join(outputRelDir, cleanDir) : cleanDir,
+            );
             results.push(...innerResults);
           }
         } catch (err) {
-          console.warn(`Warning: failed to render directory '${entry}': ${err instanceof Error ? err.message : 'unknown error'}`);
+          console.warn(
+            `Warning: failed to render directory '${entry}': ${err instanceof Error ? err.message : 'unknown error'}`,
+          );
         }
       } else {
-        const innerResults = renderDirectory(hb, baseDir, join(relDir, entry), context, outputRelDir ? join(outputRelDir, entry) : entry);
+        const innerResults = renderDirectory(
+          hb,
+          baseDir,
+          join(relDir, entry),
+          context,
+          outputRelDir ? join(outputRelDir, entry) : entry,
+        );
         results.push(...innerResults);
       }
     } else if (stat.isFile()) {
@@ -163,13 +185,13 @@ function renderTemplateFile(
   hb: typeof Handlebars,
   baseDir: string,
   relPath: string,
-  context: Context
+  context: Context,
 ): RenderedFile | null {
   if (!relPath.endsWith('.hbs')) {
     // Pass through static (non-template) files as-is
     // Skip binary files that can't be read as UTF-8 text
     const binaryExts = ['.jar', '.png', '.jpg', '.gif', '.ico', '.zip', '.gz', '.tar', '.class'];
-    if (binaryExts.some(ext => relPath.endsWith(ext))) {
+    if (binaryExts.some((ext) => relPath.endsWith(ext))) {
       return null;
     }
     const fullPath = join(baseDir, relPath);
@@ -187,11 +209,11 @@ function renderTemplateFile(
     const content = readFileSync(fullPath, 'utf-8');
     const template = hb.compile(content);
     const rendered = template(context);
-    
+
     if (rendered.trim() === '') {
       return null;
     }
-    
+
     let outPath = relPath.replace(/\.hbs$/, '');
     try {
       outPath = hb.compile(outPath)(context);

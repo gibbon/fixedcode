@@ -1,2 +1,2 @@
 bundles:
-  ts-agent: "../../bundles/ts-agent"
+  ts-agent: '../../bundles/ts-agent'

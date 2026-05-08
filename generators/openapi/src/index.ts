@@ -90,7 +90,8 @@ function buildOperation(op: OpenApiOperation): string {
   }
 
   // Parameters
-  const hasParams = op.params.path.length > 0 || op.params.query.length > 0 || op.response.type === 'paged';
+  const hasParams =
+    op.params.path.length > 0 || op.params.query.length > 0 || op.response.type === 'paged';
   if (hasParams) {
     lines.push(`      parameters:`);
     for (const p of op.params.path) {
@@ -200,7 +201,7 @@ function buildSchema(schema: OpenApiSchema): string {
 
 function buildRequestSchema(op: OpenApiOperation): string {
   const lines: string[] = [];
-  const required = op.params.body.filter(p => p.required);
+  const required = op.params.body.filter((p) => p.required);
   lines.push(`    ${op.name}Request:`);
   lines.push(`      type: object`);
   if (required.length > 0) {

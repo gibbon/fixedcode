@@ -22,9 +22,7 @@ const TYPE_MAP: Record<string, string> = {
   object: 'Map<String, Any>',
 };
 
-export function enrichAttributes(
-  raw: Record<string, string> | undefined
-): EnrichedAttribute[] {
+export function enrichAttributes(raw: Record<string, string> | undefined): EnrichedAttribute[] {
   if (!raw) return [];
   const entries = Object.entries(raw);
   let identityAssigned = false;
@@ -32,7 +30,7 @@ export function enrichAttributes(
   return entries.map(([rawKey, rawValue]) => {
     const optional = rawKey.endsWith('?');
     const name = optional ? rawKey.slice(0, -1) : rawKey;
-    const [typePart, defaultPart] = rawValue.split('=').map(s => s.trim());
+    const [typePart, defaultPart] = rawValue.split('=').map((s) => s.trim());
     const rawType = typePart.trim();
     const kotlinType = TYPE_MAP[rawType] ?? rawType;
 

@@ -2,13 +2,22 @@ import { describe, it, expect } from 'vitest';
 import { enrichCommand } from '../../src/enrich/command.js';
 
 const aggCtx = {
-  names: { kebab: 'orders', pascal: 'Order', camel: 'order', plural: 'orders', pluralKebab: 'orders' },
+  names: {
+    kebab: 'orders',
+    pascal: 'Order',
+    camel: 'order',
+    plural: 'orders',
+    pluralKebab: 'orders',
+  },
   identityField: 'orderId',
 };
 
 describe('enrichCommand', () => {
   it('CreateOrder → POST /orders 201 CREATE', () => {
-    const cmd = enrichCommand({ name: 'CreateOrder', body: ['channel', 'currency', 'placedAt?'] }, aggCtx as any);
+    const cmd = enrichCommand(
+      { name: 'CreateOrder', body: ['channel', 'currency', 'placedAt?'] },
+      aggCtx as any,
+    );
     expect(cmd.http.method).toBe('POST');
     expect(cmd.http.path).toBe('/orders');
     expect(cmd.http.statusCode).toBe(201);
@@ -29,7 +38,7 @@ describe('enrichCommand', () => {
   it('explicit path override takes precedence over convention', () => {
     const cmd = enrichCommand(
       { name: 'GetOrdersBySubscriber', path: ['subscriberId'], returns: 'OrderList' },
-      aggCtx as any
+      aggCtx as any,
     );
     expect(cmd.params.path[0].name).toBe('subscriberId');
     expect(cmd.http.path).toBe('/orders/{subscriberId}');

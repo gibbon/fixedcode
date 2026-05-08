@@ -5,7 +5,7 @@ describe('ts-service enrich', () => {
   it('enriches a basic service spec', () => {
     const ctx = enrich(
       { service: { port: 3000, package: 'ops-agent' }, features: { docker: true } },
-      { name: 'ops-agent', apiVersion: '1.0' }
+      { name: 'ops-agent', apiVersion: '1.0' },
     );
     expect(ctx.serviceName.pascal).toBe('OpsAgent');
     expect(ctx.serviceName.kebab).toBe('ops-agent');
@@ -17,10 +17,7 @@ describe('ts-service enrich', () => {
   });
 
   it('applies defaults', () => {
-    const ctx = enrich(
-      { service: { package: 'my-svc' } },
-      { name: 'my-svc', apiVersion: '1.0' }
-    );
+    const ctx = enrich({ service: { package: 'my-svc' } }, { name: 'my-svc', apiVersion: '1.0' });
     expect(ctx.port).toBe(3000);
     expect(ctx.hasDocker).toBe(true);
     expect(ctx.hasDatabase).toBe(false);
@@ -28,8 +25,11 @@ describe('ts-service enrich', () => {
 
   it('enables database feature', () => {
     const ctx = enrich(
-      { service: { package: 'db-svc' }, features: { database: { enabled: true, type: 'postgres' } } },
-      { name: 'db-svc', apiVersion: '1.0' }
+      {
+        service: { package: 'db-svc' },
+        features: { database: { enabled: true, type: 'postgres' } },
+      },
+      { name: 'db-svc', apiVersion: '1.0' },
     );
     expect(ctx.hasDatabase).toBe(true);
     expect(ctx.databaseType).toBe('postgres');

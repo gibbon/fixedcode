@@ -47,9 +47,7 @@ describe('build — error handling', () => {
 
     const { build } = await import('../src/engine/build.js');
 
-    await expect(build({ specDir, outputDir })).rejects.toThrow(
-      /No spec files found/,
-    );
+    await expect(build({ specDir, outputDir })).rejects.toThrow(/No spec files found/);
   });
 });
 
@@ -174,10 +172,7 @@ describe('build — migration consolidation', () => {
 
     writeFileSync(
       join(migDir, 'V001__create_party_table.sql'),
-      [
-        '-- lineItem table',
-        'CREATE TABLE lineItem (id UUID PRIMARY KEY);',
-      ].join('\n') + '\n',
+      ['-- lineItem table', 'CREATE TABLE lineItem (id UUID PRIMARY KEY);'].join('\n') + '\n',
       'utf-8',
     );
 
@@ -191,7 +186,9 @@ describe('build — migration consolidation', () => {
     const content = readFileSync(v002Path, 'utf-8');
     expect(content).toContain('CREATE TABLE order');
     expect(content).toContain('CREATE TABLE lineItem');
-    expect(content).toContain('ALTER TABLE order ADD CONSTRAINT fk_workspace_owner FOREIGN KEY');
+    expect(content).toContain(
+      'ALTER TABLE order ADD CONSTRAINT fk_workspace_owner FOREIGN KEY',
+    );
   });
 
   it('moves FK constraints after CREATE TABLE statements', async () => {

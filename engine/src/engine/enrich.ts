@@ -59,7 +59,7 @@ function splitTokens(name: string): string[] {
 function hasSharedToken(a: string, b: string): boolean {
   const tokensA = splitTokens(a);
   const tokensB = new Set(splitTokens(b));
-  return tokensA.some(t => t.length >= 4 && tokensB.has(t));
+  return tokensA.some((t) => t.length >= 4 && tokensB.has(t));
 }
 
 /**
@@ -70,11 +70,13 @@ function hasSharedToken(a: string, b: string): boolean {
 export function findNeighbours(
   extensionPointPath: string,
   manifest: Manifest,
-  maxFiles: number = 10
+  maxFiles: number = 10,
 ): string[] {
   const dir = dirname(extensionPointPath);
   const parentDir = dirname(dir);
-  const baseName = basename(extensionPointPath).replace(/^Default/, '').replace(/\.\w+$/, '');
+  const baseName = basename(extensionPointPath)
+    .replace(/^Default/, '')
+    .replace(/\.\w+$/, '');
 
   const candidates: Array<{ path: string; score: number }> = [];
 
@@ -90,7 +92,11 @@ export function findNeighbours(
     } else if (fileDir === parentDir || dirname(fileDir) === parentDir) {
       // Parent directory or sibling directory — check name affinity
       const fileBase = basename(filePath).replace(/\.\w+$/, '');
-      if (fileBase.includes(baseName) || baseName.includes(fileBase) || hasSharedToken(baseName, fileBase)) {
+      if (
+        fileBase.includes(baseName) ||
+        baseName.includes(fileBase) ||
+        hasSharedToken(baseName, fileBase)
+      ) {
         candidates.push({ path: filePath, score: 2 });
       }
     }
@@ -100,7 +106,7 @@ export function findNeighbours(
   // Sort by score (descending), then alphabetically for stability
   candidates.sort((a, b) => b.score - a.score || a.path.localeCompare(b.path));
 
-  return candidates.slice(0, maxFiles).map(c => c.path);
+  return candidates.slice(0, maxFiles).map((c) => c.path);
 }
 
 /**
@@ -194,7 +200,7 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
 
   // Filter to specific file if --file provided
   if (options.file) {
-    extensionPoints = extensionPoints.filter(ep => ep.path === options.file);
+    extensionPoints = extensionPoints.filter((ep) => ep.path === options.file);
     if (extensionPoints.length === 0) {
       throw new EnrichError(`File '${options.file}' is not an extension point in the manifest`);
     }
@@ -202,10 +208,14 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
 
   // Safety check: refuse to overwrite user-modified extension points
   if (!options.force) {
-    const modified = checkModified(outputDir, extensionPoints.map(ep => ep.path), manifest);
+    const modified = checkModified(
+      outputDir,
+      extensionPoints.map((ep) => ep.path),
+      manifest,
+    );
     if (modified.length > 0) {
       throw new EnrichError(
-        `Extension point files have been modified since generation. Use --force to overwrite.\nModified files:\n  ${modified.join('\n  ')}`
+        `Extension point files have been modified since generation. Use --force to overwrite.\nModified files:\n  ${modified.join('\n  ')}`,
       );
     }
   }
@@ -213,9 +223,7 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
   const result: EnrichResult = { enriched: [], skipped: [], errors: [] };
 
   // Load context files once (shared across all extension points)
-  const contextParts = options.contextFiles?.length
-    ? loadContextFiles(options.contextFiles)
-    : [];
+  const contextParts = options.contextFiles?.length ? loadContextFiles(options.contextFiles) : [];
 
   // Create backup directory for original stubs
   const backupDir = join(outputDir, '.fixedcode-enrich-backup');
@@ -241,9 +249,7 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
         continue;
       }
     } else {
-      const specPath = options.specFile
-        ? resolve(options.specFile)
-        : resolve(outputDir, specKey);
+      const specPath = options.specFile ? resolve(options.specFile) : resolve(outputDir, specKey);
       if (!existsSync(specPath)) {
         console.warn(`Warning: spec file not found: ${specPath}`);
         for (const ep of eps) result.skipped.push(ep.path);
@@ -266,7 +272,7 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
         // Gather neighbours
         const neighbourPaths = findNeighbours(ep.path, manifest);
         const neighbours: NeighbourFile[] = neighbourPaths
-          .map(p => {
+          .map((p) => {
             const nPath = resolve(outputDir, p);
             if (!existsSync(nPath)) return null;
             return { path: p, content: readFileSync(nPath, 'utf-8') };
@@ -282,19 +288,24 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
         });
 
         // Build user message — prompt + optional context files
-        const userContent = contextParts.length > 0
-          ? [
-              { type: 'text' as const, text: prompt.user },
-              { type: 'text' as const, text: '\n## Additional Context\n' },
-              ...contextParts,
-            ]
-          : prompt.user;
+        const userContent =
+          contextParts.length > 0
+            ? [
+                { type: 'text' as const, text: prompt.user },
+                { type: 'text' as const, text: '\n## Additional Context\n' },
+                ...contextParts,
+              ]
+            : prompt.user;
 
         // Call LLM
-        const response = await chatCompletion(llmConfig, [
-          { role: 'system', content: prompt.system },
-          { role: 'user', content: userContent },
-        ], { maxTokens: 8192 });
+        const response = await chatCompletion(
+          llmConfig,
+          [
+            { role: 'system', content: prompt.system },
+            { role: 'user', content: userContent },
+          ],
+          { maxTokens: 8192 },
+        );
 
         const code = extractCode(response);
 
@@ -307,7 +318,9 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
         const MAX_RESPONSE_SIZE = 512 * 1024; // 512KB
         if (code.length > MAX_RESPONSE_SIZE) {
           result.errors.push(ep.path);
-          console.error(`  Error enriching ${ep.path}: LLM response exceeds ${MAX_RESPONSE_SIZE} bytes`);
+          console.error(
+            `  Error enriching ${ep.path}: LLM response exceeds ${MAX_RESPONSE_SIZE} bytes`,
+          );
           continue;
         }
 

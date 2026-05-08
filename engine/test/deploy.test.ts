@@ -98,7 +98,10 @@ describe('deploy — migration skip logic', () => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
 
     mkdirSync(join(buildDir, 'db', 'migration'), { recursive: true });
-    writeFileSync(join(buildDir, 'db', 'migration', 'V002__add_col.sql'), 'ALTER TABLE foo ADD COLUMN bar;');
+    writeFileSync(
+      join(buildDir, 'db', 'migration', 'V002__add_col.sql'),
+      'ALTER TABLE foo ADD COLUMN bar;',
+    );
 
     const result = deploy({ buildDir, targetDir });
 
@@ -121,7 +124,9 @@ describe('deploy — migration skip logic', () => {
     expect(result.filesCopied).toBe(1);
     expect(result.filesSkipped).toBe(0);
     // File should be overwritten since the skip rule didn't apply
-    expect(readFileSync(join(targetDir, 'sql', 'V001__init.sql'), 'utf8')).toBe('CREATE TABLE foo;');
+    expect(readFileSync(join(targetDir, 'sql', 'V001__init.sql'), 'utf8')).toBe(
+      'CREATE TABLE foo;',
+    );
   });
 
   it('does NOT skip a .sql file that does not start with V0', () => {
@@ -201,8 +206,6 @@ describe('deploy — error handling', () => {
   it('throws when build directory does not exist', () => {
     const missingDir = join(tmpdir(), 'nonexistent-build-dir-xyz-12345');
 
-    expect(() => deploy({ buildDir: missingDir, targetDir })).toThrow(
-      /Build directory not found/,
-    );
+    expect(() => deploy({ buildDir: missingDir, targetDir })).toThrow(/Build directory not found/);
   });
 });

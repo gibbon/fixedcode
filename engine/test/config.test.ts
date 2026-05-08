@@ -58,13 +58,7 @@ describe('loadConfig', () => {
 
   it('loads from explicit path (second argument)', () => {
     const configPath = join(tmpDir, 'my-config.yaml');
-    writeFileSync(
-      configPath,
-      [
-        'bundles:',
-        '  spring-domain: ./bundles/spring-domain',
-      ].join('\n'),
-    );
+    writeFileSync(configPath, ['bundles:', '  spring-domain: ./bundles/spring-domain'].join('\n'));
     const result = loadConfig(tmpDir, configPath);
     expect(result.bundles).toEqual({ 'spring-domain': './bundles/spring-domain' });
     expect(result.configDir).toBe(tmpDir);

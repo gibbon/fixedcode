@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { detectPattern, deriveHttp, deriveAuth, deriveResponse } from '../../src/enrich/conventions.js';
+import {
+  detectPattern,
+  deriveHttp,
+  deriveAuth,
+  deriveResponse,
+} from '../../src/enrich/conventions.js';
 
 describe('detectPattern', () => {
   it('detects Create', () => expect(detectPattern('CreateOrder')).toBe('Create'));
@@ -57,7 +62,14 @@ describe('deriveHttp', () => {
     expect(h.path).toBe('/orders/by-date-range');
   });
   it('Find with explicit path param uses withId', () => {
-    const h = deriveHttp('Find', 'orders', true, 'subscriberId', '', 'FindWorkspacesBySubscriber');
+    const h = deriveHttp(
+      'Find',
+      'orders',
+      true,
+      'subscriberId',
+      '',
+      'FindWorkspacesBySubscriber',
+    );
     expect(h.path).toBe('/orders/{subscriberId}');
   });
 });
@@ -66,13 +78,14 @@ describe('deriveAuth', () => {
   it('Create → CREATE', () => expect(deriveAuth('Create').action).toBe('CREATE'));
   it('Update → UPDATE', () => expect(deriveAuth('Update').action).toBe('UPDATE'));
   it('Delete → DELETE', () => expect(deriveAuth('Delete').action).toBe('DELETE'));
-  it('Get → READ',    () => expect(deriveAuth('Get').action).toBe('READ'));
+  it('Get → READ', () => expect(deriveAuth('Get').action).toBe('READ'));
   it('Search → READ', () => expect(deriveAuth('Search').action).toBe('READ'));
 });
 
 describe('deriveResponse', () => {
-  it('Create → entity 201', () => expect(deriveResponse('Create', 'Order').type).toBe('entity'));
-  it('Delete → void 204',   () => expect(deriveResponse('Delete', 'Order').type).toBe('void'));
-  it('Get → entity 200',    () => expect(deriveResponse('Get', 'Order').type).toBe('entity'));
-  it('Search → paged 200',  () => expect(deriveResponse('Search', 'Order').type).toBe('paged'));
+  it('Create → entity 201', () =>
+    expect(deriveResponse('Create', 'Order').type).toBe('entity'));
+  it('Delete → void 204', () => expect(deriveResponse('Delete', 'Order').type).toBe('void'));
+  it('Get → entity 200', () => expect(deriveResponse('Get', 'Order').type).toBe('entity'));
+  it('Search → paged 200', () => expect(deriveResponse('Search', 'Order').type).toBe('paged'));
 });

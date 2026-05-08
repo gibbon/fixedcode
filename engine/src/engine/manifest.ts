@@ -53,7 +53,7 @@ export function shouldWrite(
   relPath: string,
   overwrite: boolean,
   outputDir: string,
-  manifest: Manifest | null
+  manifest: Manifest | null,
 ): 'write' | 'skip' | 'warn-overwrite' {
   const absPath = resolve(outputDir, relPath);
 
@@ -91,8 +91,8 @@ export function loadIgnorePatterns(projectDir: string): string[] {
   if (!existsSync(ignorePath)) return [];
   return readFileSync(ignorePath, 'utf-8')
     .split('\n')
-    .map(line => line.trim())
-    .filter(line => line && !line.startsWith('#'));
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('#'));
 }
 
 export function isIgnored(relPath: string, patterns: string[]): boolean {

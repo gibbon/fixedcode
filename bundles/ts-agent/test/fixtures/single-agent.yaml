@@ -1,4 +1,4 @@
-apiVersion: "1.0"
+apiVersion: '1.0'
 kind: ts-agent
 metadata:
   name: coder-agent
@@ -8,16 +8,16 @@ spec:
   provider: vercel-ai
   model:
     tier: balanced
-  prompt: "You are a coding agent with full filesystem access."
+  prompt: 'You are a coding agent with full filesystem access.'
   tools:
     - name: read-file
       type: cli
-      config: { command: "cat" }
+      config: { command: 'cat' }
     - name: write-file
       type: function
-      config: { handler: "write-file" }
+      config: { handler: 'write-file' }
     - name: web-search
       type: http
-      config: { baseUrl: "https://api.search.com" }
+      config: { baseUrl: 'https://api.search.com' }
   server:
     port: 3100

@@ -13,7 +13,7 @@ describe('ts-service e2e', () => {
   it('generates all expected files from basic service spec', () => {
     const ctx = enrich(spec.spec, { name: spec.metadata.name, apiVersion: spec.apiVersion });
     const files = generateFiles(ctx);
-    const paths = files.map(f => f.output);
+    const paths = files.map((f) => f.output);
 
     expect(paths).toContain('package.json');
     expect(paths).toContain('tsconfig.json');
@@ -31,10 +31,10 @@ describe('ts-service e2e', () => {
   it('excludes Docker files when docker is disabled', () => {
     const ctx = enrich(
       { service: { package: 'no-docker' }, features: { docker: false } },
-      { name: 'no-docker', apiVersion: '1.0' }
+      { name: 'no-docker', apiVersion: '1.0' },
     );
     const files = generateFiles(ctx);
-    const paths = files.map(f => f.output);
+    const paths = files.map((f) => f.output);
     expect(paths).not.toContain('Dockerfile');
     expect(paths).not.toContain('docker-compose.yml');
   });
@@ -42,7 +42,7 @@ describe('ts-service e2e', () => {
   it('marks extension points with overwrite false', () => {
     const ctx = enrich(spec.spec, { name: spec.metadata.name, apiVersion: spec.apiVersion });
     const files = generateFiles(ctx);
-    const extensionPoints = files.filter(f => f.overwrite === false);
+    const extensionPoints = files.filter((f) => f.overwrite === false);
     expect(extensionPoints).toHaveLength(1);
     expect(extensionPoints[0].output).toBe('src/defaults/custom-routes.ts');
   });

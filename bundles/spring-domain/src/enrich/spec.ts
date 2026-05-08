@@ -24,7 +24,7 @@ export interface RawQuerySpec {
   returns: string;
 }
 
-export interface RawEntitySpec extends RawAggregateSpec {}
+export type RawEntitySpec = RawAggregateSpec;
 
 export interface RawDomainSpec {
   boundedContext: string;

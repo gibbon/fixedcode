@@ -94,15 +94,23 @@ describe('draft integration', () => {
     // Set up a minimal test bundle
     const bundleDir = join(tmpDir, 'test-bundle');
     mkdirSync(join(bundleDir, 'templates'), { recursive: true });
-    writeFileSync(join(bundleDir, 'schema.json'), JSON.stringify({
-      type: 'object',
-      required: ['name'],
-      properties: { name: { type: 'string' } },
-    }));
-    writeFileSync(join(bundleDir, 'package.json'), JSON.stringify({ name: 'test-bundle', type: 'module', main: 'index.js' }));
+    writeFileSync(
+      join(bundleDir, 'schema.json'),
+      JSON.stringify({
+        type: 'object',
+        required: ['name'],
+        properties: { name: { type: 'string' } },
+      }),
+    );
+    writeFileSync(
+      join(bundleDir, 'package.json'),
+      JSON.stringify({ name: 'test-bundle', type: 'module', main: 'index.js' }),
+    );
     // Minimal bundle index that exports the required shape
     mkdirSync(join(bundleDir, 'src'), { recursive: true });
-    writeFileSync(join(bundleDir, 'index.js'), `
+    writeFileSync(
+      join(bundleDir, 'index.js'),
+      `
       import { readFileSync } from 'node:fs';
       import { fileURLToPath } from 'node:url';
       import { dirname, join } from 'node:path';
@@ -114,7 +122,8 @@ describe('draft integration', () => {
         enrich: (spec) => spec,
         templates: 'templates',
       };
-    `);
+    `,
+    );
 
     // Write test config
     const configPath = join(tmpDir, '.fixedcode.yaml');
@@ -150,12 +159,20 @@ describe('draft integration', () => {
     // Set up a bundle where enrich() rejects specs missing a "required" field
     const bundleDir = join(tmpDir, 'strict-bundle');
     mkdirSync(join(bundleDir, 'templates'), { recursive: true });
-    writeFileSync(join(bundleDir, 'schema.json'), JSON.stringify({
-      type: 'object',
-      properties: { name: { type: 'string' } },
-    }));
-    writeFileSync(join(bundleDir, 'package.json'), JSON.stringify({ name: 'strict-bundle', type: 'module', main: 'index.js' }));
-    writeFileSync(join(bundleDir, 'index.js'), `
+    writeFileSync(
+      join(bundleDir, 'schema.json'),
+      JSON.stringify({
+        type: 'object',
+        properties: { name: { type: 'string' } },
+      }),
+    );
+    writeFileSync(
+      join(bundleDir, 'package.json'),
+      JSON.stringify({ name: 'strict-bundle', type: 'module', main: 'index.js' }),
+    );
+    writeFileSync(
+      join(bundleDir, 'index.js'),
+      `
       import { readFileSync } from 'node:fs';
       import { fileURLToPath } from 'node:url';
       import { dirname, join } from 'node:path';
@@ -171,15 +188,18 @@ describe('draft integration', () => {
         },
         templates: 'templates',
       };
-    `);
+    `,
+    );
 
     const configPath = join(tmpDir, '.fixedcode-strict.yaml');
     writeFileSync(configPath, `bundles:\n  strict-bundle: "${bundleDir}"\n`);
 
     // First response: schema-valid but enrich() rejects (no hyphen in name)
-    const badYaml = 'apiVersion: "1.0"\nkind: strict-bundle\nmetadata:\n  name: test\nspec:\n  name: nohyphen';
+    const badYaml =
+      'apiVersion: "1.0"\nkind: strict-bundle\nmetadata:\n  name: test\nspec:\n  name: nohyphen';
     // Second response (retry): passes both schema and enrich()
-    const goodYaml = 'apiVersion: "1.0"\nkind: strict-bundle\nmetadata:\n  name: test\nspec:\n  name: has-hyphen';
+    const goodYaml =
+      'apiVersion: "1.0"\nkind: strict-bundle\nmetadata:\n  name: test\nspec:\n  name: has-hyphen';
 
     let callCount = 0;
     fetchSpy.mockImplementation(async () => {
@@ -207,7 +227,14 @@ describe('draft integration', () => {
 describe('draft round-trip with spring-domain', () => {
   it('example spec survives enrich()', async () => {
     // Load the actual example spec and verify it passes through spring-domain enrich()
-    const examplePath = join(process.cwd(), '..', 'bundles', 'spring-domain', 'examples', 'order-domain.yaml');
+    const examplePath = join(
+      process.cwd(),
+      '..',
+      'bundles',
+      'spring-domain',
+      'examples',
+      'order-domain.yaml',
+    );
     if (!existsSync(examplePath)) {
       // Skip if running from a different cwd
       return;

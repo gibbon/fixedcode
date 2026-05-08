@@ -21,5 +21,7 @@ export function resolveSpecPath(name: string, cwd: string = process.cwd()): stri
     return directPath;
   }
 
-  throw new Error(`Could not find spec file for '${name}'. Tried: ${SPEC_PATTERNS.map(p => p.replace('{name}', name)).join(', ')}`);
+  throw new Error(
+    `Could not find spec file for '${name}'. Tried: ${SPEC_PATTERNS.map((p) => p.replace('{name}', name)).join(', ')}`,
+  );
 }

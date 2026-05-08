@@ -10,7 +10,7 @@ export interface WriteOptions {
 export function writeSingleFile(
   absPath: string,
   content: string,
-  options: WriteOptions = {}
+  options: WriteOptions = {},
 ): void {
   if (options.dryRun) {
     console.log(`[DRY RUN] Would write: ${absPath}`);

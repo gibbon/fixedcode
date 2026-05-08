@@ -1,4 +1,4 @@
-apiVersion: "1.0"
+apiVersion: '1.0'
 kind: spring-domain
 metadata:
   name: order-service

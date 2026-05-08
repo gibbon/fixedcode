@@ -13,7 +13,7 @@ function splitWords(name: string): string[] {
 }
 
 function toPascal(words: string[]): string {
-  return words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+  return words.map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
 }
 
 function toCamel(words: string[]): string {
@@ -22,21 +22,26 @@ function toCamel(words: string[]): string {
 }
 
 function toSnake(words: string[]): string {
-  return words.map(w => w.toLowerCase()).join('_');
+  return words.map((w) => w.toLowerCase()).join('_');
 }
 
 function toKebab(words: string[]): string {
-  return words.map(w => w.toLowerCase()).join('-');
+  return words.map((w) => w.toLowerCase()).join('-');
 }
 
 function toUpper(words: string[]): string {
-  return words.map(w => w.toUpperCase()).join('_');
+  return words.map((w) => w.toUpperCase()).join('_');
 }
 
 /** Naive English pluralisation — covers common cases */
 function pluralize(word: string): string {
-  if (word.endsWith('s') || word.endsWith('x') || word.endsWith('z') ||
-      word.endsWith('sh') || word.endsWith('ch')) {
+  if (
+    word.endsWith('s') ||
+    word.endsWith('x') ||
+    word.endsWith('z') ||
+    word.endsWith('sh') ||
+    word.endsWith('ch')
+  ) {
     return word + 'es';
   }
   if (word.endsWith('y') && !/[aeiou]y$/i.test(word)) {

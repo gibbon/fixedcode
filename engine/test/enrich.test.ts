@@ -12,25 +12,46 @@ describe('findNeighbours', () => {
     bundles: { 'spring-domain': '0.1.0' },
     files: {
       'src/domain/order/Order.kt': {
-        hash: 'a', bundle: 'spring-domain', overwrite: true, specFile: '../spec.yaml',
+        hash: 'a',
+        bundle: 'spring-domain',
+        overwrite: true,
+        specFile: '../spec.yaml',
       },
       'src/domain/order/OrderBusinessService.kt': {
-        hash: 'b', bundle: 'spring-domain', overwrite: true, specFile: '../spec.yaml',
+        hash: 'b',
+        bundle: 'spring-domain',
+        overwrite: true,
+        specFile: '../spec.yaml',
       },
       'src/domain/order/OrderEvents.kt': {
-        hash: 'c', bundle: 'spring-domain', overwrite: true, specFile: '../spec.yaml',
+        hash: 'c',
+        bundle: 'spring-domain',
+        overwrite: true,
+        specFile: '../spec.yaml',
       },
       'src/domain/order/DefaultOrderBusinessService.kt': {
-        hash: 'd', bundle: 'spring-domain', overwrite: false, specFile: '../spec.yaml',
+        hash: 'd',
+        bundle: 'spring-domain',
+        overwrite: false,
+        specFile: '../spec.yaml',
       },
       'src/application/order/OrderCommandService.kt': {
-        hash: 'e', bundle: 'spring-domain', overwrite: true, specFile: '../spec.yaml',
+        hash: 'e',
+        bundle: 'spring-domain',
+        overwrite: true,
+        specFile: '../spec.yaml',
       },
       'src/domain/OrderRepository.kt': {
-        hash: 'f', bundle: 'spring-domain', overwrite: true, specFile: '../spec.yaml',
+        hash: 'f',
+        bundle: 'spring-domain',
+        overwrite: true,
+        specFile: '../spec.yaml',
       },
       'src/config/SecurityConfig.kt': {
-        hash: 'g', bundle: 'spring-domain', overwrite: true, specFile: '../spec.yaml',
+        hash: 'g',
+        bundle: 'spring-domain',
+        overwrite: true,
+        specFile: '../spec.yaml',
       },
     },
   };
@@ -38,7 +59,7 @@ describe('findNeighbours', () => {
   it('finds same-directory neighbours', () => {
     const neighbours = findNeighbours(
       'src/domain/order/DefaultOrderBusinessService.kt',
-      manifest
+      manifest,
     );
     expect(neighbours).toContain('src/domain/order/Order.kt');
     expect(neighbours).toContain('src/domain/order/OrderBusinessService.kt');
@@ -48,7 +69,7 @@ describe('findNeighbours', () => {
   it('excludes other extension points', () => {
     const neighbours = findNeighbours(
       'src/domain/order/DefaultOrderBusinessService.kt',
-      manifest
+      manifest,
     );
     // Should not include itself or other overwrite:false files
     expect(neighbours).not.toContain('src/domain/order/DefaultOrderBusinessService.kt');
@@ -57,7 +78,7 @@ describe('findNeighbours', () => {
   it('includes parent-directory files with name affinity', () => {
     const neighbours = findNeighbours(
       'src/domain/order/DefaultOrderBusinessService.kt',
-      manifest
+      manifest,
     );
     // Parent dir file with name affinity (contains "Order") should be included
     expect(neighbours).toContain('src/domain/OrderRepository.kt');
@@ -69,7 +90,7 @@ describe('findNeighbours', () => {
     const neighbours = findNeighbours(
       'src/domain/order/DefaultOrderBusinessService.kt',
       manifest,
-      2
+      2,
     );
     expect(neighbours.length).toBeLessThanOrEqual(2);
   });
@@ -125,9 +146,7 @@ describe('buildEnrichPrompt', () => {
       specYaml: 'kind: test',
       stubPath: 'src/Default.kt',
       stubContent: '// TODO',
-      neighbours: [
-        { path: 'src/Interface.kt', content: 'interface Foo {}' },
-      ],
+      neighbours: [{ path: 'src/Interface.kt', content: 'interface Foo {}' }],
     });
     expect(result.user).toContain('src/Interface.kt');
     expect(result.user).toContain('interface Foo {}');
@@ -157,13 +176,22 @@ describe('enrich integration', () => {
     mkdirSync(domainDir, { recursive: true });
 
     // Write a generated interface file
-    writeFileSync(join(domainDir, 'FooService.kt'), 'interface FooService {\n  fun doThing(): String\n}');
+    writeFileSync(
+      join(domainDir, 'FooService.kt'),
+      'interface FooService {\n  fun doThing(): String\n}',
+    );
 
     // Write an extension point stub
-    writeFileSync(join(domainDir, 'DefaultFooService.kt'), 'class DefaultFooService : FooService {\n  override fun doThing(): String {\n    // TODO: implement\n    throw NotImplementedError()\n  }\n}');
+    writeFileSync(
+      join(domainDir, 'DefaultFooService.kt'),
+      'class DefaultFooService : FooService {\n  override fun doThing(): String {\n    // TODO: implement\n    throw NotImplementedError()\n  }\n}',
+    );
 
     // Write a spec file
-    writeFileSync(join(tmpDir, 'spec.yaml'), 'apiVersion: "1.0"\nkind: test\nmetadata:\n  name: foo\nspec:\n  name: Foo');
+    writeFileSync(
+      join(tmpDir, 'spec.yaml'),
+      'apiVersion: "1.0"\nkind: test\nmetadata:\n  name: foo\nspec:\n  name: Foo',
+    );
 
     // Write manifest
     writeManifest(tmpDir, {
@@ -172,16 +200,23 @@ describe('enrich integration', () => {
       bundles: { test: '0.1.0' },
       files: {
         'src/domain/FooService.kt': {
-          hash: 'abc', bundle: 'test', overwrite: true, specFile: 'spec.yaml',
+          hash: 'abc',
+          bundle: 'test',
+          overwrite: true,
+          specFile: 'spec.yaml',
         },
         'src/domain/DefaultFooService.kt': {
-          hash: 'def', bundle: 'test', overwrite: false, specFile: 'spec.yaml',
+          hash: 'def',
+          bundle: 'test',
+          overwrite: false,
+          specFile: 'spec.yaml',
         },
       },
     });
 
     // Mock LLM response
-    const enrichedCode = 'class DefaultFooService : FooService {\n  override fun doThing(): String {\n    return "Hello from Foo"\n  }\n}';
+    const enrichedCode =
+      'class DefaultFooService : FooService {\n  override fun doThing(): String {\n    return "Hello from Foo"\n  }\n}';
     fetchSpy.mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -195,7 +230,7 @@ describe('enrich integration', () => {
 
     const result = await enrich({
       outputDir: tmpDir,
-      force: true,  // skip git check in test
+      force: true, // skip git check in test
     });
 
     expect(result.enriched).toContain('src/domain/DefaultFooService.kt');

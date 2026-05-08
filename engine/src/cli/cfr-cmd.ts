@@ -7,20 +7,24 @@ import { resolve } from 'node:path';
 import { writeFileSync } from 'node:fs';
 
 export function createCfrCommand() {
-  const cfr = new Command('cfr')
-    .description('Cross-Functional Requirements — view, verify, and report on CFR compliance');
+  const cfr = new Command('cfr').description(
+    'Cross-Functional Requirements — view, verify, and report on CFR compliance',
+  );
 
   cfr
     .command('catalog')
     .description('List all known CFRs that bundles can implement')
-    .option('-c, --category <category>', 'Filter by category (security, observability, resilience, data, events, testing, devops)')
+    .option(
+      '-c, --category <category>',
+      'Filter by category (security, observability, resilience, data, events, testing, devops)',
+    )
     .action((opts) => {
-      const categories = [...new Set(CFR_CATALOG.map(c => c.category))];
+      const categories = [...new Set(CFR_CATALOG.map((c) => c.category))];
 
       for (const category of categories) {
         if (opts.category && category !== opts.category) continue;
         console.log(`\n${category.toUpperCase()}`);
-        const cfrs = CFR_CATALOG.filter(c => c.category === category);
+        const cfrs = CFR_CATALOG.filter((c) => c.category === category);
         for (const cfr of cfrs) {
           console.log(`  ${cfr.id.padEnd(20)} ${cfr.name}`);
           console.log(`  ${''.padEnd(20)} ${cfr.description}`);
