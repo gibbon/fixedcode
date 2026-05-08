@@ -24,9 +24,16 @@ fixedcode registry publish --kind bundle --tags "tag1,tag2"
 
 ## Distribution model in v0.2.0
 
-Currently only the **engine** (`@fixedcode/engine`) is published to npm. Bundles and generators are distributed as `github:owner/repo[#ref]` references in `registry.json` — `fixedcode registry install <name>` runs `npm install github:owner/repo` under the hood.
+Only the **engine** (`@fixedcode/engine`) is published to npm in v0.2.0. The `registry.json` shipped at v0.2.0 acts as a **catalog** for discovery — you can `fixedcode registry list` and `fixedcode registry search` to find bundles, but `fixedcode registry install <name>` will **return 404** for the bundles listed below until those packages are published.
 
-This is intentional for the initial OSS release: it keeps the publishing surface small and avoids 21 separate npm packages on day one. Bundles may be moved to npm in a future release if there's demand.
+This is intentional for the initial OSS release: it keeps the publishing surface small. Bundles will move to npm in a future release.
+
+**To use a bundle today:** clone `github.com/gibbon/fixedcode`, register the bundle in your project's `.fixedcode.yaml` with a `file:` path:
+
+```yaml
+bundles:
+  spring-domain: "/path/to/cloned/fixedcode/bundles/spring-domain"
+```
 
 ## Install command validation
 
