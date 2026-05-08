@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdtempSync, writeFileSync, rmSync, mkdirSync, existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { deploy } from '../src/engine/deploy.js';
+import { deploy, assertContained } from '../src/engine/deploy.js';
 
 let buildDir: string;
 let targetDir: string;
@@ -207,5 +207,36 @@ describe('deploy — error handling', () => {
     const missingDir = join(tmpdir(), 'nonexistent-build-dir-xyz-12345');
 
     expect(() => deploy({ buildDir: missingDir, targetDir })).toThrow(/Build directory not found/);
+  });
+});
+
+describe('assertContained — F-2 defense-in-depth', () => {
+  it('accepts a child path under the parent', () => {
+    expect(() => assertContained('/tmp/parent', '/tmp/parent/sub/file')).not.toThrow();
+  });
+
+  it('accepts the parent itself', () => {
+    expect(() => assertContained('/tmp/parent', '/tmp/parent')).not.toThrow();
+  });
+
+  it('rejects a sibling directory with a shared prefix', () => {
+    // Critical: '/tmp/parent-evil' starts with '/tmp/parent' as a string but is a sibling
+    expect(() => assertContained('/tmp/parent', '/tmp/parent-evil/file')).toThrow(
+      /Refusing to write outside/,
+    );
+  });
+
+  it('rejects a parent-of-parent path', () => {
+    expect(() => assertContained('/tmp/parent', '/tmp/file')).toThrow(/Refusing to write outside/);
+  });
+
+  it('rejects an absolute path elsewhere on disk', () => {
+    expect(() => assertContained('/tmp/parent', '/etc/passwd')).toThrow(/Refusing to write outside/);
+  });
+
+  it('rejects a candidate that resolves outside via .. after normalisation', () => {
+    expect(() => assertContained('/tmp/parent', '/tmp/parent/../escaped')).toThrow(
+      /Refusing to write outside/,
+    );
   });
 });

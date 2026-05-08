@@ -1,6 +1,6 @@
 {
   "name": "fixedcode",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Spec-driven, deterministic code generation engine. Same spec → same code, every time.",
   "type": "module",
   "main": "dist/index.js",

@@ -4,6 +4,7 @@ import {
   listRegistry,
   installPackage,
   validateRegistryRepo,
+  validateGitBranchName,
   type Registry,
   type RegistryPackage,
 } from '../src/engine/registry.js';
@@ -283,5 +284,35 @@ describe('validateRegistryRepo', () => {
   it('rejects shell metacharacters', () => {
     expect(() => validateRegistryRepo('foo/bar;rm -rf')).toThrow(/invalid registry repo/i);
     expect(() => validateRegistryRepo('foo/bar`whoami`')).toThrow(/invalid registry repo/i);
+  });
+});
+
+describe('validateGitBranchName — F-6', () => {
+  it('accepts a normal kebab branch', () => {
+    expect(() => validateGitBranchName('add-spring-domain')).not.toThrow();
+  });
+  it('accepts feature branches with slashes', () => {
+    expect(() => validateGitBranchName('feature/abc-123')).not.toThrow();
+  });
+  it('rejects a leading dash', () => {
+    expect(() => validateGitBranchName('-help')).toThrow(/Invalid git branch/i);
+  });
+  it('rejects empty', () => {
+    expect(() => validateGitBranchName('')).toThrow(/Invalid git branch/i);
+  });
+  it('rejects spaces', () => {
+    expect(() => validateGitBranchName('foo bar')).toThrow(/Invalid git branch/i);
+  });
+  it('rejects "..": git ref-format violation', () => {
+    expect(() => validateGitBranchName('foo..bar')).toThrow(/Invalid git branch/i);
+  });
+  it('rejects @{...}', () => {
+    expect(() => validateGitBranchName('foo@{1}')).toThrow(/Invalid git branch/i);
+  });
+  it('rejects trailing /', () => {
+    expect(() => validateGitBranchName('foo/')).toThrow(/Invalid git branch/i);
+  });
+  it('rejects trailing .lock', () => {
+    expect(() => validateGitBranchName('foo.lock')).toThrow(/Invalid git branch/i);
   });
 });

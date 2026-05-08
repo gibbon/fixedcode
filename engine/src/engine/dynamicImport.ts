@@ -1,5 +1,27 @@
-import { resolve, isAbsolute, join } from 'node:path';
-import { existsSync, readFileSync } from 'node:fs';
+import { resolve, isAbsolute, join, sep } from 'node:path';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
+
+/**
+ * Verify the resolved entry resolves to a file under bundleDir after symlink
+ * resolution. Prevents a malicious package.json from pointing outside the
+ * bundle ("main": "../../evil.js"). Bundles are post-trust code (we run them
+ * in-process), so this is hardening, not a perfect sandbox.
+ */
+function assertEntryWithinBundle(bundleDir: string, entryPath: string): void {
+  const realBundle = realpathSync(bundleDir);
+  // realpathSync requires the path to exist; entry might not yet — fall back to resolve().
+  let realEntry: string;
+  try {
+    realEntry = realpathSync(entryPath);
+  } catch {
+    realEntry = resolve(entryPath);
+  }
+  if (realEntry !== realBundle && !realEntry.startsWith(realBundle + sep)) {
+    throw new Error(
+      `Bundle entry resolves outside bundle dir (potential path traversal): ${realEntry} not under ${realBundle}`,
+    );
+  }
+}
 
 export async function dynamicImport(bundlePath: string, configDir: string): Promise<unknown> {
   let resolvedPath: string;
@@ -20,7 +42,8 @@ export async function dynamicImport(bundlePath: string, configDir: string): Prom
   }
 
   if (existsSync(join(resolvedPath, 'package.json'))) {
-    const pkg = JSON.parse(readFileSync(join(resolvedPath, 'package.json'), 'utf-8'));
+    const bundleDir = resolvedPath;
+    const pkg = JSON.parse(readFileSync(join(bundleDir, 'package.json'), 'utf-8'));
     let entry: string = 'src/index.js';
     if (typeof pkg.main === 'string') {
       entry = pkg.main;
@@ -36,11 +59,8 @@ export async function dynamicImport(bundlePath: string, configDir: string): Prom
           entry;
       }
     }
-    if (entry.startsWith('.')) {
-      resolvedPath = resolve(resolvedPath, entry);
-    } else {
-      resolvedPath = join(resolvedPath, entry);
-    }
+    resolvedPath = resolve(bundleDir, entry);
+    assertEntryWithinBundle(bundleDir, resolvedPath);
   } else if (existsSync(resolve(resolvedPath, 'src/index.js'))) {
     resolvedPath = resolve(resolvedPath, 'src/index.js');
   }

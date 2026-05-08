@@ -147,6 +147,23 @@ describe('resolveLlmConfig', () => {
     };
     expect(() => resolveLlmConfig(config)).toThrow(/No API key found/);
   });
+
+  // F-12: error message must NOT echo the configured env-var name
+  // (was leaking llm.apiKeyEnv into stderr/logs).
+  it('does not leak the configured env-var name in the missing-key error', () => {
+    const config: FixedCodeConfig = {
+      ...baseConfig,
+      llm: { provider: 'openrouter', model: 'test', apiKeyEnv: 'MY_PRIVATE_KEY_NAME' },
+    };
+    try {
+      resolveLlmConfig(config);
+      throw new Error('should have thrown');
+    } catch (err) {
+      const msg = (err as Error).message;
+      expect(msg).toMatch(/No API key found/);
+      expect(msg).not.toContain('MY_PRIVATE_KEY_NAME');
+    }
+  });
 });
 
 describe('chatCompletion', () => {

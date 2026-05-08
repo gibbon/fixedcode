@@ -125,7 +125,7 @@ export function resolveLlmConfig(
 
   if (provider !== 'ollama' && !apiKey) {
     throw new LlmError(
-      `No API key found for provider '${provider}'. Set ${config.llm?.apiKeyEnv ?? 'FIXEDCODE_LLM_API_KEY'} env var, or configure llm.apiKeyEnv in .fixedcode.yaml.`,
+      `No API key found for provider '${provider}'. Configure llm.apiKeyEnv in .fixedcode.yaml and set the corresponding env var, or set FIXEDCODE_LLM_API_KEY directly.`,
     );
   }
 
