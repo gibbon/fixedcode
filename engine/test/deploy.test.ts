@@ -231,7 +231,9 @@ describe('assertContained — F-2 defense-in-depth', () => {
   });
 
   it('rejects an absolute path elsewhere on disk', () => {
-    expect(() => assertContained('/tmp/parent', '/etc/passwd')).toThrow(/Refusing to write outside/);
+    expect(() => assertContained('/tmp/parent', '/etc/passwd')).toThrow(
+      /Refusing to write outside/,
+    );
   });
 
   it('rejects a candidate that resolves outside via .. after normalisation', () => {

@@ -16,9 +16,7 @@ export function assertContained(parentDir: string, candidate: string): void {
   const parent = resolve(parentDir);
   const target = resolve(candidate);
   if (target !== parent && !target.startsWith(parent + sep)) {
-    throw new Error(
-      `Refusing to write outside target directory: ${target} is not under ${parent}`,
-    );
+    throw new Error(`Refusing to write outside target directory: ${target} is not under ${parent}`);
   }
 }
 

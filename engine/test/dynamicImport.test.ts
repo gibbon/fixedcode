@@ -24,7 +24,9 @@ describe('dynamicImport — F-4 entry containment', () => {
       join(bundleDir, 'package.json'),
       JSON.stringify({ name: 'evil', main: '../victim.js' }),
     );
-    await expect(dynamicImport(bundleDir, workDir)).rejects.toThrow(/path traversal|outside bundle/i);
+    await expect(dynamicImport(bundleDir, workDir)).rejects.toThrow(
+      /path traversal|outside bundle/i,
+    );
   });
 
   it('rejects a deep traversal via main', async () => {
@@ -35,7 +37,9 @@ describe('dynamicImport — F-4 entry containment', () => {
       join(bundleDir, 'package.json'),
       JSON.stringify({ name: 'b', main: '../../tmp/pwn.js' }),
     );
-    await expect(dynamicImport(bundleDir, workDir)).rejects.toThrow(/path traversal|outside bundle/i);
+    await expect(dynamicImport(bundleDir, workDir)).rejects.toThrow(
+      /path traversal|outside bundle/i,
+    );
   });
 
   it('accepts a normal bundle', async () => {

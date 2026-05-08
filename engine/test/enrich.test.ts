@@ -284,7 +284,9 @@ describe('assertSpecPathSafe — F-3', () => {
   });
 
   it('rejects an absolute path elsewhere on disk', () => {
-    expect(() => assertSpecPathSafe('/srv/secret.yaml', `${cwd}/build`)).toThrow(/outside the project/);
+    expect(() => assertSpecPathSafe('/srv/secret.yaml', `${cwd}/build`)).toThrow(
+      /outside the project/,
+    );
   });
 });
 
