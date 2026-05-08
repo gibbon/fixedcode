@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-05-09
+
+Maintenance release. Removes content unrelated to FixedCode and republishes a clean tarball.
+
 ### Removed
 - `bundles/spring-library` — replaced with a generic project-skeleton bundle in a future release.
 - `bundles/mcp-wrapper` — to be reintroduced with cleaner external references.
@@ -11,7 +15,9 @@ All notable changes to this project are documented in this file. The format is b
 - `docs/archive/` and `docs/business-plan.md`.
 
 ### Notes
-- Repo history rewritten to remove unrelated content. Force-push pre-v0.2.1.
+- Repo history rewritten to drop the removed paths and inline references. Force-push between 0.2.0 and 0.2.1.
+
+[0.2.1]: https://github.com/gibbon/fixedcode/releases/tag/v0.2.1
 
 ## [0.2.0] — 2026-05-09
 
