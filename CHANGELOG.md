@@ -36,7 +36,7 @@ First public OSS release.
 
 ### Notes
 - This is a pre-1.0 release. The engine's API may evolve in 0.3.x.
-- Bundles and the OpenAPI generator are distributed via `registry.json` (CLI: `fixedcode registry install <name>`), not yet published to npm.
+- `registry.json` is a discovery catalog in v0.2.0; bundles and the OpenAPI generator are not yet published to npm. `fixedcode registry list` and `search` work for discovery; `fixedcode registry install` will 404 until those packages ship. To use a bundle today, register a local `file:` path in `.fixedcode.yaml`.
 
 [Unreleased]: https://github.com/gibbon/fixedcode/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/gibbon/fixedcode/releases/tag/v0.2.0
