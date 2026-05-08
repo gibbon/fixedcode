@@ -1,6 +1,7 @@
 {
   "name": "@fixedcode/engine",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "description": "Spec-driven, deterministic code generation engine. Same spec → same code, every time.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,11 +15,44 @@
   "bin": {
     "fixedcode": "./bin/fixedcode.js"
   },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "code-generation",
+    "spec-driven",
+    "deterministic",
+    "yaml",
+    "scaffolding",
+    "ddd",
+    "spring",
+    "typescript",
+    "ai",
+    "llm"
+  ],
+  "author": "Tom D",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/gibbon/fixedcode#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gibbon/fixedcode.git",
+    "directory": "engine"
+  },
+  "bugs": {
+    "url": "https://github.com/gibbon/fixedcode/issues"
   },
   "dependencies": {
     "ajv": "^8.17.0",
