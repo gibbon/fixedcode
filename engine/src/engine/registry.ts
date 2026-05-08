@@ -11,6 +11,23 @@ import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 const DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/fixedcode-ai/registry/main/registry.json';
 const DEFAULT_REGISTRY_REPO = 'fixedcode-ai/registry';
 
+const REGISTRY_REPO_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9][A-Za-z0-9._-]*$/;
+
+export function validateRegistryRepo(repo: string): string {
+  if (typeof repo !== 'string' || repo.length === 0) {
+    throw new Error('Invalid registry repo: empty');
+  }
+  if (!REGISTRY_REPO_PATTERN.test(repo)) {
+    throw new Error(
+      `Invalid registry repo: ${JSON.stringify(repo)} — must match owner/repo (alphanumerics, dots, dashes, underscores)`,
+    );
+  }
+  return repo;
+}
+
+const INSTALL_PACKAGE_PATTERN =
+  /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*(?:@[a-z0-9][a-z0-9._-]*)?$/i;
+
 export interface RegistryPackage {
   name: string;
   description: string;
@@ -76,16 +93,23 @@ export function installPackage(
   configFile = '.fixedcode.yaml',
   configSection = 'bundles'
 ): InstallResult {
-  // Validate install command against allowlist before executing
-  const INSTALL_PATTERN = /^npm install [\w@/.:-]+$/;
-  if (!INSTALL_PATTERN.test(pkg.install)) {
+  // Validate install command against allowlist before executing.
+  // Strict shape: `npm install <single-package>` where <single-package> is a
+  // semver-style npm package identifier (optional @scope/, no relative paths).
+  const installParts = pkg.install.split(/\s+/);
+  if (
+    installParts.length !== 3 ||
+    installParts[0] !== 'npm' ||
+    installParts[1] !== 'install' ||
+    !INSTALL_PACKAGE_PATTERN.test(installParts[2]) ||
+    installParts[2].includes('..')
+  ) {
     throw new Error(`Unsafe install command: ${pkg.install}`);
   }
 
   // Run npm install
   console.log(`Installing ${pkg.name}...`);
-  const parts = pkg.install.split(' ');
-  execFileSync(parts[0], parts.slice(1), { cwd: projectDir, stdio: 'inherit' });
+  execFileSync(installParts[0], installParts.slice(1), { cwd: projectDir, stdio: 'inherit' });
 
   // Update config file
   const configPath = resolve(projectDir, configFile);
@@ -172,7 +196,7 @@ export async function publishPackage(options: PublishOptions): Promise<string> {
     install,
   };
 
-  const registryRepo = options.registryRepo ?? DEFAULT_REGISTRY_REPO;
+  const registryRepo = validateRegistryRepo(options.registryRepo ?? DEFAULT_REGISTRY_REPO);
 
   // Fetch current registry
   const registry = await fetchRegistry();
