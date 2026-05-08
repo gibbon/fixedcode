@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install root tooling
+        run: npm install --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Install + typecheck + build + test engine
+        working-directory: engine
+        run: |
+          npm install --no-audit --no-fund
+          npx tsc --noEmit
+          npm run build
+          npm test
+
+      - name: Install + build + test bundles
+        run: |
+          set -e
+          for d in bundles/*/; do
+            echo "::group::$(basename "$d")"
+            (
+              cd "$d"
+              npm install --no-audit --no-fund
+              if grep -q '"build"' package.json; then npm run build; fi
+              if grep -q '"test"' package.json; then npm test; fi
+            )
+            echo "::endgroup::"
+          done
+
+      - name: Install + build + test generators
+        run: |
+          set -e
+          for d in generators/*/; do
+            echo "::group::$(basename "$d")"
+            (
+              cd "$d"
+              npm install --no-audit --no-fund
+              if grep -q '"build"' package.json; then npm run build; fi
+              if grep -q '"test"' package.json; then npm test; fi
+            )
+            echo "::endgroup::"
+          done
+
+      - name: Smoke test (generate + verify)
+        run: |
+          node engine/bin/fixedcode.js generate examples/workspace-service/workspace-domain.yaml -o /tmp/smoke
+          node engine/bin/fixedcode.js verify examples/workspace-service/workspace-domain.yaml /tmp/smoke
+
+      - name: npm audit (engine, advisory)
+        working-directory: engine
+        run: npm audit --audit-level=high
+        continue-on-error: true
