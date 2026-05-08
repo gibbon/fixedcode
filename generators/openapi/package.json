@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@fixedcode/engine": "file:../../engine"
