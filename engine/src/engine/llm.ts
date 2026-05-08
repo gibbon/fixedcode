@@ -13,7 +13,10 @@ const ALLOWED_LLM_HOSTS = new Set([
   'api.anthropic.com',
   'localhost',
   '127.0.0.1',
+  '[::1]',
 ]);
+
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
 /**
  * Validate that a configured LLM baseUrl points at a known provider (or loopback).
@@ -32,17 +35,23 @@ export function validateBaseUrl(baseUrl: string): string {
   }
 
   if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-    throw new LlmError(`Invalid LLM baseUrl protocol: ${url.protocol}. Must be https:`);
+    throw new LlmError(`Invalid LLM baseUrl protocol: ${url.protocol}. Must be https or http on loopback.`);
   }
 
-  const isLoopback = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  // Node's WHATWG URL keeps IPv6 brackets in hostname; older parsers strip them.
+  // Normalise so set-membership comparison works either way.
+  const hostname =
+    url.hostname.includes(':') && !url.hostname.startsWith('[')
+      ? `[${url.hostname}]`
+      : url.hostname;
+  const isLoopback = LOOPBACK_HOSTS.has(hostname);
   if (url.protocol === 'http:' && !isLoopback) {
     throw new LlmError(`Invalid LLM baseUrl: must be https unless host is loopback (got ${baseUrl})`);
   }
 
-  if (!ALLOWED_LLM_HOSTS.has(url.hostname)) {
+  if (!ALLOWED_LLM_HOSTS.has(hostname)) {
     throw new LlmError(
-      `LLM baseUrl host ${url.hostname} is not on the LLM allowlist (${[...ALLOWED_LLM_HOSTS].join(', ')}). ` +
+      `LLM baseUrl host ${hostname} is not on the LLM allowlist (${[...ALLOWED_LLM_HOSTS].join(', ')}). ` +
         `If you need to add a provider, edit ALLOWED_LLM_HOSTS in engine/src/engine/llm.ts and rebuild.`,
     );
   }
