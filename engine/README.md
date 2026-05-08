@@ -2,11 +2,19 @@
 
 The FixedCode CLI and programmatic API.
 
+[![npm version](https://img.shields.io/npm/v/@fixedcode/engine.svg)](https://www.npmjs.com/package/@fixedcode/engine)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/gibbon/fixedcode/blob/master/LICENSE)
+[![Node](https://img.shields.io/node/v/@fixedcode/engine.svg)](https://www.npmjs.com/package/@fixedcode/engine)
+
+> Spec-driven, deterministic code generation for the AI era. YAML in, production code out, same spec → same code every time.
+
+Full project docs: <https://github.com/gibbon/fixedcode>
+
 ## Install
 
 ```bash
 npm install -g @fixedcode/engine
-# or
+# or as a dev dep:
 npm install --save-dev @fixedcode/engine
 ```
 
@@ -27,6 +35,23 @@ npm install --save-dev @fixedcode/engine
 
 Run `fixedcode <command> --help` for full options.
 
+## Quickstart
+
+```bash
+# install the CLI
+npm install -g @fixedcode/engine
+
+# install a bundle (registry-hosted)
+fixedcode registry install spring-domain
+
+# generate
+fixedcode generate order-domain.yaml -o build
+fixedcode verify order-domain.yaml build
+
+# (optional) deploy into an existing project
+fixedcode deploy build /path/to/your/project
+```
+
 ## Programmatic API
 
 ```ts
@@ -40,6 +65,7 @@ import {
   searchRegistry,
   installPackage,
   publishPackage,
+  renderTemplates,
 } from '@fixedcode/engine';
 
 await generate({
@@ -48,15 +74,15 @@ await generate({
 });
 ```
 
-Full type definitions live in [`engine/src/types.ts`](src/types.ts).
-
 ## Documentation
 
-- [Architecture & contracts](../docs/architecture.md)
-- [Writing a bundle](../docs/bundles.md)
-- [Writing a generator](../docs/generators.md)
-- [LLM configuration](../docs/llm.md)
+- [Architecture & contracts](https://github.com/gibbon/fixedcode/blob/master/docs/architecture.md)
+- [Writing a bundle](https://github.com/gibbon/fixedcode/blob/master/docs/bundles.md)
+- [Writing a generator](https://github.com/gibbon/fixedcode/blob/master/docs/generators.md)
+- [LLM configuration](https://github.com/gibbon/fixedcode/blob/master/docs/llm.md)
+- [Registry](https://github.com/gibbon/fixedcode/blob/master/docs/registry.md)
+- [Cross-Functional Requirements](https://github.com/gibbon/fixedcode/blob/master/docs/cfrs.md)
 
 ## License
 
-[Apache-2.0](../LICENSE)
+[Apache-2.0](https://github.com/gibbon/fixedcode/blob/master/LICENSE)
