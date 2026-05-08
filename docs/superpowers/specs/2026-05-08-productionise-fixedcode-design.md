@@ -1,7 +1,7 @@
 # Productionise FixedCode for OSS Release
 
 **Date:** 2026-05-08
-**Status:** Approved (pending spec review)
+**Status:** Approved
 **Owner:** Tom D
 **Target version:** `@fixedcode/engine@0.2.0`
 
@@ -59,7 +59,7 @@ Cleanup gates everything else. The remaining workstreams (security review, docs,
 4. **Strip rdan from tracked config**:
    - `.fixedcode.yaml` — remove all `rdan-*:` bundle entries.
    - `registry.json` — remove the 3 rdan-* entries.
-   - `docs/superpowers/specs/2026-04-06-python-and-cicd-bundles-design.md` — review and either remove rdan references or remove the file if it's rdan-specific.
+   - `docs/superpowers/specs/2026-04-06-python-and-cicd-bundles-design.md` — the doc is mostly about `ts-service`/`ts-agent`/`python-service`/`python-agent` (all kept) but has 4 references to `rdan-agent` (lines 29, 31, 42, 1087). Keep the doc; excise the rdan-agent sections only.
 5. **Working-tree cleanup commit** — delete:
    - `order-build/`, `build/`, `aggregates}}/` (stray render outputs)
    - `*:Zone.Identifier` files (Windows-on-WSL noise)
@@ -166,7 +166,7 @@ C. **Process**:
 ### Workflows under `.github/workflows/`
 1. **`ci.yml`** — runs on PR + push to master:
    - Matrix: Node 20, 22 on `ubuntu-latest`.
-   - Steps: checkout → setup-node with cache → install all packages → typecheck (`tsc --noEmit`) → lint (ESLint flat config) → format check (`prettier --check`) → build all packages → run all vitest suites with coverage → upload to Codecov (optional) → smoke test (`fixedcode generate examples/workspace-service/workspace-domain.yaml -o /tmp/out && fixedcode verify ...`) → `npm audit --audit-level=high` (non-blocking, posts comment).
+   - Steps: checkout → setup-node with cache → install all packages → typecheck (`tsc --noEmit`) → lint (ESLint flat config) → format check (`prettier --check`) → build all packages → run all vitest suites with coverage → upload to Codecov (skipped automatically when `CODECOV_TOKEN` is not set) → smoke test (`fixedcode generate examples/workspace-service/workspace-domain.yaml -o /tmp/out && fixedcode verify ...`) → `npm audit --audit-level=high` (non-blocking, posts comment).
 
 2. **`release.yml`** — runs on tag `v*`:
    - checkout → setup-node → install → build → test
@@ -240,7 +240,7 @@ Phases run strictly in order. Each phase's acceptance criteria must be met befor
 | Risk | Mitigation |
 |---|---|
 | History rewrite breaks open PRs/forks | `gh pr list` and fork-count check before force-push; communicate if non-zero. |
-| `@fixedcode/engine` already taken on npm | Check via `npm view` early in Phase 5 pre-flight; reserve immediately. |
+| `@fixedcode/engine` already taken on npm | Check via `npm view` early in Phase 5 pre-flight; reserve immediately. **Fallback:** publish unscoped as `fixedcode-engine` and update CLI install docs accordingly. |
 | LLM tests breaking CI without API keys | Mock LLM client by default in vitest; gate integration tests behind an env var. |
 | Force-push race with collaborators | Solo maintainer per current state; revisit if that changes. |
 | Rdan move loses work | Pre-flight mirror-clone backup; `mv` (not `cp` then `rm`) preserves files atomically. |
