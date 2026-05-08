@@ -49,7 +49,7 @@ node engine/bin/fixedcode.js verify examples/workspace-service/workspace-domain.
 cd engine && npm test
 ```
 
-If you've installed the CLI globally (`npm install -g @fixedcode/engine`), the binary is `fixedcode`.
+If you've installed the CLI globally (`npm install -g fixedcode`), the binary is `fixedcode`.
 
 ## Adding a bundle
 

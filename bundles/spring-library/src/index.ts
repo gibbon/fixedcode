@@ -1,5 +1,5 @@
-import type { Bundle, SpecMetadata } from '@fixedcode/engine';
-import type { Context } from '@fixedcode/engine';
+import type { Bundle, SpecMetadata } from 'fixedcode';
+import type { Context } from 'fixedcode';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';

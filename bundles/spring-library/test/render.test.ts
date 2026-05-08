@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { renderTemplates } from '@fixedcode/engine';
+import { renderTemplates } from 'fixedcode';
 import bundle from '../src/index.js';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';

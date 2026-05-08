@@ -4,7 +4,7 @@
 
 **Goal:** Create two new FixedCode bundles — `ts-service` (TypeScript project skeleton) and `ts-agent` (standalone AI agent) — following the same layered pattern as `spring-library` + `spring-domain`.
 
-**Architecture:** Each bundle is a TypeScript package in `bundles/` that exports the `Bundle` interface from `@fixedcode/engine`. `ts-service` generates a FastAPI-equivalent Express project skeleton. `ts-agent` generates a standalone agent with a tool-calling loop, HTTP server, and per-tool handler files. Both use `generateFiles()` for one-to-many expansion.
+**Architecture:** Each bundle is a TypeScript package in `bundles/` that exports the `Bundle` interface from `fixedcode`. `ts-service` generates a FastAPI-equivalent Express project skeleton. `ts-agent` generates a standalone agent with a tool-calling loop, HTTP server, and per-tool handler files. Both use `generateFiles()` for one-to-many expansion.
 
 **Tech Stack:** TypeScript, Vitest, Handlebars templates, Express (generated output), Vercel AI SDK / Anthropic SDK / OpenAI SDK (generated output, configurable via `provider` field)
 
@@ -130,7 +130,7 @@ bundles/ts-agent/
     "test": "vitest run"
   },
   "dependencies": {
-    "@fixedcode/engine": "file:../../engine"
+    "fixedcode": "file:../../engine"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -179,7 +179,7 @@ export default defineConfig({
 - [ ] **Step 4: Run npm install**
 
 Run: `cd bundles/ts-service && npm install`
-Expected: `node_modules/` created, `@fixedcode/engine` linked
+Expected: `node_modules/` created, `fixedcode` linked
 
 - [ ] **Step 5: Commit**
 
@@ -423,7 +423,7 @@ export function parseSpec(raw: Record<string, unknown>): RawTsServiceSpec {
 - [ ] **Step 4: Create src/index.ts with enrich()**
 
 ```typescript
-import type { Bundle, Context, FileEntry, SpecMetadata } from '@fixedcode/engine';
+import type { Bundle, Context, FileEntry, SpecMetadata } from 'fixedcode';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -575,7 +575,7 @@ Expected: FAIL — generateFiles not exported
 Update `bundles/ts-service/src/index.ts` — add `generateFiles()` and the default `bundle` export:
 
 ```typescript
-import type { Bundle, Context, FileEntry, SpecMetadata } from '@fixedcode/engine';
+import type { Bundle, Context, FileEntry, SpecMetadata } from 'fixedcode';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -1024,7 +1024,7 @@ git commit -m "feat(ts-service): integration test with engine pipeline"
     "test": "vitest run"
   },
   "dependencies": {
-    "@fixedcode/engine": "file:../../engine"
+    "fixedcode": "file:../../engine"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -1404,7 +1404,7 @@ export function parseSpec(raw: Record<string, unknown>): RawTsAgentSpec {
 - [ ] **Step 4: Create src/index.ts with enrich()**
 
 ```typescript
-import type { Bundle, Context, FileEntry, SpecMetadata } from '@fixedcode/engine';
+import type { Bundle, Context, FileEntry, SpecMetadata } from 'fixedcode';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';

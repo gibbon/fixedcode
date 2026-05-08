@@ -10,7 +10,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@fixedcode/engine": "file:../../engine"
+    "fixedcode": "file:../../engine"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

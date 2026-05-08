@@ -2,16 +2,16 @@
 
 **Spec-driven, deterministic code generation for the AI era.**
 
-[![npm version](https://img.shields.io/npm/v/@fixedcode/engine.svg)](https://www.npmjs.com/package/@fixedcode/engine)
+[![npm version](https://img.shields.io/npm/v/fixedcode.svg)](https://www.npmjs.com/package/fixedcode)
 [![CI](https://github.com/gibbon/fixedcode/actions/workflows/ci.yml/badge.svg)](https://github.com/gibbon/fixedcode/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Node](https://img.shields.io/node/v/@fixedcode/engine.svg)](https://www.npmjs.com/package/@fixedcode/engine)
+[![Node](https://img.shields.io/node/v/fixedcode.svg)](https://www.npmjs.com/package/fixedcode)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 YAML in. Production code out. Same spec → same code, every time.
 
 ```bash
-npm install -g @fixedcode/engine
+npm install -g fixedcode
 fixedcode generate workspace-domain.yaml -o build
 fixedcode deploy build /path/to/your/project
 ```
@@ -32,7 +32,7 @@ You get the speed of "write me a service that does X" with the auditability of "
 
 ```bash
 # install the CLI
-npm install -g @fixedcode/engine
+npm install -g fixedcode
 
 # (optional) draft a spec from a description using your configured LLM
 fixedcode draft spring-domain "workspace service with workspaces and parties" -o workspace-domain.yaml

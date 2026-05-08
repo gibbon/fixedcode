@@ -1,5 +1,5 @@
-import type { Context } from '@fixedcode/engine';
-import type { SpecMetadata } from '@fixedcode/engine';
+import type { Context } from 'fixedcode';
+import type { SpecMetadata } from 'fixedcode';
 import type {
   CrudContext,
   ResourceContext,

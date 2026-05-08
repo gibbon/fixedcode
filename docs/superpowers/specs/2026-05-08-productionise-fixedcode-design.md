@@ -3,7 +3,7 @@
 **Date:** 2026-05-08
 **Status:** Approved
 **Owner:** Tom D
-**Target version:** `@fixedcode/engine@0.2.0`
+**Target version:** `fixedcode@0.2.0`
 
 ## Problem
 
@@ -12,7 +12,7 @@
 ## Goals
 
 1. Repo presents as a polished OSS dev tool: README, LICENSE (Apache-2.0), CONTRIBUTING, SECURITY, CHANGELOG, badges, issue/PR templates.
-2. Engine is published to npm as `@fixedcode/engine@0.2.0` with provenance.
+2. Engine is published to npm as `fixedcode@0.2.0` with provenance.
 3. Bundles + the OpenAPI generator stay distributed via the existing `registry.json` model (not npm) — but cleanly documented.
 4. CI runs typecheck/lint/test/build on every PR; tagged commits cut a GitHub Release and publish to npm reproducibly.
 5. Critical and high security findings are fixed; medium/low are filed as issues.
@@ -197,7 +197,7 @@ C. **Process**:
 
 ## Phase 5 — Publish v0.2.0
 
-**Goal:** `npm install @fixedcode/engine` works, GitHub Release v0.2.0 is live, registry installs work end-to-end.
+**Goal:** `npm install fixedcode` works, GitHub Release v0.2.0 is live, registry installs work end-to-end.
 
 ### Pre-flight checklist
 1. All CI green on master.
@@ -205,7 +205,7 @@ C. **Process**:
 3. README + LICENSE + CHANGELOG present and accurate.
 4. `npm publish --dry-run` from `engine/` produces expected file list.
 5. `npm pack` tarball inspected (`tar -tzf`) — only `dist/`, `bin/`, `package.json`, `README.md`, `LICENSE`.
-6. `@fixedcode` npm org and `@fixedcode/engine` package name reserved (check via `npm view @fixedcode/engine` first).
+6. `@fixedcode` npm org and `fixedcode` package name reserved (check via `npm view fixedcode` first).
 7. npm trusted-publisher configured: GitHub Actions OIDC for `gibbon/fixedcode` workflow.
 
 ### Engine `package.json` adjustments
@@ -225,9 +225,9 @@ C. **Process**:
 - Engine tarball attached.
 
 ### Acceptance
-- `@fixedcode/engine@0.2.0` visible on npm with provenance attestation.
+- `fixedcode@0.2.0` visible on npm with provenance attestation.
 - GitHub Release `v0.2.0` exists with notes.
-- Fresh machine: `npm install -g @fixedcode/engine` then `fixedcode generate <example>` works without errors.
+- Fresh machine: `npm install -g fixedcode` then `fixedcode generate <example>` works without errors.
 - `fixedcode registry install spring-domain` successfully fetches from GitHub.
 - README badges render and resolve correctly.
 
@@ -240,7 +240,7 @@ Phases run strictly in order. Each phase's acceptance criteria must be met befor
 | Risk | Mitigation |
 |---|---|
 | History rewrite breaks open PRs/forks | `gh pr list` and fork-count check before force-push; communicate if non-zero. |
-| `@fixedcode/engine` already taken on npm | Check via `npm view` early in Phase 5 pre-flight; reserve immediately. **Fallback:** publish unscoped as `fixedcode-engine` and update CLI install docs accordingly. |
+| `fixedcode` already taken on npm | Check via `npm view` early in Phase 5 pre-flight; reserve immediately. **Fallback:** publish unscoped as `fixedcode-engine` and update CLI install docs accordingly. |
 | LLM tests breaking CI without API keys | Mock LLM client by default in vitest; gate integration tests behind an env var. |
 | Force-push race with collaborators | Solo maintainer per current state; revisit if that changes. |
 | Rdan move loses work | Pre-flight mirror-clone backup; `mv` (not `cp` then `rm`) preserves files atomically. |

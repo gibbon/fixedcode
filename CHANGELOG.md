@@ -11,7 +11,7 @@ First public OSS release.
 ### Added
 - Productionisation of the repo: README, LICENSE (Apache-2.0), CONTRIBUTING, SECURITY, CHANGELOG.
 - GitHub Actions CI for typecheck, lint, build, test, and smoke generation.
-- GitHub Actions release workflow that publishes `@fixedcode/engine` to npm with provenance.
+- GitHub Actions release workflow that publishes `fixedcode` to npm with provenance.
 - ESLint 9 + Prettier configuration at the repo root.
 - CodeQL JavaScript/TypeScript security scanning.
 - Dependabot config (npm + GitHub Actions, weekly).

@@ -141,7 +141,7 @@ mkdir -p engine/src engine/test
 `engine/package.json`:
 ```json
 {
-  "name": "@fixedcode/engine",
+  "name": "fixedcode",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
@@ -222,7 +222,7 @@ mkdir -p bundles/ddd-spike/src/enrich bundles/ddd-spike/test/enrich bundles/ddd-
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@fixedcode/engine": "file:../../engine"
+    "fixedcode": "file:../../engine"
   },
   "devDependencies": {
     "handlebars": "^4.7.0",
@@ -1346,7 +1346,7 @@ Expected: FAIL
 
 `bundles/ddd-spike/src/enrich/index.ts`:
 ```typescript
-import type { SpecMetadata } from '@fixedcode/engine';
+import type { SpecMetadata } from 'fixedcode';
 import type { DddContext, AggregateContext } from '../context.js';
 import { toNameVariants } from './names.js';
 import { toTypeMapping } from './types.js';
@@ -1829,7 +1829,7 @@ export const helpers: Record<string, (...args: unknown[]) => unknown> = {
 
 `bundles/ddd-spike/src/index.ts`:
 ```typescript
-import type { Bundle } from '@fixedcode/engine';
+import type { Bundle } from 'fixedcode';
 import specSchema from './schema.json' with { type: 'json' };
 import { enrich } from './enrich/index.js';
 import { helpers } from './helpers.js';
@@ -3218,7 +3218,7 @@ Wire the spike bundle to the engine and generate real Kotlin files from the orde
 cd /home/gibbon/projects/fixedcode/bundles/ddd-spike && npm run build
 ```
 
-If this fails due to the `@fixedcode/engine` dependency not being built yet:
+If this fails due to the `fixedcode` dependency not being built yet:
 ```bash
 cd /home/gibbon/projects/fixedcode/engine && npm run build
 cd /home/gibbon/projects/fixedcode/bundles/ddd-spike && npm install && npm run build

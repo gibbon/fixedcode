@@ -11,7 +11,7 @@ packages/
 ├── naming/              # @fixedcode/naming
 ├── types/               # @fixedcode/types  
 ├── conventions/         # @fixedcode/conventions
-└── engine/              # @fixedcode/engine (already exists)
+└── engine/              # fixedcode (already exists)
 ```
 
 ---

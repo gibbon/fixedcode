@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Take fixedcode from a private working repo to a polished public OSS dev tool: clean repo, security-reviewed, documented, CI/CD wired, engine published as `@fixedcode/engine@0.2.0` on npm.
+**Goal:** Take fixedcode from a private working repo to a polished public OSS dev tool: clean repo, security-reviewed, documented, CI/CD wired, engine published as `fixedcode@0.2.0` on npm.
 
 **Architecture:** Five sequential phases each with explicit gates. Phase 1 (cleanup, including a git-history rewrite) gates everything else. Phase 2 (security review) and Phase 3 (docs) precede Phase 4 (CI/CD), which precedes Phase 5 (publish). The publish in Phase 5 is the terminal event.
 
@@ -755,7 +755,7 @@ All notable changes to this project are documented in this file. The format is b
 ### Added
 - Productionisation of the repo: README, LICENSE (Apache-2.0), CONTRIBUTING, SECURITY, CHANGELOG.
 - GitHub Actions CI for typecheck/lint/test/build.
-- GitHub Actions release workflow publishing `@fixedcode/engine` to npm with provenance.
+- GitHub Actions release workflow publishing `fixedcode` to npm with provenance.
 - ESLint 9 + Prettier configuration.
 - Per-package READMEs.
 - CodeQL scanning, Dependabot config.
@@ -792,10 +792,10 @@ Sections (in order):
 
 1. Hero block (h1 + tagline + 1-paragraph value prop).
 2. Badges row (npm version, build status, license, node version, PRs welcome). Use shields.io URLs:
-   - `https://img.shields.io/npm/v/@fixedcode/engine.svg`
+   - `https://img.shields.io/npm/v/fixedcode.svg`
    - `https://github.com/gibbon/fixedcode/actions/workflows/ci.yml/badge.svg`
    - `https://img.shields.io/github/license/gibbon/fixedcode.svg`
-   - `https://img.shields.io/node/v/@fixedcode/engine.svg`
+   - `https://img.shields.io/node/v/fixedcode.svg`
    - `https://img.shields.io/badge/PRs-welcome-brightgreen.svg`
 3. "Why FixedCode?" (3–4 sentences on spec-driven, deterministic generation, AI-friendly).
 4. Quickstart (4 commands: install, init, generate, deploy).
@@ -1476,7 +1476,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 - [ ] **Step 1: Check name availability**
 
 ```bash
-npm view @fixedcode/engine 2>&1 | head
+npm view fixedcode 2>&1 | head
 ```
 Expected: 404 / "is not in the npm registry". If taken, fall back to unscoped name `fixedcode-engine` per the spec; update README install lines and CLI publishing commands accordingly.
 
@@ -1540,7 +1540,7 @@ git tag v0.2.0-rc.1
 git push origin v0.2.0-rc.1
 gh run watch
 ```
-Expected: publish step succeeds (publishes the rc to npm). Verify with `npm view @fixedcode/engine versions`. Then unpublish: `npm unpublish @fixedcode/engine@0.2.0-rc.1` (within 72h window).
+Expected: publish step succeeds (publishes the rc to npm). Verify with `npm view fixedcode versions`. Then unpublish: `npm unpublish fixedcode@0.2.0-rc.1` (within 72h window).
 
 ```bash
 gh release delete v0.2.0-rc.1 --yes
@@ -1642,8 +1642,8 @@ Expected: build → test → npm publish (with provenance) → GitHub release cr
 - [ ] **Step 3: Verify on npm**
 
 ```bash
-npm view @fixedcode/engine versions
-npm view @fixedcode/engine@0.2.0
+npm view fixedcode versions
+npm view fixedcode@0.2.0
 ```
 Expected: 0.2.0 listed; package metadata correct; provenance attestation present.
 
@@ -1660,7 +1660,7 @@ gh release view v0.2.0
 ```bash
 mkdir -p /tmp/fc-public-smoke && cd /tmp/fc-public-smoke
 npm init -y
-npm install @fixedcode/engine
+npm install fixedcode
 npx fixedcode --version
 ```
 Expected: prints `0.2.0`.
@@ -1713,14 +1713,14 @@ gh repo view gibbon/fixedcode --json name,description,url,homepageUrl,licenseInf
 Confirm description reads as a clear OSS-tool-for-devs tagline; if empty, set with:
 
 ```bash
-gh repo edit gibbon/fixedcode --description "Spec-driven, deterministic code generation engine. Same spec → same code, every time." --homepage "https://www.npmjs.com/package/@fixedcode/engine"
+gh repo edit gibbon/fixedcode --description "Spec-driven, deterministic code generation engine. Same spec → same code, every time." --homepage "https://www.npmjs.com/package/fixedcode"
 ```
 
 **Phase 5 acceptance gate:**
-- `@fixedcode/engine@0.2.0` live on npm with provenance attestation.
+- `fixedcode@0.2.0` live on npm with provenance attestation.
 - GitHub Release v0.2.0 published with notes.
 - README badges resolve correctly.
-- Fresh-machine `npm install @fixedcode/engine` + generate + verify works.
+- Fresh-machine `npm install fixedcode` + generate + verify works.
 - `fixedcode registry install spring-domain` succeeds against the GitHub-tarball install path.
 
 ---

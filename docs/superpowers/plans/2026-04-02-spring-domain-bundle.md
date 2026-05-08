@@ -336,7 +336,7 @@
       "test": "vitest run"
     },
     "dependencies": {
-      "@fixedcode/engine": "file:../../engine",
+      "fixedcode": "file:../../engine",
       "pluralize": "^8.0.0"
     },
     "devDependencies": {
@@ -403,7 +403,7 @@
 - [ ] **Create stub src/index.ts**
 
   ```typescript
-  import type { Bundle, Context, FileEntry, SpecMetadata } from '@fixedcode/engine';
+  import type { Bundle, Context, FileEntry, SpecMetadata } from 'fixedcode';
   import { readFileSync } from 'node:fs';
   import { fileURLToPath } from 'node:url';
   import { dirname, join } from 'node:path';

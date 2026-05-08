@@ -6,7 +6,7 @@
 
 **File:** `engine/src/index.ts`
 
-**Problem:** `fetchRegistry`, `searchRegistry`, `listRegistry`, `installPackage`, `publishPackage` and their associated types (`RegistryPackage`, `Registry`, `InstallResult`, `PublishOptions`) are defined in `engine/src/engine/registry.ts` but not exported from the package entry point. CLAUDE.md documents them as importable from `@fixedcode/engine`.
+**Problem:** `fetchRegistry`, `searchRegistry`, `listRegistry`, `installPackage`, `publishPackage` and their associated types (`RegistryPackage`, `Registry`, `InstallResult`, `PublishOptions`) are defined in `engine/src/engine/registry.ts` but not exported from the package entry point. CLAUDE.md documents them as importable from `fixedcode`.
 
 **Fix:** Add one export line to `engine/src/index.ts`:
 ```typescript

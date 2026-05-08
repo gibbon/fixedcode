@@ -1,4 +1,4 @@
-import type { Generator, RenderedFile } from '@fixedcode/engine';
+import type { Generator, RenderedFile } from 'fixedcode';
 import type { OpenApiInput, OpenApiOperation, OpenApiSchema } from './types.js';
 
 export type { OpenApiInput, OpenApiOperation, OpenApiSchema, OpenApiParam } from './types.js';
