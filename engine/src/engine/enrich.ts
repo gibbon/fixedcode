@@ -183,6 +183,15 @@ export async function enrich(options: EnrichOptions): Promise<EnrichResult> {
     return { enriched: [], skipped: [], errors: [] };
   }
 
+  // Privacy / trust banner: enrich sends file content to the configured LLM endpoint
+  // and writes the response back to disk verbatim. Users MUST review via git diff.
+  console.warn(
+    `\n  fixedcode enrich:\n` +
+      `    LLM endpoint: ${llmConfig.baseUrl} (provider=${llmConfig.provider}, model=${llmConfig.model})\n` +
+      `    Files at extension points (${extensionPoints.length}) and their neighbours will be sent to this endpoint.\n` +
+      `    LLM output is written to disk verbatim. ALWAYS review with \`git diff\` before committing.\n`,
+  );
+
   // Filter to specific file if --file provided
   if (options.file) {
     extensionPoints = extensionPoints.filter(ep => ep.path === options.file);

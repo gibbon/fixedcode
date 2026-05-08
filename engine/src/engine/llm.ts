@@ -7,6 +7,49 @@ const DEFAULT_BASE_URLS: Record<string, string> = {
   ollama: 'http://localhost:11434/v1',
 };
 
+const ALLOWED_LLM_HOSTS = new Set([
+  'openrouter.ai',
+  'api.openai.com',
+  'api.anthropic.com',
+  'localhost',
+  '127.0.0.1',
+]);
+
+/**
+ * Validate that a configured LLM baseUrl points at a known provider (or loopback).
+ *
+ * Why: enrich/draft send project file contents and the API key as Bearer auth to
+ * this URL. An unconstrained baseUrl lets a malicious .fixedcode.yaml exfiltrate
+ * source and credentials. Loopback (localhost / 127.0.0.1) is allowed for Ollama
+ * and similar local model servers.
+ */
+export function validateBaseUrl(baseUrl: string): string {
+  let url: URL;
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    throw new LlmError(`Invalid LLM baseUrl: ${baseUrl}`);
+  }
+
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    throw new LlmError(`Invalid LLM baseUrl protocol: ${url.protocol}. Must be https:`);
+  }
+
+  const isLoopback = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  if (url.protocol === 'http:' && !isLoopback) {
+    throw new LlmError(`Invalid LLM baseUrl: must be https unless host is loopback (got ${baseUrl})`);
+  }
+
+  if (!ALLOWED_LLM_HOSTS.has(url.hostname)) {
+    throw new LlmError(
+      `LLM baseUrl host ${url.hostname} is not on the LLM allowlist (${[...ALLOWED_LLM_HOSTS].join(', ')}). ` +
+        `If you need to add a provider, edit ALLOWED_LLM_HOSTS in engine/src/engine/llm.ts and rebuild.`,
+    );
+  }
+
+  return baseUrl;
+}
+
 export interface ResolvedLlmConfig {
   provider: 'openrouter' | 'ollama' | 'openai';
   model: string;
@@ -53,7 +96,9 @@ export function resolveLlmConfig(
     throw new LlmError('No LLM model configured. Set `llm.model` in .fixedcode.yaml, set FIXEDCODE_LLM_MODEL env var, or use --model flag.');
   }
 
-  const baseUrl = process.env.FIXEDCODE_LLM_BASE_URL ?? config.llm?.baseUrl ?? DEFAULT_BASE_URLS[provider];
+  const rawBaseUrl =
+    process.env.FIXEDCODE_LLM_BASE_URL ?? config.llm?.baseUrl ?? DEFAULT_BASE_URLS[provider];
+  const baseUrl = validateBaseUrl(rawBaseUrl);
   const apiKey = process.env.FIXEDCODE_LLM_API_KEY ?? (config.llm?.apiKeyEnv ? process.env[config.llm.apiKeyEnv] : undefined);
 
   if (provider !== 'ollama' && !apiKey) {
