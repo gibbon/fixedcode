@@ -26,6 +26,8 @@ export { generate, validate } from './engine/pipeline.js';
 export { build } from './engine/build.js';
 export { deploy } from './engine/deploy.js';
 export { verify } from './engine/verify.js';
+export { renderTemplates, createHandlebarsEnv, renderFile } from './engine/render.js';
+export type { TemplateOptions } from './engine/render.js';
 export { createProgram } from './cli/index.js';
 export {
   fetchRegistry,
