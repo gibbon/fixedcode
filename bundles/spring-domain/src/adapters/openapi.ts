@@ -2,7 +2,12 @@
  * Adapter that maps spring-domain's EnrichedContext into the OpenAPI generator's input contract.
  */
 import type { Context } from '@fixedcode/engine';
-import type { OpenApiInput, OpenApiOperation, OpenApiSchema, OpenApiParam } from '@fixedcode/generator-openapi';
+import type {
+  OpenApiInput,
+  OpenApiOperation,
+  OpenApiSchema,
+  OpenApiParam,
+} from '@fixedcode/generator-openapi';
 
 const OPENAPI_TYPE_MAP: Record<string, { type: string; format?: string }> = {
   UUID: { type: 'string', format: 'uuid' },
@@ -79,7 +84,11 @@ function mapSchema(entity: any): OpenApiSchema {
   };
 }
 
-function mapCommand(cmd: any, entityName: string, attrTypeMap: Map<string, string>): OpenApiOperation {
+function mapCommand(
+  cmd: any,
+  entityName: string,
+  attrTypeMap: Map<string, string>,
+): OpenApiOperation {
   return {
     name: cmd.names.pascal,
     operationId: cmd.names.camel,
@@ -131,7 +140,13 @@ function mapParam(p: any, attrTypeMap: Map<string, string>): OpenApiParam {
   const kotlinType = attrTypeMap.get(p.name);
   if (kotlinType) {
     const mapped = OPENAPI_TYPE_MAP[kotlinType];
-    if (mapped) return { name: p.names.camel, type: mapped.type, format: mapped.format, required: p.required };
+    if (mapped)
+      return {
+        name: p.names.camel,
+        type: mapped.type,
+        format: mapped.format,
+        required: p.required,
+      };
   }
   return {
     name: p.names.camel,

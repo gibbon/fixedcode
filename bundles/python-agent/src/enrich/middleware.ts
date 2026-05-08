@@ -11,7 +11,7 @@ export interface EnrichedMiddleware {
 
 const middlewareTypeMap: Record<string, string> = {
   'correlation-id': 'correlation_id',
-  'auth': 'auth',
+  auth: 'auth',
   'feature-toggles': 'feature_toggles',
 };
 

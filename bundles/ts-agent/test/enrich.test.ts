@@ -15,7 +15,7 @@ describe('ts-agent enrich', () => {
         ],
         server: { port: 3100 },
       },
-      { name: 'coder-agent', apiVersion: '1.0' }
+      { name: 'coder-agent', apiVersion: '1.0' },
     );
 
     expect(ctx.mode).toBe('single');
@@ -38,7 +38,7 @@ describe('ts-agent enrich', () => {
         prompt: 'You are an agent',
         tools: [{ name: 'search', type: 'http' }],
       },
-      { name: 'basic-agent', apiVersion: '1.0' }
+      { name: 'basic-agent', apiVersion: '1.0' },
     );
     expect(ctx.serverPort).toBe(3100);
     expect(ctx.modelTier).toBe('balanced');
@@ -57,7 +57,7 @@ describe('ts-agent enrich', () => {
         tools: [{ name: 'search', type: 'http' }],
         routing: 'sequential',
       },
-      { name: 'orch', apiVersion: '1.0' }
+      { name: 'orch', apiVersion: '1.0' },
     );
     expect(ctx.agents).toHaveLength(2);
     expect(ctx.agents![0].name.pascal).toBe('Planner');

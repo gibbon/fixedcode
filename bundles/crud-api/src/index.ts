@@ -21,7 +21,10 @@ const schema = {
               required: ['name', 'type'],
               properties: {
                 name: { type: 'string' },
-                type: { type: 'string', enum: ['uuid', 'string', 'number', 'integer', 'boolean', 'date'] },
+                type: {
+                  type: 'string',
+                  enum: ['uuid', 'string', 'number', 'integer', 'boolean', 'date'],
+                },
                 required: { type: 'boolean' },
                 isId: { type: 'boolean' },
               },

@@ -108,7 +108,10 @@ describe('resolveLlmConfig', () => {
 
   it('derives default baseUrl for openrouter', () => {
     process.env.FIXEDCODE_LLM_API_KEY = 'test-key';
-    const config: FixedCodeConfig = { ...baseConfig, llm: { provider: 'openrouter', model: 'test' } };
+    const config: FixedCodeConfig = {
+      ...baseConfig,
+      llm: { provider: 'openrouter', model: 'test' },
+    };
     expect(resolveLlmConfig(config).baseUrl).toBe('https://openrouter.ai/api/v1');
   });
 
@@ -154,14 +157,21 @@ describe('chatCompletion', () => {
     vi.stubGlobal('fetch', fetchSpy);
   });
 
-  afterEach(() => { vi.unstubAllGlobals(); });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
 
   it('sends correct request shape', async () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       json: async () => ({ choices: [{ message: { content: 'response text' } }] }),
     });
-    const config = { provider: 'openrouter' as const, model: 'test-model', baseUrl: 'https://openrouter.ai/api/v1', apiKey: 'test-key' };
+    const config = {
+      provider: 'openrouter' as const,
+      model: 'test-model',
+      baseUrl: 'https://openrouter.ai/api/v1',
+      apiKey: 'test-key',
+    };
     const result = await chatCompletion(config, [
       { role: 'system' as const, content: 'You are helpful' },
       { role: 'user' as const, content: 'Hello' },
@@ -178,25 +188,56 @@ describe('chatCompletion', () => {
 
   it('throws on non-200 response', async () => {
     fetchSpy.mockResolvedValue({ ok: false, status: 401, text: async () => 'Unauthorized' });
-    const config = { provider: 'openrouter' as const, model: 'test-model', baseUrl: 'https://openrouter.ai/api/v1', apiKey: 'bad-key' };
-    await expect(chatCompletion(config, [{ role: 'user' as const, content: 'Hi' }])).rejects.toThrow(/LLM request failed.*401/);
+    const config = {
+      provider: 'openrouter' as const,
+      model: 'test-model',
+      baseUrl: 'https://openrouter.ai/api/v1',
+      apiKey: 'bad-key',
+    };
+    await expect(
+      chatCompletion(config, [{ role: 'user' as const, content: 'Hi' }]),
+    ).rejects.toThrow(/LLM request failed.*401/);
   });
 
   it('throws on empty choices', async () => {
     fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ choices: [] }) });
-    const config = { provider: 'openrouter' as const, model: 'test-model', baseUrl: 'https://openrouter.ai/api/v1', apiKey: 'key' };
-    await expect(chatCompletion(config, [{ role: 'user' as const, content: 'Hi' }])).rejects.toThrow(/empty choices/i);
+    const config = {
+      provider: 'openrouter' as const,
+      model: 'test-model',
+      baseUrl: 'https://openrouter.ai/api/v1',
+      apiKey: 'key',
+    };
+    await expect(
+      chatCompletion(config, [{ role: 'user' as const, content: 'Hi' }]),
+    ).rejects.toThrow(/empty choices/i);
   });
 
   it('throws on null content', async () => {
-    fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ choices: [{ message: { content: null } }] }) });
-    const config = { provider: 'openrouter' as const, model: 'test-model', baseUrl: 'https://openrouter.ai/api/v1', apiKey: 'key' };
-    await expect(chatCompletion(config, [{ role: 'user' as const, content: 'Hi' }])).rejects.toThrow(/null content/i);
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: null } }] }),
+    });
+    const config = {
+      provider: 'openrouter' as const,
+      model: 'test-model',
+      baseUrl: 'https://openrouter.ai/api/v1',
+      apiKey: 'key',
+    };
+    await expect(
+      chatCompletion(config, [{ role: 'user' as const, content: 'Hi' }]),
+    ).rejects.toThrow(/null content/i);
   });
 
   it('skips auth header for ollama', async () => {
-    fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ choices: [{ message: { content: 'ok' } }] }) });
-    const config = { provider: 'ollama' as const, model: 'llama3', baseUrl: 'http://localhost:11434/v1' };
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: 'ok' } }] }),
+    });
+    const config = {
+      provider: 'ollama' as const,
+      model: 'llama3',
+      baseUrl: 'http://localhost:11434/v1',
+    };
     await chatCompletion(config, [{ role: 'user' as const, content: 'Hi' }]);
     const [, opts] = fetchSpy.mock.calls[0];
     expect(opts.headers['Authorization']).toBeUndefined();

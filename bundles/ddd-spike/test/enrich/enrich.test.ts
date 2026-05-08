@@ -4,7 +4,10 @@ import { parse } from 'yaml';
 import { enrich } from '../../src/enrich/index.js';
 import type { DddContext } from '../../src/context.js';
 
-function loadFixture(): { spec: Record<string, unknown>; metadata: { name: string; apiVersion: string } } {
+function loadFixture(): {
+  spec: Record<string, unknown>;
+  metadata: { name: string; apiVersion: string };
+} {
   const raw = parse(readFileSync(new URL('../fixtures/order-spec.yaml', import.meta.url), 'utf-8'));
   return { spec: raw.spec, metadata: { name: raw.metadata.name, apiVersion: raw.apiVersion } };
 }
@@ -39,7 +42,7 @@ describe('enrich (full pipeline)', () => {
     expect(order.allAttributes).toHaveLength(4);
     expect(order.attributes).toHaveLength(3); // excludes identity
 
-    const status = order.attributes.find(a => a.names.camel === 'status')!;
+    const status = order.attributes.find((a) => a.names.camel === 'status')!;
     expect(status.hasDefault).toBe(true);
     expect(status.kotlinDefault).toBe(' = "CREATED"');
   });

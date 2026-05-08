@@ -9,14 +9,17 @@ const templatesDir = join(__dirname, '..', 'templates');
 
 describe('spring-library template rendering', () => {
   it('renders all templates without errors', async () => {
-    const ctx = bundle.enrich({
-      library: { name: 'gap-workspace-core', description: 'Workspace domain library' },
-      features: {
-        database: { enabled: true, type: 'postgresql', port: 5433 },
-        messaging: { enabled: true },
+    const ctx = bundle.enrich(
+      {
+        library: { name: 'gap-workspace-core', description: 'Workspace domain library' },
+        features: {
+          database: { enabled: true, type: 'postgresql', port: 5433 },
+          messaging: { enabled: true },
+        },
+        service: { port: 8081 },
       },
-      service: { port: 8081 },
-    }, { name: 'workspace', apiVersion: '1.0' });
+      { name: 'workspace', apiVersion: '1.0' },
+    );
 
     const rendered = await renderTemplates(templatesDir, ctx, {
       noEscape: true,
@@ -29,12 +32,14 @@ describe('spring-library template rendering', () => {
     console.log(`Rendered ${rendered.length} files`);
 
     // Check key files exist
-    const paths = rendered.map(r => r.path);
-    expect(paths.some(p => p.includes('build.gradle.kts'))).toBe(true);
-    expect(paths.some(p => p.includes('docker-compose.yml'))).toBe(true);
-    expect(paths.some(p => p.includes('application.yml'))).toBe(true);
+    const paths = rendered.map((r) => r.path);
+    expect(paths.some((p) => p.includes('build.gradle.kts'))).toBe(true);
+    expect(paths.some((p) => p.includes('docker-compose.yml'))).toBe(true);
+    expect(paths.some((p) => p.includes('application.yml'))).toBe(true);
     // Library bundles produce autoconfiguration imports instead of Application.kt
-    expect(paths.some(p => p.includes('AutoConfiguration.imports') || p.includes('.kt'))).toBe(true);
+    expect(paths.some((p) => p.includes('AutoConfiguration.imports') || p.includes('.kt'))).toBe(
+      true,
+    );
 
     // Check no rendered content contains unresolved Handlebars
     for (const file of rendered) {
@@ -47,10 +52,13 @@ describe('spring-library template rendering', () => {
   });
 
   it('key files have correct package declarations', async () => {
-    const ctx = bundle.enrich({
-      library: { name: 'gap-workspace-core', description: 'Workspace domain library' },
-      service: { port: 8081 },
-    }, { name: 'workspace', apiVersion: '1.0' });
+    const ctx = bundle.enrich(
+      {
+        library: { name: 'gap-workspace-core', description: 'Workspace domain library' },
+        service: { port: 8081 },
+      },
+      { name: 'workspace', apiVersion: '1.0' },
+    );
 
     const rendered = await renderTemplates(templatesDir, ctx, {
       noEscape: true,
@@ -58,14 +66,14 @@ describe('spring-library template rendering', () => {
     });
 
     // settings.gradle.kts should reference the library name
-    const settingsFile = rendered.find(r => r.path.includes('settings.gradle.kts'));
+    const settingsFile = rendered.find((r) => r.path.includes('settings.gradle.kts'));
     if (settingsFile) {
       expect(settingsFile.content).toContain('gap-workspace-core');
     }
 
     // Kotlin files under the domain package path should use the enriched package
-    const domainKotlinFiles = rendered.filter(r =>
-      r.path.endsWith('.kt') && r.path.includes('workspace')
+    const domainKotlinFiles = rendered.filter(
+      (r) => r.path.endsWith('.kt') && r.path.includes('workspace'),
     );
     for (const file of domainKotlinFiles) {
       expect(file.content).toContain('io.pexa.gap.workspace');

@@ -6,10 +6,11 @@ export interface ProviderConfig {
 }
 
 const providers: Record<string, ProviderConfig> = {
-  'strands': {
+  strands: {
     providerImport: 'from strands import Agent, tool',
     providerDependency: 'strands-agents>=1.0.0',
-    providerClientInit: 'Agent(model=model, tools=tools, system_prompt=system_prompt, conversation_manager=conversation_manager)',
+    providerClientInit:
+      'Agent(model=model, tools=tools, system_prompt=system_prompt, conversation_manager=conversation_manager)',
     providerToolDecorator: '@tool',
   },
   'claude-agent-sdk': {
@@ -18,13 +19,13 @@ const providers: Record<string, ProviderConfig> = {
     providerClientInit: 'anthropic.Anthropic()',
     providerToolDecorator: '',
   },
-  'openai': {
+  openai: {
     providerImport: 'from openai import OpenAI',
     providerDependency: 'openai>=1.0.0',
     providerClientInit: 'OpenAI()',
     providerToolDecorator: '',
   },
-  'ollama': {
+  ollama: {
     providerImport: 'from openai import OpenAI',
     providerDependency: 'openai>=1.0.0',
     providerClientInit: 'OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")',

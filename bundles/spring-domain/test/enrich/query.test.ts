@@ -15,13 +15,19 @@ describe('enrichQuery', () => {
   });
 
   it('SearchWorkspace → GET /workspaces 200 paged', () => {
-    const q = enrichQuery({ name: 'SearchWorkspace', returns: 'PagedWorkspaceList' }, aggCtx as any);
+    const q = enrichQuery(
+      { name: 'SearchWorkspace', returns: 'PagedWorkspaceList' },
+      aggCtx as any,
+    );
     expect(q.http.path).toBe('/workspaces');
     expect(q.response.type).toBe('paged');
   });
 
   it('FindBySubscriber with explicit query param', () => {
-    const q = enrichQuery({ name: 'FindWorkspacesBySubscriber', query: ['subscriberId'], returns: 'WorkspaceList' }, aggCtx as any);
+    const q = enrichQuery(
+      { name: 'FindWorkspacesBySubscriber', query: ['subscriberId'], returns: 'WorkspaceList' },
+      aggCtx as any,
+    );
     expect(q.params.query[0].name).toBe('subscriberId');
   });
 });

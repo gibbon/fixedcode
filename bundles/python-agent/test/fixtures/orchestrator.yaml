@@ -1,4 +1,4 @@
-apiVersion: "1.0"
+apiVersion: '1.0'
 kind: python-agent
 metadata:
   name: ops-orchestrator
@@ -12,23 +12,23 @@ spec:
     - correlation-id
     - auth:
         provider: auth0
-        permission: "admin:query"
+        permission: 'admin:query'
 
   session:
     dev: file
-    prod: { provider: s3, bucket: "${ENV}-sessions" }
+    prod: { provider: s3, bucket: '${ENV}-sessions' }
 
   agents:
     - name: planner
-      prompt: "You are the planning agent..."
+      prompt: 'You are the planning agent...'
       tools: [call-api]
       critical: true
     - name: enricher
-      prompt: "You enrich context with data lookups..."
+      prompt: 'You enrich context with data lookups...'
       tools: [query-database]
       critical: false
     - name: executor
-      prompt: "You execute approved plans..."
+      prompt: 'You execute approved plans...'
       tools: [run-script, query-database]
       critical: true
 
@@ -40,7 +40,7 @@ spec:
       config: { readOnly: true, databases: [ops-db] }
     - name: call-api
       type: http
-      config: { baseUrl: "https://api.internal" }
+      config: { baseUrl: 'https://api.internal' }
     - name: run-script
       type: cli
-      config: { command: "kubectl" }
+      config: { command: 'kubectl' }

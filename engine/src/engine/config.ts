@@ -28,9 +28,12 @@ export function findConfigFile(cwd: string): string | null {
 
 export function loadConfig(cwd: string = process.cwd(), explicitPath?: string): FixedCodeConfig {
   // Explicit path takes priority, then FIXEDCODE_CONFIG env var, then search
-  const configPath = explicitPath
-    ?? (process.env.FIXEDCODE_CONFIG && existsSync(process.env.FIXEDCODE_CONFIG) ? process.env.FIXEDCODE_CONFIG : null)
-    ?? findConfigFile(cwd);
+  const configPath =
+    explicitPath ??
+    (process.env.FIXEDCODE_CONFIG && existsSync(process.env.FIXEDCODE_CONFIG)
+      ? process.env.FIXEDCODE_CONFIG
+      : null) ??
+    findConfigFile(cwd);
 
   if (!configPath) {
     return { bundles: {}, configDir: cwd };
@@ -54,8 +57,12 @@ export function loadConfig(cwd: string = process.cwd(), explicitPath?: string): 
     }
 
     return {
-      bundles: (typeof cfg.bundles === 'object' && cfg.bundles !== null ? cfg.bundles : {}) as Record<string, string>,
-      generators: (typeof cfg.generators === 'object' && cfg.generators !== null ? cfg.generators : {}) as Record<string, string>,
+      bundles: (typeof cfg.bundles === 'object' && cfg.bundles !== null
+        ? cfg.bundles
+        : {}) as Record<string, string>,
+      generators: (typeof cfg.generators === 'object' && cfg.generators !== null
+        ? cfg.generators
+        : {}) as Record<string, string>,
       configDir,
       llm: cfg.llm as FixedCodeConfig['llm'],
     };

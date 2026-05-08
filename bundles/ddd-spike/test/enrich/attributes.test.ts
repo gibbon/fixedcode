@@ -4,7 +4,10 @@ import { enrichAttribute } from '../../src/enrich/attributes.js';
 describe('enrichAttribute', () => {
   it('enriches a required uuid identity field', () => {
     const result = enrichAttribute({
-      name: 'orderId', type: 'uuid', required: true, identity: true,
+      name: 'orderId',
+      type: 'uuid',
+      required: true,
+      identity: true,
     });
     expect(result.names.pascal).toBe('OrderId');
     expect(result.names.camel).toBe('orderId');
@@ -19,7 +22,9 @@ describe('enrichAttribute', () => {
 
   it('enriches an optional string field with default', () => {
     const result = enrichAttribute({
-      name: 'status', type: 'string', default: 'CREATED',
+      name: 'status',
+      type: 'string',
+      default: 'CREATED',
     });
     expect(result.required).toBe(false);
     expect(result.type.kotlinDecl).toBe('String?');
@@ -30,7 +35,8 @@ describe('enrichAttribute', () => {
 
   it('enriches an optional decimal field', () => {
     const result = enrichAttribute({
-      name: 'totalAmount', type: 'decimal',
+      name: 'totalAmount',
+      type: 'decimal',
     });
     expect(result.type.kotlinDecl).toBe('BigDecimal?');
     expect(result.sqlColumn).toBe('total_amount DECIMAL(19,2)');

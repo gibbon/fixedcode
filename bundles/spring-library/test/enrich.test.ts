@@ -5,11 +5,14 @@ const enrich = bundle.enrich;
 
 describe('spring-library enrichment', () => {
   it('enriches a core library spec correctly', () => {
-    const ctx = enrich({
-      library: { name: 'gap-workspace-core', description: 'Workspace domain library' },
-      features: { database: { enabled: true, type: 'postgresql' } },
-      service: { port: 8081 },
-    }, { name: 'workspace', apiVersion: '1.0' });
+    const ctx = enrich(
+      {
+        library: { name: 'gap-workspace-core', description: 'Workspace domain library' },
+        features: { database: { enabled: true, type: 'postgresql' } },
+        service: { port: 8081 },
+      },
+      { name: 'workspace', apiVersion: '1.0' },
+    );
 
     expect(ctx.LibraryName).toBe('gap-workspace-core');
     expect(ctx.PackageName).toBe('workspace');
@@ -24,11 +27,14 @@ describe('spring-library enrichment', () => {
   });
 
   it('enriches a feature library spec correctly', () => {
-    const ctx = enrich({
-      library: { name: 'gap-compliance-risk', description: 'Risk assessment feature' },
-      featureLibrary: { coreDomain: 'compliance', featureName: 'risk' },
-      service: { port: 8082 },
-    }, { name: 'compliance-risk', apiVersion: '1.0' });
+    const ctx = enrich(
+      {
+        library: { name: 'gap-compliance-risk', description: 'Risk assessment feature' },
+        featureLibrary: { coreDomain: 'compliance', featureName: 'risk' },
+        service: { port: 8082 },
+      },
+      { name: 'compliance-risk', apiVersion: '1.0' },
+    );
 
     expect(ctx.IsFeatureLibrary).toBe(true);
     expect(ctx.CoreDomain).toBe('compliance');
@@ -40,9 +46,12 @@ describe('spring-library enrichment', () => {
   });
 
   it('applies defaults correctly', () => {
-    const ctx = enrich({
-      library: { name: 'gap-workspace-core', description: 'Test' },
-    }, { name: 'workspace', apiVersion: '1.0' });
+    const ctx = enrich(
+      {
+        library: { name: 'gap-workspace-core', description: 'Test' },
+      },
+      { name: 'workspace', apiVersion: '1.0' },
+    );
 
     expect(ctx.DatabaseEnabled).toBe(true);
     expect(ctx.DatabaseType).toBe('postgresql');
@@ -54,12 +63,18 @@ describe('spring-library enrichment', () => {
   });
 
   it('computes DatabaseReadPort deterministically', () => {
-    const ctx1 = enrich({
-      library: { name: 'gap-workspace-core', description: 'Test' },
-    }, { name: 'workspace', apiVersion: '1.0' });
-    const ctx2 = enrich({
-      library: { name: 'gap-workspace-core', description: 'Test' },
-    }, { name: 'workspace', apiVersion: '1.0' });
+    const ctx1 = enrich(
+      {
+        library: { name: 'gap-workspace-core', description: 'Test' },
+      },
+      { name: 'workspace', apiVersion: '1.0' },
+    );
+    const ctx2 = enrich(
+      {
+        library: { name: 'gap-workspace-core', description: 'Test' },
+      },
+      { name: 'workspace', apiVersion: '1.0' },
+    );
 
     expect(ctx1.DatabaseReadPort).toBe(ctx2.DatabaseReadPort);
     expect(ctx1.DatabaseReadPort).toBeGreaterThanOrEqual(15432);

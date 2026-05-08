@@ -81,9 +81,11 @@ function parseLibraryName(name: string): { domain: string; suffix: string } {
 }
 
 function toPascalCase(str: string): string {
-  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) =>
-    index === 0 ? word.toUpperCase() : word.toUpperCase()
-  ).replace(/[\s_-]+/g, '');
+  return str
+    .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) =>
+      index === 0 ? word.toUpperCase() : word.toUpperCase(),
+    )
+    .replace(/[\s_-]+/g, '');
 }
 
 function toCamelCase(str: string): string {
@@ -92,11 +94,19 @@ function toCamelCase(str: string): string {
 }
 
 function toSnakeCase(str: string): string {
-  return str.replace(/([A-Z])/g, '_$1').toLowerCase().replace(/^_/, '').replace(/[\s-]+/g, '_');
+  return str
+    .replace(/([A-Z])/g, '_$1')
+    .toLowerCase()
+    .replace(/^_/, '')
+    .replace(/[\s-]+/g, '_');
 }
 
 function toKebabCase(str: string): string {
-  return str.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '').replace(/[\s_]+/g, '-');
+  return str
+    .replace(/([A-Z])/g, '-$1')
+    .toLowerCase()
+    .replace(/^-/, '')
+    .replace(/[\s_]+/g, '-');
 }
 
 /**

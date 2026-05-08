@@ -15,7 +15,7 @@ const providers: Record<string, ProviderConfig> = {
     providerDependency: '"@anthropic-ai/sdk": "^0.80.0"',
     providerClientInit: 'new Anthropic()',
   },
-  'openai': {
+  openai: {
     providerImport: "import OpenAI from 'openai';",
     providerDependency: '"openai": "^4.0.0"',
     providerClientInit: 'new OpenAI()',

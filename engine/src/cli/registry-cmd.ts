@@ -1,5 +1,11 @@
 import { Command } from 'commander';
-import { fetchRegistry, searchRegistry, listRegistry, installPackage, publishPackage } from '../engine/registry.js';
+import {
+  fetchRegistry,
+  searchRegistry,
+  listRegistry,
+  installPackage,
+  publishPackage,
+} from '../engine/registry.js';
 
 export function createRegistryCommand() {
   const registry = new Command('registry')
@@ -64,7 +70,7 @@ export function createRegistryCommand() {
     .action(async (name: string, opts) => {
       try {
         const reg = await fetchRegistry(opts.url);
-        const pkg = reg.packages.find(p => p.name === name || p.name.endsWith(`/${name}`));
+        const pkg = reg.packages.find((p) => p.name === name || p.name.endsWith(`/${name}`));
 
         if (!pkg) {
           console.error(`Package "${name}" not found in registry`);

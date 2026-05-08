@@ -30,7 +30,10 @@ export async function dynamicImport(bundlePath: string, configDir: string): Prom
       const dotEntry = (pkg.exports as Record<string, unknown>)['.'];
       if (typeof dotEntry === 'string') entry = dotEntry;
       else if (typeof dotEntry === 'object' && dotEntry !== null) {
-        entry = (dotEntry as Record<string, string>).import ?? (dotEntry as Record<string, string>).default ?? entry;
+        entry =
+          (dotEntry as Record<string, string>).import ??
+          (dotEntry as Record<string, string>).default ??
+          entry;
       }
     }
     if (entry.startsWith('.')) {

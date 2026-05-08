@@ -45,7 +45,7 @@ export function deploy(options: DeployOptions): DeployResult {
 function copyDirectoryWithMigrationAwareness(
   srcDir: string,
   dstDir: string,
-  dryRun: boolean
+  dryRun: boolean,
 ): { copied: number; skipped: number } {
   let copied = 0;
   let skipped = 0;
@@ -63,7 +63,11 @@ function copyDirectoryWithMigrationAwareness(
         walk(srcPath);
       } else if (entry.isFile()) {
         // Smart migration handling: skip versioned SQL migrations if target already has them
-        if (relPath.includes('migration') && entry.name.startsWith('V0') && entry.name.endsWith('.sql')) {
+        if (
+          relPath.includes('migration') &&
+          entry.name.startsWith('V0') &&
+          entry.name.endsWith('.sql')
+        ) {
           if (existsSync(dstPath)) {
             skipped++;
             continue;

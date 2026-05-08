@@ -51,11 +51,13 @@ export function verify(options: VerifyOptions): VerifyResult {
     } else if (kind === 'spring-library') {
       verifyLibrarySpec(outputDir, checks);
     } else {
-      console.warn(`Warning: no manifest found and no verification rules for bundle kind '${kind}'.`);
+      console.warn(
+        `Warning: no manifest found and no verification rules for bundle kind '${kind}'.`,
+      );
     }
   }
 
-  const missing = checks.filter(c => !c.exists).map(c => c.file);
+  const missing = checks.filter((c) => !c.exists).map((c) => c.file);
 
   return {
     passed: missing.length === 0,
@@ -65,8 +67,12 @@ export function verify(options: VerifyOptions): VerifyResult {
   };
 }
 
-interface DomainService { package: string }
-interface DomainCommand { name: string }
+interface DomainService {
+  package: string;
+}
+interface DomainCommand {
+  name: string;
+}
 interface DomainAggregate {
   commands?: DomainCommand[];
   entities?: Record<string, DomainAggregate>;
@@ -75,7 +81,7 @@ interface DomainAggregate {
 function verifyDomainSpec(
   spec: Record<string, unknown>,
   outputDir: string,
-  checks: VerifyResult['checks']
+  checks: VerifyResult['checks'],
 ): void {
   const service = spec.service as DomainService | undefined;
   const pkg = service?.package?.replace(/\./g, '/') ?? '';
@@ -91,41 +97,101 @@ function verifyDomainSpec(
 
     // Per-aggregate files
     check(checks, outputDir, `src/main/kotlin/${pkg}/domain/${kebab}/${pascal}.kt`, 'aggregate');
-    check(checks, outputDir, `src/main/kotlin/${pkg}/domain/${kebab}/${pascal}Events.kt`, 'aggregate');
-    check(checks, outputDir, `src/main/kotlin/${pkg}/application/${kebab}/${pascal}CommandService.kt`, 'aggregate');
-    check(checks, outputDir, `src/main/kotlin/${pkg}/application/${kebab}/${pascal}QueryService.kt`, 'aggregate');
-    check(checks, outputDir, `src/main/kotlin/${pkg}/api/${kebab}/${pascal}ApiDelegateImpl.kt`, 'aggregate');
-    check(checks, outputDir, `src/main/kotlin/${pkg}/infrastructure/${kebab}/${pascal}ReadRepositoryImpl.kt`, 'aggregate');
-    check(checks, outputDir, `src/main/kotlin/${pkg}/infrastructure/${kebab}/${pascal}WriteRepositoryImpl.kt`, 'aggregate');
+    check(
+      checks,
+      outputDir,
+      `src/main/kotlin/${pkg}/domain/${kebab}/${pascal}Events.kt`,
+      'aggregate',
+    );
+    check(
+      checks,
+      outputDir,
+      `src/main/kotlin/${pkg}/application/${kebab}/${pascal}CommandService.kt`,
+      'aggregate',
+    );
+    check(
+      checks,
+      outputDir,
+      `src/main/kotlin/${pkg}/application/${kebab}/${pascal}QueryService.kt`,
+      'aggregate',
+    );
+    check(
+      checks,
+      outputDir,
+      `src/main/kotlin/${pkg}/api/${kebab}/${pascal}ApiDelegateImpl.kt`,
+      'aggregate',
+    );
+    check(
+      checks,
+      outputDir,
+      `src/main/kotlin/${pkg}/infrastructure/${kebab}/${pascal}ReadRepositoryImpl.kt`,
+      'aggregate',
+    );
+    check(
+      checks,
+      outputDir,
+      `src/main/kotlin/${pkg}/infrastructure/${kebab}/${pascal}WriteRepositoryImpl.kt`,
+      'aggregate',
+    );
 
     // Tests
     check(checks, outputDir, `src/test/kotlin/${pkg}/domain/${kebab}/${pascal}Test.kt`, 'test');
-    check(checks, outputDir, `src/test/kotlin/${pkg}/application/${kebab}/${pascal}CommandServiceTest.kt`, 'test');
-    check(checks, outputDir, `src/test/kotlin/${pkg}/api/${kebab}/${pascal}ApiDelegateImplTest.kt`, 'test');
+    check(
+      checks,
+      outputDir,
+      `src/test/kotlin/${pkg}/application/${kebab}/${pascal}CommandServiceTest.kt`,
+      'test',
+    );
+    check(
+      checks,
+      outputDir,
+      `src/test/kotlin/${pkg}/api/${kebab}/${pascal}ApiDelegateImplTest.kt`,
+      'test',
+    );
 
     // Per-command files
     for (const cmd of agg.commands ?? []) {
       const cmdPascal = cmd.name;
-      check(checks, outputDir, `src/main/kotlin/${pkg}/domain/${kebab}/commands/${cmdPascal}Command.kt`, 'command');
+      check(
+        checks,
+        outputDir,
+        `src/main/kotlin/${pkg}/domain/${kebab}/commands/${cmdPascal}Command.kt`,
+        'command',
+      );
     }
 
     // Per-entity files
     for (const [entityName, entity] of Object.entries(agg.entities ?? {})) {
       const entityPascal = entityName;
-      check(checks, outputDir, `src/main/kotlin/${pkg}/domain/${kebab}/entities/${entityPascal}.kt`, 'entity');
-      check(checks, outputDir, `src/main/kotlin/${pkg}/domain/${kebab}/entities/${entityPascal}Events.kt`, 'entity');
+      check(
+        checks,
+        outputDir,
+        `src/main/kotlin/${pkg}/domain/${kebab}/entities/${entityPascal}.kt`,
+        'entity',
+      );
+      check(
+        checks,
+        outputDir,
+        `src/main/kotlin/${pkg}/domain/${kebab}/entities/${entityPascal}Events.kt`,
+        'entity',
+      );
 
       // Entity commands
       for (const cmd of entity.commands ?? []) {
         const cmdPascal = cmd.name;
-        check(checks, outputDir, `src/main/kotlin/${pkg}/domain/${kebab}/entities/commands/${cmdPascal}Command.kt`, 'entity-command');
+        check(
+          checks,
+          outputDir,
+          `src/main/kotlin/${pkg}/domain/${kebab}/entities/commands/${cmdPascal}Command.kt`,
+          'entity-command',
+        );
       }
     }
   }
 
   // OpenAPI spec
   const rootFiles = existsSync(outputDir) ? readdirSync(outputDir) : [];
-  const hasOpenapi = rootFiles.some(f => f.includes('openapi') && f.endsWith('.yaml'));
+  const hasOpenapi = rootFiles.some((f) => f.includes('openapi') && f.endsWith('.yaml'));
   checks.push({ file: '*-openapi.yaml', exists: hasOpenapi, category: 'openapi' });
 }
 
@@ -144,7 +210,7 @@ function check(
   checks: VerifyResult['checks'],
   outputDir: string,
   relPath: string,
-  category: string
+  category: string,
 ): void {
   checks.push({
     file: relPath,

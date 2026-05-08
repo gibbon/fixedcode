@@ -35,7 +35,9 @@ export function validateBaseUrl(baseUrl: string): string {
   }
 
   if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-    throw new LlmError(`Invalid LLM baseUrl protocol: ${url.protocol}. Must be https or http on loopback.`);
+    throw new LlmError(
+      `Invalid LLM baseUrl protocol: ${url.protocol}. Must be https or http on loopback.`,
+    );
   }
 
   // Node's WHATWG URL keeps IPv6 brackets in hostname; older parsers strip them.
@@ -46,7 +48,9 @@ export function validateBaseUrl(baseUrl: string): string {
       : url.hostname;
   const isLoopback = LOOPBACK_HOSTS.has(hostname);
   if (url.protocol === 'http:' && !isLoopback) {
-    throw new LlmError(`Invalid LLM baseUrl: must be https unless host is loopback (got ${baseUrl})`);
+    throw new LlmError(
+      `Invalid LLM baseUrl: must be https unless host is loopback (got ${baseUrl})`,
+    );
   }
 
   if (!ALLOWED_LLM_HOSTS.has(hostname)) {
@@ -86,32 +90,43 @@ export interface ChatOptions {
 
 export function resolveLlmConfig(
   config: FixedCodeConfig,
-  overrides?: { provider?: string; model?: string }
+  overrides?: { provider?: string; model?: string },
 ): ResolvedLlmConfig {
-  const provider = overrides?.provider ?? process.env.FIXEDCODE_LLM_PROVIDER ?? config.llm?.provider;
+  const provider =
+    overrides?.provider ?? process.env.FIXEDCODE_LLM_PROVIDER ?? config.llm?.provider;
 
   if (!provider) {
-    throw new LlmError('No LLM provider configured. Set `llm.provider` in .fixedcode.yaml, set FIXEDCODE_LLM_PROVIDER env var, or use --provider flag.');
+    throw new LlmError(
+      'No LLM provider configured. Set `llm.provider` in .fixedcode.yaml, set FIXEDCODE_LLM_PROVIDER env var, or use --provider flag.',
+    );
   }
 
   const validProviders = ['openrouter', 'ollama', 'openai'];
   if (!validProviders.includes(provider)) {
-    throw new LlmError(`Invalid LLM provider '${provider}'. Must be one of: ${validProviders.join(', ')}`);
+    throw new LlmError(
+      `Invalid LLM provider '${provider}'. Must be one of: ${validProviders.join(', ')}`,
+    );
   }
 
   const model = overrides?.model ?? process.env.FIXEDCODE_LLM_MODEL ?? config.llm?.model;
 
   if (!model) {
-    throw new LlmError('No LLM model configured. Set `llm.model` in .fixedcode.yaml, set FIXEDCODE_LLM_MODEL env var, or use --model flag.');
+    throw new LlmError(
+      'No LLM model configured. Set `llm.model` in .fixedcode.yaml, set FIXEDCODE_LLM_MODEL env var, or use --model flag.',
+    );
   }
 
   const rawBaseUrl =
     process.env.FIXEDCODE_LLM_BASE_URL ?? config.llm?.baseUrl ?? DEFAULT_BASE_URLS[provider];
   const baseUrl = validateBaseUrl(rawBaseUrl);
-  const apiKey = process.env.FIXEDCODE_LLM_API_KEY ?? (config.llm?.apiKeyEnv ? process.env[config.llm.apiKeyEnv] : undefined);
+  const apiKey =
+    process.env.FIXEDCODE_LLM_API_KEY ??
+    (config.llm?.apiKeyEnv ? process.env[config.llm.apiKeyEnv] : undefined);
 
   if (provider !== 'ollama' && !apiKey) {
-    throw new LlmError(`No API key found for provider '${provider}'. Set ${config.llm?.apiKeyEnv ?? 'FIXEDCODE_LLM_API_KEY'} env var, or configure llm.apiKeyEnv in .fixedcode.yaml.`);
+    throw new LlmError(
+      `No API key found for provider '${provider}'. Set ${config.llm?.apiKeyEnv ?? 'FIXEDCODE_LLM_API_KEY'} env var, or configure llm.apiKeyEnv in .fixedcode.yaml.`,
+    );
   }
 
   return { provider: provider as ResolvedLlmConfig['provider'], model, baseUrl, apiKey };
@@ -120,11 +135,13 @@ export function resolveLlmConfig(
 export async function chatCompletion(
   config: ResolvedLlmConfig,
   messages: ChatMessage[],
-  options?: ChatOptions
+  options?: ChatOptions,
 ): Promise<string> {
   const url = `${config.baseUrl}/chat/completions`;
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (config.apiKey) { headers['Authorization'] = `Bearer ${config.apiKey}`; }
+  if (config.apiKey) {
+    headers['Authorization'] = `Bearer ${config.apiKey}`;
+  }
 
   const body = JSON.stringify({
     model: config.model,
@@ -156,7 +173,11 @@ export async function chatCompletion(
   }
 
   let data: unknown;
-  try { data = await response.json(); } catch { throw new LlmError('LLM request failed: response is not valid JSON'); }
+  try {
+    data = await response.json();
+  } catch {
+    throw new LlmError('LLM request failed: response is not valid JSON');
+  }
 
   const choices = (data as { choices?: Array<{ message?: { content?: string } }> })?.choices;
   if (!Array.isArray(choices) || choices.length === 0) {

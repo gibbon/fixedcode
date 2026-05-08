@@ -8,7 +8,8 @@ import { resolve } from 'node:path';
 import { readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 
-const DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/fixedcode-ai/registry/main/registry.json';
+const DEFAULT_REGISTRY_URL =
+  'https://raw.githubusercontent.com/fixedcode-ai/registry/main/registry.json';
 const DEFAULT_REGISTRY_REPO = 'fixedcode-ai/registry';
 
 const REGISTRY_REPO_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9][A-Za-z0-9._-]*$/;
@@ -63,7 +64,7 @@ export async function fetchRegistry(url?: string): Promise<Registry> {
   try {
     const response = await fetch(registryUrl, { headers: { 'Cache-Control': 'no-cache' } });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json() as Registry;
+    return (await response.json()) as Registry;
   } catch {
     // Fall back to local registry if URL fails
     const localPath = resolve(process.cwd(), 'registry.json');
@@ -76,17 +77,18 @@ export async function fetchRegistry(url?: string): Promise<Registry> {
 
 export function searchRegistry(registry: Registry, query: string): RegistryPackage[] {
   const q = query.toLowerCase();
-  return registry.packages.filter(pkg =>
-    pkg.name.toLowerCase().includes(q) ||
-    pkg.description.toLowerCase().includes(q) ||
-    pkg.tags.some(t => t.toLowerCase().includes(q)) ||
-    pkg.kind.toLowerCase().includes(q)
+  return registry.packages.filter(
+    (pkg) =>
+      pkg.name.toLowerCase().includes(q) ||
+      pkg.description.toLowerCase().includes(q) ||
+      pkg.tags.some((t) => t.toLowerCase().includes(q)) ||
+      pkg.kind.toLowerCase().includes(q),
   );
 }
 
 export function listRegistry(registry: Registry, kind?: string): RegistryPackage[] {
   if (!kind) return registry.packages;
-  return registry.packages.filter(pkg => pkg.kind === kind);
+  return registry.packages.filter((pkg) => pkg.kind === kind);
 }
 
 export interface InstallResult {
@@ -103,7 +105,7 @@ export function installPackage(
   pkg: RegistryPackage,
   projectDir: string,
   configFile = '.fixedcode.yaml',
-  configSection = 'bundles'
+  configSection = 'bundles',
 ): InstallResult {
   // Validate install command against allowlist before executing.
   // Strict shape: `npm install <single-target>` where <single-target> is either
@@ -170,7 +172,7 @@ export async function publishPackage(options: PublishOptions): Promise<string> {
   const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
   const name = pkgJson.name as string;
   const version = pkgJson.version as string;
-  const description = pkgJson.description as string ?? '';
+  const description = (pkgJson.description as string) ?? '';
 
   if (!name) throw new Error('package.json must have a "name" field');
   if (!version) throw new Error('package.json must have a "version" field');
@@ -179,7 +181,10 @@ export async function publishPackage(options: PublishOptions): Promise<string> {
   let repo = options.repo;
   if (!repo) {
     try {
-      repo = execFileSync('git', ['remote', 'get-url', 'origin'], { cwd: options.packageDir, encoding: 'utf-8' }).trim();
+      repo = execFileSync('git', ['remote', 'get-url', 'origin'], {
+        cwd: options.packageDir,
+        encoding: 'utf-8',
+      }).trim();
       // Convert SSH to HTTPS
       repo = repo.replace(/^git@github\.com:/, 'https://github.com/').replace(/\.git$/, '');
     } catch {
@@ -193,9 +198,15 @@ export async function publishPackage(options: PublishOptions): Promise<string> {
     : `npm install ${name}`;
 
   // Detect author from git or package.json
-  const author = pkgJson.author ?? (() => {
-    try { return execFileSync('git', ['config', 'user.name'], { encoding: 'utf-8' }).trim(); } catch { return 'unknown'; }
-  })();
+  const author =
+    pkgJson.author ??
+    (() => {
+      try {
+        return execFileSync('git', ['config', 'user.name'], { encoding: 'utf-8' }).trim();
+      } catch {
+        return 'unknown';
+      }
+    })();
 
   const entry: RegistryPackage = {
     name,
@@ -203,7 +214,7 @@ export async function publishPackage(options: PublishOptions): Promise<string> {
     version,
     kind: options.kind,
     tags: options.tags,
-    author: typeof author === 'string' ? author : author.name ?? 'unknown',
+    author: typeof author === 'string' ? author : (author.name ?? 'unknown'),
     repo,
     install,
   };
@@ -214,7 +225,7 @@ export async function publishPackage(options: PublishOptions): Promise<string> {
   const registry = await fetchRegistry();
 
   // Check for existing entry and update or append
-  const existingIdx = registry.packages.findIndex(p => p.name === name);
+  const existingIdx = registry.packages.findIndex((p) => p.name === name);
   if (existingIdx >= 0) {
     registry.packages[existingIdx] = entry;
   } else {
@@ -228,14 +239,14 @@ export async function publishPackage(options: PublishOptions): Promise<string> {
   const tmpDir = resolve(options.packageDir, '.registry-pr-tmp');
 
   try {
-    execFileSync('gh', ['repo', 'clone', registryRepo, tmpDir, '--', '--depth', '1'], { stdio: 'pipe' });
+    execFileSync('gh', ['repo', 'clone', registryRepo, tmpDir, '--', '--depth', '1'], {
+      stdio: 'pipe',
+    });
     writeFileSync(resolve(tmpDir, 'registry.json'), registryJson, 'utf-8');
     execFileSync('git', ['checkout', '-b', branchName], { cwd: tmpDir, stdio: 'pipe' });
     execFileSync('git', ['add', 'registry.json'], { cwd: tmpDir, stdio: 'pipe' });
 
-    const commitMsg = existingIdx >= 0
-      ? `Update ${name} to ${version}`
-      : `Add ${name}@${version}`;
+    const commitMsg = existingIdx >= 0 ? `Update ${name} to ${version}` : `Add ${name}@${version}`;
     execFileSync('git', ['commit', '-m', commitMsg], { cwd: tmpDir, stdio: 'pipe' });
     execFileSync('git', ['push', 'origin', branchName], { cwd: tmpDir, stdio: 'pipe' });
 
@@ -249,26 +260,48 @@ export async function publishPackage(options: PublishOptions): Promise<string> {
       repo ? `- **Repo:** ${repo}` : '',
       '',
       `Generated by \`fixedcode registry publish\``,
-    ].filter(Boolean).join('\n');
+    ]
+      .filter(Boolean)
+      .join('\n');
 
     let prUrl: string;
     try {
       prUrl = execFileSync(
         'gh',
-        ['pr', 'create', '--repo', registryRepo, '--head', branchName, '--title', commitMsg, '--body', prBody],
-        { cwd: tmpDir, encoding: 'utf-8' }
+        [
+          'pr',
+          'create',
+          '--repo',
+          registryRepo,
+          '--head',
+          branchName,
+          '--title',
+          commitMsg,
+          '--body',
+          prBody,
+        ],
+        { cwd: tmpDir, encoding: 'utf-8' },
       ).trim();
     } catch (prErr) {
       // PR creation failed but branch was already pushed — clean up remote branch
       try {
-        execFileSync('git', ['push', 'origin', '--delete', branchName], { cwd: tmpDir, stdio: 'pipe' });
-      } catch { /* best effort cleanup */ }
+        execFileSync('git', ['push', 'origin', '--delete', branchName], {
+          cwd: tmpDir,
+          stdio: 'pipe',
+        });
+      } catch {
+        /* best effort cleanup */
+      }
       throw prErr;
     }
 
     return prUrl;
   } finally {
     // Clean up temp directory
-    try { rmSync(tmpDir, { recursive: true, force: true }); } catch { /* ignore */ }
+    try {
+      rmSync(tmpDir, { recursive: true, force: true });
+    } catch {
+      /* ignore */
+    }
   }
 }

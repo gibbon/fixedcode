@@ -9,17 +9,18 @@ describe('python-agent enrich', () => {
         provider: 'strands',
         streaming: true,
         prompt: 'You are an operations assistant...',
-        middleware: [
-          'correlation-id',
-          { auth: { provider: 'auth0', permission: 'admin:query' } },
-        ],
+        middleware: ['correlation-id', { auth: { provider: 'auth0', permission: 'admin:query' } }],
         tools: [
-          { name: 'query-database', type: 'database', config: { readOnly: true, databases: ['ops-db'] } },
+          {
+            name: 'query-database',
+            type: 'database',
+            config: { readOnly: true, databases: ['ops-db'] },
+          },
           { name: 'call-api', type: 'http', config: { baseUrl: 'https://api.internal' } },
         ],
         session: { dev: 'file', prod: { provider: 's3', bucket: '${ENV}-sessions' } },
       },
-      { name: 'ops-agent', apiVersion: '1.0' }
+      { name: 'ops-agent', apiVersion: '1.0' },
     );
 
     expect(ctx.mode).toBe('single');
@@ -51,7 +52,7 @@ describe('python-agent enrich', () => {
         prompt: 'You are an agent',
         tools: [{ name: 'search', type: 'http' }],
       },
-      { name: 'basic-agent', apiVersion: '1.0' }
+      { name: 'basic-agent', apiVersion: '1.0' },
     );
     expect(ctx.port).toBe(8000);
     expect(ctx.streaming).toBe(true);
@@ -75,7 +76,7 @@ describe('python-agent enrich', () => {
           { name: 'ext', type: 'mcp' },
         ],
       },
-      { name: 'tool-agent', apiVersion: '1.0' }
+      { name: 'tool-agent', apiVersion: '1.0' },
     );
     expect(ctx.tools[0].templatePath).toBe('tools/database.py.hbs');
     expect(ctx.tools[1].templatePath).toBe('tools/http.py.hbs');
@@ -96,7 +97,7 @@ describe('python-agent enrich', () => {
         tools: [{ name: 'search', type: 'http' }],
         routing: 'sequential',
       },
-      { name: 'orch', apiVersion: '1.0' }
+      { name: 'orch', apiVersion: '1.0' },
     );
     expect(ctx.agents).toHaveLength(3);
     expect(ctx.agents![0].name.pascal).toBe('Planner');
@@ -121,7 +122,7 @@ describe('python-agent enrich', () => {
           { 'feature-toggles': { toggleName: 'myToggle' } },
         ],
       },
-      { name: 'mw-agent', apiVersion: '1.0' }
+      { name: 'mw-agent', apiVersion: '1.0' },
     );
     expect(ctx.middleware).toHaveLength(3);
     expect(ctx.middleware[0].type).toBe('correlation-id');
@@ -145,7 +146,7 @@ describe('python-agent enrich', () => {
           prompt: 'Agent',
           tools: [{ name: 'search', type: 'http' }],
         },
-        { name: `${provider}-agent`, apiVersion: '1.0' }
+        { name: `${provider}-agent`, apiVersion: '1.0' },
       );
       expect(ctx.provider).toBe(provider);
       expect(ctx.providerImport).toBeTruthy();
@@ -154,14 +155,16 @@ describe('python-agent enrich', () => {
   });
 
   it('throws on unknown provider', () => {
-    expect(() => enrich(
-      {
-        mode: 'single',
-        provider: 'unknown-provider',
-        prompt: 'Agent',
-        tools: [{ name: 'search', type: 'http' }],
-      },
-      { name: 'bad-agent', apiVersion: '1.0' }
-    )).toThrow('Unknown provider: unknown-provider');
+    expect(() =>
+      enrich(
+        {
+          mode: 'single',
+          provider: 'unknown-provider',
+          prompt: 'Agent',
+          tools: [{ name: 'search', type: 'http' }],
+        },
+        { name: 'bad-agent', apiVersion: '1.0' },
+      ),
+    ).toThrow('Unknown provider: unknown-provider');
   });
 });

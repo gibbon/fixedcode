@@ -21,7 +21,11 @@ export interface McpWrapperSpec {
 }
 
 function toKebabCase(str: string): string {
-  return str.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '').replace(/[\s_]+/g, '-');
+  return str
+    .replace(/([A-Z])/g, '-$1')
+    .toLowerCase()
+    .replace(/^-/, '')
+    .replace(/[\s_]+/g, '-');
 }
 
 function enrich(spec: McpWrapperSpec, _metadata: SpecMetadata): Context {

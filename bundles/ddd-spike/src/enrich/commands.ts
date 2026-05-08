@@ -24,7 +24,7 @@ function enrichParam(raw: { name: string; type: string; required?: boolean }): P
 function enrichEvent(eventName: string, command: RawCommand, identity: IdentityInfo): EventContext {
   const fields = [
     { names: toNameVariants(identity.name), type: toTypeMapping(identity.type, true) },
-    ...command.params.map(p => ({
+    ...command.params.map((p) => ({
       names: toNameVariants(p.name),
       type: toTypeMapping(p.type, true),
     })),

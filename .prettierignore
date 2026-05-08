@@ -1,0 +1,12 @@
+**/dist/**
+**/node_modules/**
+**/build/**
+**/coverage/**
+**/templates/**
+**/*.hbs
+examples/**/build/**
+*.md
+docs/**
+website/**
+LICENSE
+CHANGELOG.md

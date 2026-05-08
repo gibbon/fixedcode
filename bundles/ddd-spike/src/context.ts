@@ -6,12 +6,12 @@ export interface DddContext {
 
 /** All naming variants for a concept — pre-computed, never derived in templates */
 export interface NameVariants {
-  pascal: string;      // OrderItem
-  camel: string;       // orderItem
-  snake: string;       // order_item
-  kebab: string;       // order-item
-  upper: string;       // ORDER_ITEM
-  plural: string;      // OrderItems (pascal plural)
+  pascal: string; // OrderItem
+  camel: string; // orderItem
+  snake: string; // order_item
+  kebab: string; // order-item
+  upper: string; // ORDER_ITEM
+  plural: string; // OrderItems (pascal plural)
   camelPlural: string; // orderItems
   snakePlural: string; // order_items
   kebabPlural: string; // order-items
@@ -19,11 +19,11 @@ export interface NameVariants {
 
 /** Mapped type information — spec type resolved to target language types */
 export interface TypeMapping {
-  spec: string;        // uuid, string, decimal, etc.
-  kotlin: string;       // UUID, String, BigDecimal
-  sql: string;          // UUID, VARCHAR(255), DECIMAL(19,2)
-  nullable: boolean;    // whether this field is optional
-  kotlinDecl: string;   // "UUID" or "String?" (includes ? for nullable)
+  spec: string; // uuid, string, decimal, etc.
+  kotlin: string; // UUID, String, BigDecimal
+  sql: string; // UUID, VARCHAR(255), DECIMAL(19,2)
+  nullable: boolean; // whether this field is optional
+  kotlinDecl: string; // "UUID" or "String?" (includes ? for nullable)
   needsImport?: string; // e.g. "java.util.UUID", "java.math.BigDecimal"
 }
 
