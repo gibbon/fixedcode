@@ -310,6 +310,17 @@ describe('buildEnrichPrompt — F-11 prompt injection delimiters', () => {
 });
 
 describe('enrich — F-10 upload confirmation', () => {
+  beforeEach(() => {
+    process.env.FIXEDCODE_LLM_PROVIDER = 'openrouter';
+    process.env.FIXEDCODE_LLM_MODEL = 'test-model';
+    process.env.FIXEDCODE_LLM_API_KEY = 'test-key';
+  });
+  afterEach(() => {
+    delete process.env.FIXEDCODE_LLM_PROVIDER;
+    delete process.env.FIXEDCODE_LLM_MODEL;
+    delete process.env.FIXEDCODE_LLM_API_KEY;
+  });
+
   it('skips upload when confirmFn returns false', async () => {
     // We test the confirmFn integration by stubbing it in a minimal manifest run.
     // Setup: tmp dir with one extension point and a manifest pointing at it.
