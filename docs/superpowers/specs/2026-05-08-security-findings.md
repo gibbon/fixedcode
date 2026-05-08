@@ -14,18 +14,18 @@
 
 | ID | Severity | Area | File | Status |
 |----|----------|------|------|--------|
-| F-1 | high | path traversal | engine/src/cli/bundle-init.ts | **Fix this phase** |
-| F-2 | medium | path traversal | engine/src/engine/deploy.ts | Issue |
-| F-3 | medium | path traversal | engine/src/engine/enrich.ts (`--spec`) | Issue |
-| F-4 | medium | path traversal | engine/src/engine/dynamicImport.ts | Issue |
-| F-5 | high | shell args | engine/src/engine/registry.ts (`registryRepo`) | **Fix this phase** |
-| F-6 | medium | shell args | engine/src/engine/registry.ts (branch names) | Issue |
-| F-7 | high | shell args | engine/src/engine/registry.ts (`npm install` regex too permissive) | **Fix this phase** |
-| F-8 | high | LLM | engine/src/engine/llm.ts (`baseUrl` not validated) | **Fix this phase** |
-| F-9 | high | LLM | engine/src/engine/enrich.ts (writes LLM output without validation) | Document + warn |
-| F-10 | medium | LLM | engine/src/cli/enrich-cmd.ts (no upload warning) | Issue |
-| F-11 | medium | LLM | enrich + draft (prompt-injection through spec values) | Issue (inherent) |
-| F-12 | low | LLM | engine/src/engine/llm.ts (env-var name in error msg) | Issue |
+| F-1 | high | path traversal | engine/src/cli/bundle-init.ts | **Fixed in 3536e84** |
+| F-2 | medium | path traversal | engine/src/engine/deploy.ts | Deferred ([#1](https://github.com/gibbon/fixedcode/issues/1)) |
+| F-3 | medium | path traversal | engine/src/engine/enrich.ts (`--spec`) | Deferred ([#2](https://github.com/gibbon/fixedcode/issues/2)) |
+| F-4 | medium | path traversal | engine/src/engine/dynamicImport.ts | Deferred ([#3](https://github.com/gibbon/fixedcode/issues/3)) |
+| F-5 | high | shell args | engine/src/engine/registry.ts (`registryRepo`) | **Fixed in 3536e84** |
+| F-6 | medium | shell args | engine/src/engine/registry.ts (branch names) | Deferred ([#4](https://github.com/gibbon/fixedcode/issues/4)) |
+| F-7 | high | shell args | engine/src/engine/registry.ts (`npm install` regex too permissive) | **Fixed in 3536e84** |
+| F-8 | high | LLM | engine/src/engine/llm.ts (`baseUrl` not validated) | **Fixed in 3536e84** |
+| F-9 | high | LLM | engine/src/engine/enrich.ts (writes LLM output without validation) | **Partial fix in 3536e84** + AST validation deferred ([#8](https://github.com/gibbon/fixedcode/issues/8)) |
+| F-10 | medium | LLM | engine/src/cli/enrich-cmd.ts (no upload warning) | Deferred ([#5](https://github.com/gibbon/fixedcode/issues/5)) |
+| F-11 | medium | LLM | enrich + draft (prompt-injection through spec values) | Deferred ([#6](https://github.com/gibbon/fixedcode/issues/6)) |
+| F-12 | low | LLM | engine/src/engine/llm.ts (env-var name in error msg) | Deferred ([#7](https://github.com/gibbon/fixedcode/issues/7)) |
 | Handlebars/templates | — | clean | — | No findings |
 
 ## Findings — fixed this phase (high)
