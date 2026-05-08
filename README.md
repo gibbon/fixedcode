@@ -16,6 +16,8 @@ fixedcode generate my-domain.yaml -o build
 fixedcode deploy build /path/to/your/project
 ```
 
+> **No LLM required.** The core engine — `generate`, `build`, `verify`, `deploy`, `validate`, `registry` — is fully deterministic and works **offline with zero AI dependencies**. The optional `draft` (spec-from-prose) and `enrich` (extension-point fill-in) commands use an LLM if you configure one, but you never have to. Hand-write your spec, hand-write your business logic, and the engine still works exactly the same.
+
 ## Why FixedCode?
 
 LLMs are great at writing code from descriptions, but their output isn't reproducible — ask twice and you get two different answers. FixedCode flips this: the LLM writes the **spec**, the engine writes the **code**, and the LLM fills in extension points where the human-readable logic lives. The middle step is deterministic — the same YAML always produces the same output, byte for byte.
@@ -30,34 +32,39 @@ You get the speed of "write me a service that does X" with the auditability of "
 
 ## Quickstart
 
+The minimum viable workflow needs **no LLM** at all:
+
 ```bash
-# install the CLI
 npm install -g fixedcode
 
-# (optional) draft a spec from a description using your configured LLM
+# write your spec by hand (or copy an example), then:
+fixedcode generate my-domain.yaml -o build
+fixedcode verify   my-domain.yaml build
+fixedcode deploy   build /path/to/your/project
+```
+
+### Optional: LLM-assisted commands
+
+If you'd rather not write specs and extension-point logic by hand, FixedCode can use an LLM. **This is opt-in** — you only need it for the two AI-flavoured commands:
+
+```bash
+# draft a spec from a description (LLM required)
 fixedcode draft spring-domain "order service with orders and line items" -o my-domain.yaml
 
-# generate code
-fixedcode generate my-domain.yaml -o build
-
-# verify every expected file landed
-fixedcode verify my-domain.yaml build
-
-# (optional) deploy into an existing project
-fixedcode deploy build /path/to/your/project
-
-# (optional) ask the LLM to fill in the extension points
+# fill in extension-point business logic (LLM required)
 fixedcode enrich build/
 ```
 
-For LLM commands (`draft`, `enrich`), configure `.fixedcode.yaml`:
+To use these, drop an `llm` block in `.fixedcode.yaml`:
 
 ```yaml
 llm:
-  provider: openrouter          # openrouter | openai | ollama
+  provider: openrouter # openrouter | openai | ollama
   model: google/gemini-2.5-flash
   apiKeyEnv: OPENROUTER_API_KEY
 ```
+
+Allowed endpoints: openrouter.ai, api.openai.com, api.anthropic.com, plus loopback for local model servers (Ollama). See [`docs/llm.md`](docs/llm.md) for the full trust model.
 
 ## Concepts
 
