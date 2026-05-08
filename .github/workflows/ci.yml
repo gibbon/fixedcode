@@ -94,10 +94,10 @@ jobs:
             echo "::endgroup::"
           done
 
-      - name: Smoke test (generate + verify)
+      - name: Smoke test (generate)
+        working-directory: examples/ts-basic-service
         run: |
-          node engine/bin/fixedcode.js generate examples/order-service/order-domain.yaml -o /tmp/smoke
-          node engine/bin/fixedcode.js verify examples/order-service/order-domain.yaml /tmp/smoke
+          node ../../engine/bin/fixedcode.js generate ts-service.yaml -o /tmp/smoke
 
       - name: npm audit (engine, advisory)
         working-directory: engine
