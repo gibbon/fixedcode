@@ -13,7 +13,8 @@ const tiers = [
     icon: <PersonIcon className="w-7 h-7 text-purple-400" />,
     color: "border-border",
     bgColor: "",
-    ctaText: "Get Started",
+    ctaText: "Install from npm",
+    ctaHref: "https://www.npmjs.com/package/fixedcode",
     ctaClass: "border border-border text-gray-300 hover:bg-surface-light",
     features: [
       { text: "FixedCode CLI — capture, generate, validate", included: true },
@@ -155,7 +156,9 @@ export default function PricingPage() {
             <p className="text-sm text-gray-400 mb-6">{tier.description}</p>
 
             <a
-              href="#"
+              href={tier.ctaHref ?? 'https://github.com/gibbon/fixedcode'}
+              target="_blank"
+              rel="noopener noreferrer"
               className={`inline-flex items-center justify-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all mb-6 ${tier.ctaClass}`}
             >
               {tier.ctaText}

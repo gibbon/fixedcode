@@ -2,6 +2,8 @@
 
 **Spec-driven, deterministic code generation for the AI era.**
 
+[Website](https://fixedcode.ai)  ·  [npm](https://www.npmjs.com/package/fixedcode)  ·  [Docs](docs/architecture.md)  ·  [Changelog](CHANGELOG.md)  ·  [Issues](https://github.com/gibbon/fixedcode/issues)
+
 [![npm version](https://img.shields.io/npm/v/fixedcode.svg)](https://www.npmjs.com/package/fixedcode)
 [![CI](https://github.com/gibbon/fixedcode/actions/workflows/ci.yml/badge.svg)](https://github.com/gibbon/fixedcode/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)

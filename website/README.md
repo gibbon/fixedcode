@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# fixedcode.ai
 
-## Getting Started
+Marketing site for [FixedCode](https://github.com/gibbon/fixedcode). Built with Next.js 14 and Tailwind. Deploys to Cloudflare Pages.
 
-First, run the development server:
+## Develop
 
 ```bash
+cd website
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+```
 
-## Learn More
+Static output is emitted to `out/` (Next.js App Router with `output: 'export'`).
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Cloudflare Pages reads from `master`. The deploy hooks live in Cloudflare's dashboard, not in this repo. Local Wrangler state in `.wrangler/` is gitignored.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Required env (local development only):**
 
-## Deploy on Vercel
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Put them in `website/.env.local` (gitignored). **Never commit this file.** The repo's `.gitignore` excludes `.env*.local` at every level.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Structure
+
+- `app/` — Next.js App Router pages
+- `components/` — page sections (Hero, Bundles, AISandwich, Footer, etc.)
+- `tailwind.config.ts`, `postcss.config.mjs` — styling
+
+## License
+
+[Apache-2.0](../LICENSE) — same as the rest of the repo.
