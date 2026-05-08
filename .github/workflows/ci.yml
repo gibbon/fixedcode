@@ -33,37 +33,62 @@ jobs:
       - name: Format check
         run: npm run format:check
 
-      - name: Install + typecheck + build + test engine
+      - name: Install + build engine
         working-directory: engine
         run: |
           npm install --no-audit --no-fund
           npx tsc --noEmit
           npm run build
-          npm test
 
-      - name: Install + build + test bundles
+      - name: Install + build bundles (engine tests import their dist)
         run: |
           set -e
           for d in bundles/*/; do
-            echo "::group::$(basename "$d")"
+            echo "::group::$(basename "$d") install+build"
             (
               cd "$d"
               npm install --no-audit --no-fund
               if grep -q '"build"' package.json; then npm run build; fi
+            )
+            echo "::endgroup::"
+          done
+
+      - name: Install + build generators
+        run: |
+          set -e
+          for d in generators/*/; do
+            echo "::group::$(basename "$d") install+build"
+            (
+              cd "$d"
+              npm install --no-audit --no-fund
+              if grep -q '"build"' package.json; then npm run build; fi
+            )
+            echo "::endgroup::"
+          done
+
+      - name: Test engine
+        working-directory: engine
+        run: npm test
+
+      - name: Test bundles
+        run: |
+          set -e
+          for d in bundles/*/; do
+            echo "::group::$(basename "$d") test"
+            (
+              cd "$d"
               if grep -q '"test"' package.json; then npm test; fi
             )
             echo "::endgroup::"
           done
 
-      - name: Install + build + test generators
+      - name: Test generators
         run: |
           set -e
           for d in generators/*/; do
-            echo "::group::$(basename "$d")"
+            echo "::group::$(basename "$d") test"
             (
               cd "$d"
-              npm install --no-audit --no-fund
-              if grep -q '"build"' package.json; then npm run build; fi
               if grep -q '"test"' package.json; then npm test; fi
             )
             echo "::endgroup::"
