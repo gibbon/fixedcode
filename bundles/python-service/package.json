@@ -20,7 +20,7 @@
   "devDependencies": {
     "@types/node": "^22.19.17",
     "typescript": "^5.9.3",
-    "vitest": "^1.2.2",
+    "vitest": "^3.2.4",
     "yaml": "^2.8.3"
   }
 }
