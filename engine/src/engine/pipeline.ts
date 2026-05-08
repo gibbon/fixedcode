@@ -4,7 +4,8 @@ import { fileURLToPath } from 'node:url';
 import type { Context } from '../types.js';
 
 const __dirname = resolve(fileURLToPath(import.meta.url), '..');
-const engineVersion = JSON.parse(readFileSync(resolve(__dirname, '../../package.json'), 'utf-8')).version as string;
+const engineVersion = JSON.parse(readFileSync(resolve(__dirname, '../../package.json'), 'utf-8'))
+  .version as string;
 import { EnrichmentError, WriteError } from '../errors.js';
 import { parseSpec, validateEnvelope } from './parse.js';
 import { loadConfig } from './config.js';
@@ -12,7 +13,16 @@ import { resolveBundle, resolveGenerators, resolveBundleDir } from './resolve.js
 import { validateBody } from './validate.js';
 import { renderTemplates, renderFile, createHandlebarsEnv } from './render.js';
 import { writeSingleFile } from './write.js';
-import { readManifest, writeManifest, hashContent, shouldWrite, loadIgnorePatterns, isIgnored, type Manifest, type ManifestEntry } from './manifest.js';
+import {
+  readManifest,
+  writeManifest,
+  hashContent,
+  shouldWrite,
+  loadIgnorePatterns,
+  isIgnored,
+  type Manifest,
+  type ManifestEntry,
+} from './manifest.js';
 
 export interface GenerateOptions {
   outputDir?: string;
@@ -21,26 +31,23 @@ export interface GenerateOptions {
   configPath?: string;
 }
 
-export async function generate(
-  specPath: string,
-  options: GenerateOptions = {}
-): Promise<void> {
+export async function generate(specPath: string, options: GenerateOptions = {}): Promise<void> {
   const specDir = resolve(specPath, '..');
   const config = loadConfig(specDir, options.configPath);
-  
+
   const rawSpec = parseSpec(specPath);
   validateEnvelope(rawSpec);
-  
+
   const bundle = await resolveBundle(rawSpec.kind, config);
-  
+
   validateBody(rawSpec.spec, bundle.specSchema);
-  
+
   const metadata = {
     name: rawSpec.metadata.name,
     description: rawSpec.metadata.description,
     apiVersion: rawSpec.apiVersion,
   };
-  
+
   let context: Context;
   try {
     context = bundle.enrich(rawSpec.spec, metadata);
@@ -61,7 +68,13 @@ export async function generate(
   let skipped = 0;
   let warned = 0;
 
-  const writeWithManifest = (relPath: string, content: string, overwrite: boolean, bundleKind: string, specFile?: string) => {
+  const writeWithManifest = (
+    relPath: string,
+    content: string,
+    overwrite: boolean,
+    bundleKind: string,
+    specFile?: string,
+  ) => {
     // Path containment check: ensure resolved path stays within outputDir
     const absOut = resolve(outputDir, relPath);
     if (!absOut.startsWith(resolve(outputDir) + sep)) {
@@ -107,7 +120,13 @@ export async function generate(
       const absTemplatePath = resolve(bundleDir, bundle.templates, entry.template);
       const content = renderFile(absTemplatePath, entry.ctx, { noEscape: true }, hb);
       if (content.trim() !== '') {
-        writeWithManifest(entry.output, content, entry.overwrite !== false, rawSpec.kind, relativeSpecFile);
+        writeWithManifest(
+          entry.output,
+          content,
+          entry.overwrite !== false,
+          rawSpec.kind,
+          relativeSpecFile,
+        );
       }
     }
   } else {
@@ -152,12 +171,12 @@ export async function generate(
 export async function validate(specPath: string, options?: { configPath?: string }): Promise<void> {
   const specDir = resolve(specPath, '..');
   const config = loadConfig(specDir, options?.configPath);
-  
+
   const rawSpec = parseSpec(specPath);
   validateEnvelope(rawSpec);
-  
+
   const bundle = await resolveBundle(rawSpec.kind, config);
   validateBody(rawSpec.spec, bundle.specSchema);
-  
+
   console.log(`Spec ${rawSpec.metadata.name} is valid.`);
 }

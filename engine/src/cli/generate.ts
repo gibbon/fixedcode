@@ -23,7 +23,12 @@ export function createGenerateCommand() {
       const outputDir = opts.output ?? output;
 
       try {
-        await generate(specPath, { outputDir, dryRun: opts.dryRun, diff: opts.diff, configPath: opts.config });
+        await generate(specPath, {
+          outputDir,
+          dryRun: opts.dryRun,
+          diff: opts.diff,
+          configPath: opts.config,
+        });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error';
         console.error(`Generate failed: ${message}`);

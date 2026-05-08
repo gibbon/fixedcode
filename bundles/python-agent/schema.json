@@ -4,7 +4,10 @@
   "required": ["mode", "provider"],
   "properties": {
     "mode": { "enum": ["single", "orchestrator"], "default": "single" },
-    "provider": { "enum": ["strands", "claude-agent-sdk", "openai", "ollama"], "default": "strands" },
+    "provider": {
+      "enum": ["strands", "claude-agent-sdk", "openai", "ollama"],
+      "default": "strands"
+    },
     "streaming": { "type": "boolean", "default": true },
     "prompt": { "type": "string" },
     "middleware": {

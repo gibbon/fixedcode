@@ -53,11 +53,11 @@ export function enrich(raw: Record<string, unknown>, metadata: SpecMetadata): Py
   const spec = parseSpec(raw);
   const serviceName = generateVariants(metadata.name);
   const providerConfig = enrichProvider(spec.provider);
-  const tools = (spec.tools ?? []).map(t => enrichTool(t));
+  const tools = (spec.tools ?? []).map((t) => enrichTool(t));
   const rawMiddleware = parseMiddleware(spec.middleware);
-  const middleware = rawMiddleware.map(m => enrichMiddleware(m));
+  const middleware = rawMiddleware.map((m) => enrichMiddleware(m));
 
-  const agents = spec.agents?.map(a => ({
+  const agents = spec.agents?.map((a) => ({
     name: generateVariants(a.name),
     prompt: a.prompt,
     toolRefs: a.tools ?? [],
@@ -78,9 +78,9 @@ export function enrich(raw: Record<string, unknown>, metadata: SpecMetadata): Py
     ...providerConfig,
     tools,
     middleware,
-    hasAuth: middleware.some(m => m.type === 'auth'),
-    hasCorrelationId: middleware.some(m => m.type === 'correlation-id'),
-    hasFeatureToggles: middleware.some(m => m.type === 'feature-toggles'),
+    hasAuth: middleware.some((m) => m.type === 'auth'),
+    hasCorrelationId: middleware.some((m) => m.type === 'correlation-id'),
+    hasFeatureToggles: middleware.some((m) => m.type === 'feature-toggles'),
     prompt: spec.prompt,
     agents,
     routing: spec.routing,
@@ -111,10 +111,18 @@ export function generateFiles(ctx: PythonAgentContext): FileEntry[] {
   // __init__.py files for Python packages
   files.push({ template: '__init__.py.hbs', output: `src/${pkg}/__init__.py`, ctx: baseCtx });
   files.push({ template: '__init__.py.hbs', output: `src/${pkg}/tools/__init__.py`, ctx: baseCtx });
-  files.push({ template: '__init__.py.hbs', output: `src/${pkg}/defaults/__init__.py`, ctx: baseCtx });
+  files.push({
+    template: '__init__.py.hbs',
+    output: `src/${pkg}/defaults/__init__.py`,
+    ctx: baseCtx,
+  });
 
   if (ctx.middleware.length > 0) {
-    files.push({ template: '__init__.py.hbs', output: `src/${pkg}/middleware/__init__.py`, ctx: baseCtx });
+    files.push({
+      template: '__init__.py.hbs',
+      output: `src/${pkg}/middleware/__init__.py`,
+      ctx: baseCtx,
+    });
   }
 
   // Provider-specific app.py (FastAPI endpoints + agent wiring)
@@ -162,23 +170,67 @@ export function generateFiles(ctx: PythonAgentContext): FileEntry[] {
   // Orchestrator mode
   if (ctx.mode === 'orchestrator' && ctx.agents) {
     // Main app (mounts orchestrator + agents)
-    files.push({ template: 'orchestrator/main.py.hbs', output: `src/${pkg}/main.py`, ctx: baseCtx });
+    files.push({
+      template: 'orchestrator/main.py.hbs',
+      output: `src/${pkg}/main.py`,
+      ctx: baseCtx,
+    });
 
     // Orchestrator module
-    files.push({ template: '__init__.py.hbs', output: `src/${pkg}/orchestrator/__init__.py`, ctx: baseCtx });
-    files.push({ template: 'orchestrator/app.py.hbs', output: `src/${pkg}/orchestrator/app.py`, ctx: baseCtx });
-    files.push({ template: 'orchestrator/service.py.hbs', output: `src/${pkg}/orchestrator/service.py`, ctx: baseCtx });
-    files.push({ template: 'orchestrator/routing.py.hbs', output: `src/${pkg}/orchestrator/routing.py`, ctx: baseCtx });
-    files.push({ template: 'orchestrator/schemas.py.hbs', output: `src/${pkg}/orchestrator/schemas.py`, ctx: baseCtx });
-    files.push({ template: 'orchestrator/context.py.hbs', output: `src/${pkg}/orchestrator/context.py`, ctx: baseCtx });
-    files.push({ template: 'orchestrator/discovery.py.hbs', output: `src/${pkg}/orchestrator/discovery.py`, ctx: baseCtx });
+    files.push({
+      template: '__init__.py.hbs',
+      output: `src/${pkg}/orchestrator/__init__.py`,
+      ctx: baseCtx,
+    });
+    files.push({
+      template: 'orchestrator/app.py.hbs',
+      output: `src/${pkg}/orchestrator/app.py`,
+      ctx: baseCtx,
+    });
+    files.push({
+      template: 'orchestrator/service.py.hbs',
+      output: `src/${pkg}/orchestrator/service.py`,
+      ctx: baseCtx,
+    });
+    files.push({
+      template: 'orchestrator/routing.py.hbs',
+      output: `src/${pkg}/orchestrator/routing.py`,
+      ctx: baseCtx,
+    });
+    files.push({
+      template: 'orchestrator/schemas.py.hbs',
+      output: `src/${pkg}/orchestrator/schemas.py`,
+      ctx: baseCtx,
+    });
+    files.push({
+      template: 'orchestrator/context.py.hbs',
+      output: `src/${pkg}/orchestrator/context.py`,
+      ctx: baseCtx,
+    });
+    files.push({
+      template: 'orchestrator/discovery.py.hbs',
+      output: `src/${pkg}/orchestrator/discovery.py`,
+      ctx: baseCtx,
+    });
 
     // Per-agent wrappers
-    files.push({ template: '__init__.py.hbs', output: `src/${pkg}/agents/__init__.py`, ctx: baseCtx });
+    files.push({
+      template: '__init__.py.hbs',
+      output: `src/${pkg}/agents/__init__.py`,
+      ctx: baseCtx,
+    });
     for (const agent of ctx.agents) {
       const agentCtx = { ...baseCtx, agent } as Record<string, unknown>;
-      files.push({ template: 'agents/agent.py.hbs', output: `src/${pkg}/agents/${agent.name.snake}/agent.py`, ctx: agentCtx });
-      files.push({ template: '__init__.py.hbs', output: `src/${pkg}/agents/${agent.name.snake}/__init__.py`, ctx: agentCtx });
+      files.push({
+        template: 'agents/agent.py.hbs',
+        output: `src/${pkg}/agents/${agent.name.snake}/agent.py`,
+        ctx: agentCtx,
+      });
+      files.push({
+        template: '__init__.py.hbs',
+        output: `src/${pkg}/agents/${agent.name.snake}/__init__.py`,
+        ctx: agentCtx,
+      });
       files.push({
         template: 'agents/default_agent.py.hbs',
         output: `src/${pkg}/agents/${agent.name.snake}/default_${agent.name.snake}.py`,
@@ -208,7 +260,7 @@ export const bundle: Bundle = {
     files: {
       'health-check': ['src/*/app.py'],
       'unit-tests': ['tests/**/*.py'],
-      'tracing': ['src/*/middleware/correlation_id.py'],
+      tracing: ['src/*/middleware/correlation_id.py'],
     },
   },
 };

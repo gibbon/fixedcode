@@ -39,9 +39,9 @@ export function enrich(raw: Record<string, unknown>, metadata: SpecMetadata): Ts
   const spec = parseSpec(raw);
   const serviceName = generateVariants(metadata.name);
   const providerConfig = enrichProvider(spec.provider);
-  const tools = (spec.tools ?? []).map(t => enrichTool(t));
+  const tools = (spec.tools ?? []).map((t) => enrichTool(t));
 
-  const agents = spec.agents?.map(a => ({
+  const agents = spec.agents?.map((a) => ({
     name: generateVariants(a.name),
     prompt: a.prompt,
     toolRefs: a.tools ?? [],

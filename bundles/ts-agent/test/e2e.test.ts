@@ -15,9 +15,12 @@ const orchSpec = parseYaml(orchYaml);
 
 describe('ts-agent e2e (single mode)', () => {
   it('generates all expected files for a single agent', () => {
-    const ctx = enrich(singleSpec.spec, { name: singleSpec.metadata.name, apiVersion: singleSpec.apiVersion });
+    const ctx = enrich(singleSpec.spec, {
+      name: singleSpec.metadata.name,
+      apiVersion: singleSpec.apiVersion,
+    });
     const files = generateFiles(ctx);
-    const paths = files.map(f => f.output);
+    const paths = files.map((f) => f.output);
 
     expect(paths).toContain('agent.yaml');
     expect(paths).toContain('src/agent.ts');
@@ -35,37 +38,46 @@ describe('ts-agent e2e (single mode)', () => {
     expect(paths).toContain('tests/tools/web-search.test.ts');
 
     expect(paths).toContain('src/defaults/custom-agent.ts');
-    const extPoint = files.find(f => f.output === 'src/defaults/custom-agent.ts');
+    const extPoint = files.find((f) => f.output === 'src/defaults/custom-agent.ts');
     expect(extPoint?.overwrite).toBe(false);
   });
 
   it('uses provider-specific template for agent.ts', () => {
-    const ctx = enrich(singleSpec.spec, { name: singleSpec.metadata.name, apiVersion: singleSpec.apiVersion });
+    const ctx = enrich(singleSpec.spec, {
+      name: singleSpec.metadata.name,
+      apiVersion: singleSpec.apiVersion,
+    });
     const files = generateFiles(ctx);
-    const agentFile = files.find(f => f.output === 'src/agent.ts');
+    const agentFile = files.find((f) => f.output === 'src/agent.ts');
     expect(agentFile?.template).toBe('providers/vercel-ai/agent.ts.hbs');
   });
 
   it('uses tool-type-specific templates for tool files', () => {
-    const ctx = enrich(singleSpec.spec, { name: singleSpec.metadata.name, apiVersion: singleSpec.apiVersion });
+    const ctx = enrich(singleSpec.spec, {
+      name: singleSpec.metadata.name,
+      apiVersion: singleSpec.apiVersion,
+    });
     const files = generateFiles(ctx);
 
-    const readFile = files.find(f => f.output === 'src/tools/read-file.ts');
+    const readFile = files.find((f) => f.output === 'src/tools/read-file.ts');
     expect(readFile?.template).toBe('tools/cli.ts.hbs');
 
-    const writeFile = files.find(f => f.output === 'src/tools/write-file.ts');
+    const writeFile = files.find((f) => f.output === 'src/tools/write-file.ts');
     expect(writeFile?.template).toBe('tools/function.ts.hbs');
 
-    const webSearch = files.find(f => f.output === 'src/tools/web-search.ts');
+    const webSearch = files.find((f) => f.output === 'src/tools/web-search.ts');
     expect(webSearch?.template).toBe('tools/http.ts.hbs');
   });
 });
 
 describe('ts-agent e2e (orchestrator mode)', () => {
   it('generates orchestrator + per-agent files', () => {
-    const ctx = enrich(orchSpec.spec, { name: orchSpec.metadata.name, apiVersion: orchSpec.apiVersion });
+    const ctx = enrich(orchSpec.spec, {
+      name: orchSpec.metadata.name,
+      apiVersion: orchSpec.apiVersion,
+    });
     const files = generateFiles(ctx);
-    const paths = files.map(f => f.output);
+    const paths = files.map((f) => f.output);
 
     expect(paths).toContain('src/orchestrator.ts');
 
@@ -76,16 +88,21 @@ describe('ts-agent e2e (orchestrator mode)', () => {
     expect(paths).toContain('src/agents/reviewer/agent.ts');
     expect(paths).toContain('src/agents/reviewer/default-reviewer.ts');
 
-    const orchExtPoints = files.filter(f => f.overwrite === false && f.output.includes('agents/'));
+    const orchExtPoints = files.filter(
+      (f) => f.overwrite === false && f.output.includes('agents/'),
+    );
     expect(orchExtPoints).toHaveLength(3);
   });
 
   it('marks non-critical agents in context', () => {
-    const ctx = enrich(orchSpec.spec, { name: orchSpec.metadata.name, apiVersion: orchSpec.apiVersion });
-    const reviewer = ctx.agents?.find(a => a.name.kebab === 'reviewer');
+    const ctx = enrich(orchSpec.spec, {
+      name: orchSpec.metadata.name,
+      apiVersion: orchSpec.apiVersion,
+    });
+    const reviewer = ctx.agents?.find((a) => a.name.kebab === 'reviewer');
     expect(reviewer?.critical).toBe(false);
 
-    const planner = ctx.agents?.find(a => a.name.kebab === 'planner');
+    const planner = ctx.agents?.find((a) => a.name.kebab === 'planner');
     expect(planner?.critical).toBe(true);
   });
 });

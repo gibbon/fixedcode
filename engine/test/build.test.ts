@@ -47,9 +47,7 @@ describe('build — error handling', () => {
 
     const { build } = await import('../src/engine/build.js');
 
-    await expect(build({ specDir, outputDir })).rejects.toThrow(
-      /No spec files found/,
-    );
+    await expect(build({ specDir, outputDir })).rejects.toThrow(/No spec files found/);
   });
 });
 
@@ -174,10 +172,7 @@ describe('build — migration consolidation', () => {
 
     writeFileSync(
       join(migDir, 'V001__create_party_table.sql'),
-      [
-        '-- party table',
-        'CREATE TABLE party (id UUID PRIMARY KEY);',
-      ].join('\n') + '\n',
+      ['-- party table', 'CREATE TABLE party (id UUID PRIMARY KEY);'].join('\n') + '\n',
       'utf-8',
     );
 
@@ -191,7 +186,9 @@ describe('build — migration consolidation', () => {
     const content = readFileSync(v002Path, 'utf-8');
     expect(content).toContain('CREATE TABLE workspace');
     expect(content).toContain('CREATE TABLE party');
-    expect(content).toContain('ALTER TABLE workspace ADD CONSTRAINT fk_workspace_owner FOREIGN KEY');
+    expect(content).toContain(
+      'ALTER TABLE workspace ADD CONSTRAINT fk_workspace_owner FOREIGN KEY',
+    );
   });
 
   it('moves FK constraints after CREATE TABLE statements', async () => {

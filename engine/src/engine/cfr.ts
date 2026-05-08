@@ -16,46 +16,186 @@ import { resolve } from 'node:path';
  */
 export const CFR_CATALOG: CfrDefinition[] = [
   // Security
-  { id: 'auth', category: 'security', name: 'Authentication', description: 'JWT/OAuth2 bearer token validation on all endpoints' },
-  { id: 'authorization', category: 'security', name: 'Authorization', description: 'Role-based or policy-based access control per operation' },
-  { id: 'cors', category: 'security', name: 'CORS', description: 'Cross-origin resource sharing configuration' },
-  { id: 'input-validation', category: 'security', name: 'Input Validation', description: 'Request body and parameter validation with error responses' },
-  { id: 'rate-limiting', category: 'security', name: 'Rate Limiting', description: 'Request rate throttling per client/endpoint' },
+  {
+    id: 'auth',
+    category: 'security',
+    name: 'Authentication',
+    description: 'JWT/OAuth2 bearer token validation on all endpoints',
+  },
+  {
+    id: 'authorization',
+    category: 'security',
+    name: 'Authorization',
+    description: 'Role-based or policy-based access control per operation',
+  },
+  {
+    id: 'cors',
+    category: 'security',
+    name: 'CORS',
+    description: 'Cross-origin resource sharing configuration',
+  },
+  {
+    id: 'input-validation',
+    category: 'security',
+    name: 'Input Validation',
+    description: 'Request body and parameter validation with error responses',
+  },
+  {
+    id: 'rate-limiting',
+    category: 'security',
+    name: 'Rate Limiting',
+    description: 'Request rate throttling per client/endpoint',
+  },
 
   // Observability
-  { id: 'logging', category: 'observability', name: 'Structured Logging', description: 'JSON-structured logs with correlation IDs' },
-  { id: 'metrics', category: 'observability', name: 'Metrics', description: 'Prometheus/Micrometer metrics for requests, errors, latency' },
-  { id: 'health-check', category: 'observability', name: 'Health Check', description: 'Liveness and readiness probe endpoints' },
-  { id: 'tracing', category: 'observability', name: 'Distributed Tracing', description: 'OpenTelemetry trace propagation across services' },
-  { id: 'audit-log', category: 'observability', name: 'Audit Log', description: 'Immutable record of who did what and when' },
+  {
+    id: 'logging',
+    category: 'observability',
+    name: 'Structured Logging',
+    description: 'JSON-structured logs with correlation IDs',
+  },
+  {
+    id: 'metrics',
+    category: 'observability',
+    name: 'Metrics',
+    description: 'Prometheus/Micrometer metrics for requests, errors, latency',
+  },
+  {
+    id: 'health-check',
+    category: 'observability',
+    name: 'Health Check',
+    description: 'Liveness and readiness probe endpoints',
+  },
+  {
+    id: 'tracing',
+    category: 'observability',
+    name: 'Distributed Tracing',
+    description: 'OpenTelemetry trace propagation across services',
+  },
+  {
+    id: 'audit-log',
+    category: 'observability',
+    name: 'Audit Log',
+    description: 'Immutable record of who did what and when',
+  },
 
   // Resilience
-  { id: 'error-handling', category: 'resilience', name: 'Error Handling', description: 'Consistent error response format with problem details (RFC 7807)' },
-  { id: 'retry', category: 'resilience', name: 'Retry', description: 'Automatic retry with exponential backoff for transient failures' },
-  { id: 'circuit-breaker', category: 'resilience', name: 'Circuit Breaker', description: 'Fail-fast when downstream services are unhealthy' },
-  { id: 'optimistic-locking', category: 'resilience', name: 'Optimistic Locking', description: 'Version-based conflict detection on concurrent updates' },
-  { id: 'dead-letter', category: 'resilience', name: 'Dead Letter Queue', description: 'Failed messages captured for investigation and replay' },
+  {
+    id: 'error-handling',
+    category: 'resilience',
+    name: 'Error Handling',
+    description: 'Consistent error response format with problem details (RFC 7807)',
+  },
+  {
+    id: 'retry',
+    category: 'resilience',
+    name: 'Retry',
+    description: 'Automatic retry with exponential backoff for transient failures',
+  },
+  {
+    id: 'circuit-breaker',
+    category: 'resilience',
+    name: 'Circuit Breaker',
+    description: 'Fail-fast when downstream services are unhealthy',
+  },
+  {
+    id: 'optimistic-locking',
+    category: 'resilience',
+    name: 'Optimistic Locking',
+    description: 'Version-based conflict detection on concurrent updates',
+  },
+  {
+    id: 'dead-letter',
+    category: 'resilience',
+    name: 'Dead Letter Queue',
+    description: 'Failed messages captured for investigation and replay',
+  },
 
   // Data
-  { id: 'pagination', category: 'data', name: 'Pagination', description: 'Consistent page/size/sort/direction on list endpoints' },
-  { id: 'filtering', category: 'data', name: 'Filtering', description: 'Query parameter-based filtering with AND/OR logic' },
-  { id: 'migration', category: 'data', name: 'Database Migration', description: 'Flyway/Liquibase versioned schema migrations' },
-  { id: 'soft-delete', category: 'data', name: 'Soft Delete', description: 'Logical deletion with audit trail instead of physical delete' },
+  {
+    id: 'pagination',
+    category: 'data',
+    name: 'Pagination',
+    description: 'Consistent page/size/sort/direction on list endpoints',
+  },
+  {
+    id: 'filtering',
+    category: 'data',
+    name: 'Filtering',
+    description: 'Query parameter-based filtering with AND/OR logic',
+  },
+  {
+    id: 'migration',
+    category: 'data',
+    name: 'Database Migration',
+    description: 'Flyway/Liquibase versioned schema migrations',
+  },
+  {
+    id: 'soft-delete',
+    category: 'data',
+    name: 'Soft Delete',
+    description: 'Logical deletion with audit trail instead of physical delete',
+  },
 
   // Events
-  { id: 'domain-events', category: 'events', name: 'Domain Events', description: 'Event publishing on aggregate state changes' },
-  { id: 'outbox', category: 'events', name: 'Transactional Outbox', description: 'Guaranteed event delivery via database outbox pattern' },
-  { id: 'event-schema', category: 'events', name: 'Event Schema', description: 'Versioned event schemas with backward compatibility' },
+  {
+    id: 'domain-events',
+    category: 'events',
+    name: 'Domain Events',
+    description: 'Event publishing on aggregate state changes',
+  },
+  {
+    id: 'outbox',
+    category: 'events',
+    name: 'Transactional Outbox',
+    description: 'Guaranteed event delivery via database outbox pattern',
+  },
+  {
+    id: 'event-schema',
+    category: 'events',
+    name: 'Event Schema',
+    description: 'Versioned event schemas with backward compatibility',
+  },
 
   // Testing
-  { id: 'unit-tests', category: 'testing', name: 'Unit Tests', description: 'Generated test stubs for every operation' },
-  { id: 'integration-tests', category: 'testing', name: 'Integration Tests', description: 'End-to-end tests against running service' },
-  { id: 'contract-tests', category: 'testing', name: 'Contract Tests', description: 'API contract verification against OpenAPI spec' },
+  {
+    id: 'unit-tests',
+    category: 'testing',
+    name: 'Unit Tests',
+    description: 'Generated test stubs for every operation',
+  },
+  {
+    id: 'integration-tests',
+    category: 'testing',
+    name: 'Integration Tests',
+    description: 'End-to-end tests against running service',
+  },
+  {
+    id: 'contract-tests',
+    category: 'testing',
+    name: 'Contract Tests',
+    description: 'API contract verification against OpenAPI spec',
+  },
 
   // DevOps
-  { id: 'docker', category: 'devops', name: 'Docker', description: 'Dockerfile and docker-compose for local development' },
-  { id: 'ci-cd', category: 'devops', name: 'CI/CD', description: 'Pipeline configuration for build, test, deploy' },
-  { id: 'openapi', category: 'devops', name: 'OpenAPI Spec', description: 'Auto-generated OpenAPI 3.0 specification' },
+  {
+    id: 'docker',
+    category: 'devops',
+    name: 'Docker',
+    description: 'Dockerfile and docker-compose for local development',
+  },
+  {
+    id: 'ci-cd',
+    category: 'devops',
+    name: 'CI/CD',
+    description: 'Pipeline configuration for build, test, deploy',
+  },
+  {
+    id: 'openapi',
+    category: 'devops',
+    name: 'OpenAPI Spec',
+    description: 'Auto-generated OpenAPI 3.0 specification',
+  },
 ];
 
 export interface CfrDefinition {
@@ -100,16 +240,16 @@ export interface CfrVerifyResult {
 export function verifyCfrs(
   bundleCfrs: BundleCfrManifest,
   specCfrs: SpecCfrConfig | undefined,
-  outputDir: string
+  outputDir: string,
 ): CfrVerifyResult {
   const results: CfrVerifyResult['cfrs'] = [];
 
   for (const cfrId of bundleCfrs.provides) {
-    const def = CFR_CATALOG.find(c => c.id === cfrId);
+    const def = CFR_CATALOG.find((c) => c.id === cfrId);
     const enabled = specCfrs?.[cfrId] !== false; // enabled by default
     const expectedFiles = bundleCfrs.files?.[cfrId] ?? [];
     const missingFiles = enabled
-      ? expectedFiles.filter(f => !existsSync(resolve(outputDir, f)))
+      ? expectedFiles.filter((f) => !existsSync(resolve(outputDir, f)))
       : [];
 
     results.push({
@@ -122,7 +262,7 @@ export function verifyCfrs(
   }
 
   return {
-    passed: results.every(r => !r.enabled || r.present),
+    passed: results.every((r) => !r.enabled || r.present),
     cfrs: results,
   };
 }
@@ -132,7 +272,7 @@ export function verifyCfrs(
  * Useful for bundle authors to see what they could add.
  */
 export function suggestCfrs(bundleCfrs: BundleCfrManifest): CfrDefinition[] {
-  return CFR_CATALOG.filter(c => !bundleCfrs.provides.includes(c.id));
+  return CFR_CATALOG.filter((c) => !bundleCfrs.provides.includes(c.id));
 }
 
 /**
@@ -141,7 +281,7 @@ export function suggestCfrs(bundleCfrs: BundleCfrManifest): CfrDefinition[] {
 export function generateCfrReport(
   bundleCfrs: BundleCfrManifest,
   specCfrs: SpecCfrConfig | undefined,
-  outputDir: string
+  outputDir: string,
 ): string {
   const result = verifyCfrs(bundleCfrs, specCfrs, outputDir);
   const lines: string[] = [];
@@ -149,10 +289,10 @@ export function generateCfrReport(
   lines.push('# CFR Compliance Report');
   lines.push('');
 
-  const categories = [...new Set(CFR_CATALOG.map(c => c.category))];
+  const categories = [...new Set(CFR_CATALOG.map((c) => c.category))];
   for (const category of categories) {
-    const catCfrs = result.cfrs.filter(r => {
-      const def = CFR_CATALOG.find(c => c.id === r.id);
+    const catCfrs = result.cfrs.filter((r) => {
+      const def = CFR_CATALOG.find((c) => c.id === r.id);
       return def?.category === category;
     });
     if (catCfrs.length === 0) continue;

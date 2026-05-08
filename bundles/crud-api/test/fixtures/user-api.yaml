@@ -1,4 +1,4 @@
-apiVersion: "1.0"
+apiVersion: '1.0'
 kind: crud-api
 metadata:
   name: user-service

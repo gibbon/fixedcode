@@ -31,7 +31,17 @@
                 },
                 "type": {
                   "type": "string",
-                  "enum": ["uuid", "string", "int", "long", "boolean", "decimal", "date", "datetime", "object"]
+                  "enum": [
+                    "uuid",
+                    "string",
+                    "int",
+                    "long",
+                    "boolean",
+                    "decimal",
+                    "date",
+                    "datetime",
+                    "object"
+                  ]
                 },
                 "required": {
                   "type": "boolean"

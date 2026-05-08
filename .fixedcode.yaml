@@ -1,14 +1,14 @@
 bundles:
-  ddd-domain: "./bundles/ddd-spike"
-  crud-api: "./bundles/crud-api"
-  spring-library: "./bundles/spring-library"
-  mcp-wrapper: "./bundles/mcp-wrapper"
-  spring-domain: "./bundles/spring-domain"
-  python-service: "./bundles/python-service"
-  python-agent: "./bundles/python-agent"
+  ddd-domain: './bundles/ddd-spike'
+  crud-api: './bundles/crud-api'
+  spring-library: './bundles/spring-library'
+  mcp-wrapper: './bundles/mcp-wrapper'
+  spring-domain: './bundles/spring-domain'
+  python-service: './bundles/python-service'
+  python-agent: './bundles/python-agent'
 
 generators:
-  openapi: "./generators/openapi"
+  openapi: './generators/openapi'
 
 llm:
   provider: openrouter

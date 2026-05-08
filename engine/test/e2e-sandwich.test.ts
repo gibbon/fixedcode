@@ -28,7 +28,7 @@ describe.skipIf(!canRun)('e2e AI sandwich: draft → generate → enrich', () =>
   // The example spec that we know works with spring-domain
   const exampleSpec = readFileSync(
     join(SPRING_DOMAIN_BUNDLE, 'examples', 'workspace-domain.yaml'),
-    'utf-8'
+    'utf-8',
   );
 
   beforeEach(() => {
@@ -90,20 +90,20 @@ describe.skipIf(!canRun)('e2e AI sandwich: draft → generate → enrich', () =>
     expect(allFiles.length).toBeGreaterThan(15);
 
     // Check key files exist
-    const hasAggregate = allFiles.some(f => f.includes('Workspace.kt'));
-    const hasCommands = allFiles.some(f => f.includes('CreateWorkspaceCommand.kt'));
-    const hasApi = allFiles.some(f => f.includes('WorkspaceApiDelegateImpl.kt'));
-    const hasTest = allFiles.some(f => f.includes('WorkspaceTest.kt'));
+    const hasAggregate = allFiles.some((f) => f.includes('Workspace.kt'));
+    const hasCommands = allFiles.some((f) => f.includes('CreateWorkspaceCommand.kt'));
+    const hasApi = allFiles.some((f) => f.includes('WorkspaceApiDelegateImpl.kt'));
+    const hasTest = allFiles.some((f) => f.includes('WorkspaceTest.kt'));
     expect(hasAggregate).toBe(true);
     expect(hasCommands).toBe(true);
     expect(hasApi).toBe(true);
     expect(hasTest).toBe(true);
 
     // Verify extension points exist
-    const extensionPoints = allFiles.filter(f => !manifest!.files[f].overwrite);
+    const extensionPoints = allFiles.filter((f) => !manifest!.files[f].overwrite);
     expect(extensionPoints.length).toBeGreaterThan(0);
-    expect(extensionPoints.some(f => f.includes('DefaultWorkspaceBusinessService'))).toBe(true);
-    expect(extensionPoints.some(f => f.includes('DefaultWorkspaceValidator'))).toBe(true);
+    expect(extensionPoints.some((f) => f.includes('DefaultWorkspaceBusinessService'))).toBe(true);
+    expect(extensionPoints.some((f) => f.includes('DefaultWorkspaceValidator'))).toBe(true);
 
     // Verify specFile is tracked in manifest entries
     for (const ep of extensionPoints) {
@@ -122,7 +122,9 @@ describe.skipIf(!canRun)('e2e AI sandwich: draft → generate → enrich', () =>
       return {
         ok: true,
         json: async () => ({
-          choices: [{ message: { content: '// AI-enriched business logic\nclass Implemented {}' } }],
+          choices: [
+            { message: { content: '// AI-enriched business logic\nclass Implemented {}' } },
+          ],
         }),
       };
     });

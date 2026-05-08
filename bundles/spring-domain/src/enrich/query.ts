@@ -1,5 +1,11 @@
 import { generateVariants } from './naming.js';
-import { detectPattern, deriveHttp, deriveAuth, deriveResponse, type OperationPattern } from './conventions.js';
+import {
+  detectPattern,
+  deriveHttp,
+  deriveAuth,
+  deriveResponse,
+  type OperationPattern,
+} from './conventions.js';
 import { parseParam, type EnrichedParam, type AggCtx } from './shared.js';
 
 export interface EnrichedQuery {
@@ -12,12 +18,15 @@ export interface EnrichedQuery {
   params: { path: EnrichedParam[]; query: EnrichedParam[] };
 }
 
-export function enrichQuery(raw: {
-  name: string;
-  path?: string[];
-  query?: string[];
-  returns: string;
-}, agg: AggCtx): EnrichedQuery {
+export function enrichQuery(
+  raw: {
+    name: string;
+    path?: string[];
+    query?: string[];
+    returns: string;
+  },
+  agg: AggCtx,
+): EnrichedQuery {
   const names = generateVariants(raw.name);
   const pattern = detectPattern(raw.name);
   const needsId = pattern === 'Get';

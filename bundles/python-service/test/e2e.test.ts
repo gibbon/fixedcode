@@ -13,7 +13,7 @@ describe('python-service e2e', () => {
   it('generates all expected files from basic service spec', () => {
     const ctx = enrich(spec.spec, { name: spec.metadata.name, apiVersion: spec.apiVersion });
     const files = generateFiles(ctx);
-    const paths = files.map(f => f.output);
+    const paths = files.map((f) => f.output);
 
     expect(paths).toContain('pyproject.toml');
     expect(paths).toContain('Dockerfile');
@@ -29,10 +29,10 @@ describe('python-service e2e', () => {
   it('excludes Docker files when docker is disabled', () => {
     const ctx = enrich(
       { service: { package: 'no_docker' }, features: { docker: false } },
-      { name: 'no-docker', apiVersion: '1.0' }
+      { name: 'no-docker', apiVersion: '1.0' },
     );
     const files = generateFiles(ctx);
-    const paths = files.map(f => f.output);
+    const paths = files.map((f) => f.output);
     expect(paths).not.toContain('Dockerfile');
     expect(paths).not.toContain('docker-compose.yml');
   });
@@ -40,7 +40,7 @@ describe('python-service e2e', () => {
   it('marks extension points with overwrite false', () => {
     const ctx = enrich(spec.spec, { name: spec.metadata.name, apiVersion: spec.apiVersion });
     const files = generateFiles(ctx);
-    const extensionPoints = files.filter(f => f.overwrite === false);
+    const extensionPoints = files.filter((f) => f.overwrite === false);
     expect(extensionPoints).toHaveLength(1);
     expect(extensionPoints[0].output).toBe('src/ops_agent/defaults/custom_routes.py');
   });
@@ -48,7 +48,7 @@ describe('python-service e2e', () => {
   it('includes __init__.py files for Python packages', () => {
     const ctx = enrich(spec.spec, { name: spec.metadata.name, apiVersion: spec.apiVersion });
     const files = generateFiles(ctx);
-    const paths = files.map(f => f.output);
+    const paths = files.map((f) => f.output);
     expect(paths).toContain('src/ops_agent/__init__.py');
     expect(paths).toContain('src/ops_agent/routes/__init__.py');
     expect(paths).toContain('src/ops_agent/defaults/__init__.py');
@@ -57,10 +57,10 @@ describe('python-service e2e', () => {
   it('uses packageName in output paths', () => {
     const ctx = enrich(
       { service: { package: 'custom_pkg' } },
-      { name: 'custom-pkg', apiVersion: '1.0' }
+      { name: 'custom-pkg', apiVersion: '1.0' },
     );
     const files = generateFiles(ctx);
-    const paths = files.map(f => f.output);
+    const paths = files.map((f) => f.output);
     expect(paths).toContain('src/custom_pkg/__init__.py');
     expect(paths).toContain('src/custom_pkg/main.py');
     expect(paths).toContain('src/custom_pkg/config.py');

@@ -18,7 +18,7 @@ export function toPascalCase(str: string): string {
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/[\s_-]+/g, ' ')
     .split(' ')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join('');
 }
 

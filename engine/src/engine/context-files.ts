@@ -10,7 +10,15 @@ import type { ChatContentPart } from './llm.js';
 
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
 const SKIP_EXTENSIONS = new Set(['.pdf', '.tar', '.gz', '.bin', '.exe', '.class', '.o']);
-const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '__pycache__', '.venv', 'venv']);
+const SKIP_DIRS = new Set([
+  'node_modules',
+  '.git',
+  'dist',
+  'build',
+  '__pycache__',
+  '.venv',
+  'venv',
+]);
 
 /**
  * Expand a list of paths into individual files.
@@ -59,9 +67,15 @@ function collectFilesFromZip(zipPath: string, out: string[]): void {
     execFileSync('unzip', ['-qo', zipPath, '-d', tmpDir], { stdio: 'pipe' });
     collectFilesFromDir(tmpDir, out);
   } catch (err) {
-    console.warn(`Warning: failed to unzip ${zipPath}: ${err instanceof Error ? err.message : 'unknown error'}`);
+    console.warn(
+      `Warning: failed to unzip ${zipPath}: ${err instanceof Error ? err.message : 'unknown error'}`,
+    );
   } finally {
-    try { rmSync(tmpDir, { recursive: true, force: true }); } catch { /* ignore */ }
+    try {
+      rmSync(tmpDir, { recursive: true, force: true });
+    } catch {
+      /* ignore */
+    }
   }
 }
 
@@ -75,9 +89,7 @@ export function loadContextFiles(inputPaths: string[]): ChatContentPart[] {
   const parts: ChatContentPart[] = [];
 
   // Find common root for relative display names
-  const commonRoot = filePaths.length > 1
-    ? findCommonDir(filePaths)
-    : dirname(filePaths[0] ?? '');
+  const commonRoot = filePaths.length > 1 ? findCommonDir(filePaths) : dirname(filePaths[0] ?? '');
 
   for (const absPath of filePaths) {
     const ext = extname(absPath).toLowerCase();
@@ -86,10 +98,14 @@ export function loadContextFiles(inputPaths: string[]): ChatContentPart[] {
     if (IMAGE_EXTENSIONS.has(ext)) {
       const data = readFileSync(absPath);
       const base64 = data.toString('base64');
-      const mime = ext === '.png' ? 'image/png'
-        : ext === '.gif' ? 'image/gif'
-        : ext === '.webp' ? 'image/webp'
-        : 'image/jpeg';
+      const mime =
+        ext === '.png'
+          ? 'image/png'
+          : ext === '.gif'
+            ? 'image/gif'
+            : ext === '.webp'
+              ? 'image/webp'
+              : 'image/jpeg';
       parts.push({
         type: 'image_url',
         image_url: { url: `data:${mime};base64,${base64}` },

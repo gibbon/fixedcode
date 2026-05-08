@@ -55,20 +55,20 @@ function enrichAggregate(raw: RawAggregate): AggregateContext {
   const names = toNameVariants(raw.name);
 
   const allAttributes = raw.attributes.map(enrichAttribute);
-  const identity = allAttributes.find(a => a.identity);
+  const identity = allAttributes.find((a) => a.identity);
   if (!identity) {
     throw new Error(`Aggregate '${raw.name}' has no identity attribute (set identity: true)`);
   }
-  const attributes = allAttributes.filter(a => !a.identity);
+  const attributes = allAttributes.filter((a) => !a.identity);
 
   const identityInfo = { name: identity.names.camel, type: identity.type.spec };
-  const commands = (raw.commands ?? []).map(c => enrichCommand(c, identityInfo));
-  const queries = (raw.queries ?? []).map(q => enrichQuery(q, identityInfo));
+  const commands = (raw.commands ?? []).map((c) => enrichCommand(c, identityInfo));
+  const queries = (raw.queries ?? []).map((q) => enrichQuery(q, identityInfo));
 
   // Build events from spec (not derived from commands — spec is authoritative)
-  const events = (raw.events ?? []).map(e => ({
+  const events = (raw.events ?? []).map((e) => ({
     names: toNameVariants(e.name),
-    fields: e.fields.map(f => ({
+    fields: e.fields.map((f) => ({
       names: toNameVariants(f.name),
       type: toTypeMapping(f.type, true),
     })),

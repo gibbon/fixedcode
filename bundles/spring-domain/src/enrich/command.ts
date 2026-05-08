@@ -1,5 +1,11 @@
 import { generateVariants } from './naming.js';
-import { detectPattern, deriveHttp, deriveAuth, deriveResponse, type OperationPattern } from './conventions.js';
+import {
+  detectPattern,
+  deriveHttp,
+  deriveAuth,
+  deriveResponse,
+  type OperationPattern,
+} from './conventions.js';
 import { parseParam, type EnrichedParam, type AggCtx } from './shared.js';
 
 export type { EnrichedParam };
@@ -16,14 +22,17 @@ export interface EnrichedCommand {
   methodSignature: string;
 }
 
-export function enrichCommand(raw: {
-  name: string;
-  body?: string[];
-  path?: string[];
-  query?: string[];
-  emits?: string;
-  returns?: string;
-}, agg: AggCtx): EnrichedCommand {
+export function enrichCommand(
+  raw: {
+    name: string;
+    body?: string[];
+    path?: string[];
+    query?: string[];
+    emits?: string;
+    returns?: string;
+  },
+  agg: AggCtx,
+): EnrichedCommand {
   const names = generateVariants(raw.name);
   const pattern = detectPattern(raw.name);
   const needsId = ['Update', 'Delete', 'Archive', 'Get', 'Remove'].includes(pattern);
@@ -44,7 +53,9 @@ export function enrichCommand(raw: {
   const auth = deriveAuth(pattern, agg.names.pascal);
   const response = deriveResponse(pattern, agg.names.pascal);
 
-  const allParams = [...pathParams, ...bodyParams, ...queryParams].map(p => `${p.names.camel}: ${p.required ? 'String' : 'String?'}`).join(', ');
+  const allParams = [...pathParams, ...bodyParams, ...queryParams]
+    .map((p) => `${p.names.camel}: ${p.required ? 'String' : 'String?'}`)
+    .join(', ');
   const methodSignature = `fun ${names.camel}(${allParams}): ${response.returnType}`;
 
   return {

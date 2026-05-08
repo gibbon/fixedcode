@@ -1,6 +1,15 @@
 import pluralize from 'pluralize';
 
-export type OperationPattern = 'Create' | 'Update' | 'Delete' | 'Archive' | 'Add' | 'Remove' | 'Get' | 'Search' | 'Find';
+export type OperationPattern =
+  | 'Create'
+  | 'Update'
+  | 'Delete'
+  | 'Archive'
+  | 'Add'
+  | 'Remove'
+  | 'Get'
+  | 'Search'
+  | 'Find';
 
 export function detectPattern(name: string): OperationPattern {
   if (name.startsWith('Create')) return 'Create';
@@ -23,7 +32,10 @@ export interface HttpMetadata {
 }
 
 function toPascal(kebab: string): string {
-  return kebab.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
+  return kebab
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('');
 }
 
 /**
@@ -50,9 +62,7 @@ function deriveFindSuffix(operationName: string, entityPluralKebab: string): str
   if (!remainder) return '';
 
   // Convert PascalCase remainder to kebab-case: "ByStatus" → "by-status"
-  return remainder
-    .replace(/([a-z])([A-Z])/g, '$1-$2')
-    .toLowerCase();
+  return remainder.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
 export function deriveHttp(
@@ -61,20 +71,28 @@ export function deriveHttp(
   hasIdParam: boolean,
   idParamName?: string,
   pathPrefix = '',
-  operationName = ''
+  operationName = '',
 ): HttpMetadata {
   const base = pathPrefix ? `${pathPrefix}/${resourcePlural}` : `/${resourcePlural}`;
   const withId = `${base}/{${idParamName ?? 'id'}}`;
 
   switch (pattern) {
-    case 'Create': return { method: 'POST', path: base, statusCode: 201 };
-    case 'Update': return { method: 'PUT', path: withId, statusCode: 200 };
-    case 'Delete': return { method: 'DELETE', path: withId, statusCode: 204 };
-    case 'Archive': return { method: 'PUT', path: `${withId}/archive`, statusCode: 200 };
-    case 'Add':    return { method: 'POST', path: base, statusCode: 201 };
-    case 'Remove': return { method: 'DELETE', path: withId, statusCode: 204 };
-    case 'Get':    return { method: 'GET', path: withId, statusCode: 200 };
-    case 'Search': return { method: 'GET', path: base, statusCode: 200 };
+    case 'Create':
+      return { method: 'POST', path: base, statusCode: 201 };
+    case 'Update':
+      return { method: 'PUT', path: withId, statusCode: 200 };
+    case 'Delete':
+      return { method: 'DELETE', path: withId, statusCode: 204 };
+    case 'Archive':
+      return { method: 'PUT', path: `${withId}/archive`, statusCode: 200 };
+    case 'Add':
+      return { method: 'POST', path: base, statusCode: 201 };
+    case 'Remove':
+      return { method: 'DELETE', path: withId, statusCode: 204 };
+    case 'Get':
+      return { method: 'GET', path: withId, statusCode: 200 };
+    case 'Search':
+      return { method: 'GET', path: base, statusCode: 200 };
     case 'Find': {
       const suffix = deriveFindSuffix(operationName, resourcePlural);
       const findPath = suffix ? `${base}/${suffix}` : base;
@@ -90,8 +108,15 @@ export interface AuthMetadata {
 
 export function deriveAuth(pattern: OperationPattern, resource = ''): AuthMetadata {
   const actionMap: Record<OperationPattern, AuthMetadata['action']> = {
-    Create: 'CREATE', Update: 'UPDATE', Delete: 'DELETE', Archive: 'UPDATE',
-    Add: 'CREATE', Remove: 'DELETE', Get: 'READ', Search: 'READ', Find: 'READ',
+    Create: 'CREATE',
+    Update: 'UPDATE',
+    Delete: 'DELETE',
+    Archive: 'UPDATE',
+    Add: 'CREATE',
+    Remove: 'DELETE',
+    Get: 'READ',
+    Search: 'READ',
+    Find: 'READ',
   };
   const action = actionMap[pattern];
   return {

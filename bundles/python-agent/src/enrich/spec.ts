@@ -27,10 +27,12 @@ export interface RawPythonAgentSpec {
   cfrs?: Record<string, boolean>;
 }
 
-export function parseMiddleware(raw: Array<string | Record<string, Record<string, unknown>>> | undefined): RawMiddlewareEntry[] {
+export function parseMiddleware(
+  raw: Array<string | Record<string, Record<string, unknown>>> | undefined,
+): RawMiddlewareEntry[] {
   if (!raw) return [];
 
-  return raw.map(entry => {
+  return raw.map((entry) => {
     if (typeof entry === 'string') {
       return { type: entry, config: {} };
     }

@@ -6,9 +6,15 @@ export function createEnrichCommand() {
     .description('Fill extension point stubs with AI-generated business logic')
     .argument('<outputDir>', 'Generated output directory (contains .fixedcode-manifest.json)')
     .option('--spec <path>', 'Path to the original spec YAML')
-    .option('--file <path>', 'Enrich only this specific extension point file (relative to outputDir)')
+    .option(
+      '--file <path>',
+      'Enrich only this specific extension point file (relative to outputDir)',
+    )
     .option('--force', 'Skip safety check (allow enriching modified files)')
-    .option('--context <files...>', 'Context files (requirements, examples, images) to guide the AI')
+    .option(
+      '--context <files...>',
+      'Context files (requirements, examples, images) to guide the AI',
+    )
     .option('-c, --config <path>', 'Explicit path to .fixedcode.yaml config')
     .option('--provider <provider>', 'LLM provider (openrouter, ollama, openai)')
     .option('--model <model>', 'LLM model name')

@@ -213,21 +213,26 @@ describe('installPackage — input validation', () => {
 // a real `npm install` invocation; we exercise validation only here. The
 // patterns below are the same as those used in installPackage's allow-list.
 
-import {
-  // Re-import to access the internal helper through the module's barrel:
-  // tests rely on the public side-effect (throw / no-throw) of installPackage.
-} from '../src/engine/registry.js';
+import {} from // Re-import to access the internal helper through the module's barrel:
+// tests rely on the public side-effect (throw / no-throw) of installPackage.
+'../src/engine/registry.js';
 
 describe('install allow-list — github: refs', () => {
   const projectDir = '/tmp/__never_used__';
   it('accepts npm install github:owner/repo', () => {
-    const pkg: RegistryPackage = { ...bundleSpring, install: 'npm install github:fixedcode-ai/bundle-x' };
+    const pkg: RegistryPackage = {
+      ...bundleSpring,
+      install: 'npm install github:fixedcode-ai/bundle-x',
+    };
     // Will throw because projectDir is bogus when execFileSync runs;
     // we want the validator to NOT throw "Unsafe install command".
     expect(() => installPackage(pkg, projectDir)).not.toThrow(/Unsafe install command/);
   });
   it('accepts npm install github:owner/repo#ref', () => {
-    const pkg: RegistryPackage = { ...bundleSpring, install: 'npm install github:fixedcode-ai/bundle-x#main' };
+    const pkg: RegistryPackage = {
+      ...bundleSpring,
+      install: 'npm install github:fixedcode-ai/bundle-x#main',
+    };
     expect(() => installPackage(pkg, projectDir)).not.toThrow(/Unsafe install command/);
   });
   it('rejects npm install github:owner/../etc', () => {

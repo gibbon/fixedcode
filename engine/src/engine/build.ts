@@ -39,9 +39,9 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
 
   // Find all spec YAML files
   const specFiles = readdirSync(specDir)
-    .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
-    .filter(f => !f.startsWith('.'))
-    .map(f => resolve(specDir, f));
+    .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
+    .filter((f) => !f.startsWith('.'))
+    .map((f) => resolve(specDir, f));
 
   if (specFiles.length === 0) {
     throw new Error(`No spec files found in ${specDir}`);
@@ -50,18 +50,18 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
   // Generate from each spec into the same output directory
   // Library specs should go first (project skeleton), then domain specs (DDD code)
   // Read the kind field from each spec YAML to determine ordering
-  const specKinds = specFiles.map(f => {
+  const specKinds = specFiles.map((f) => {
     const content = readFileSync(f, 'utf-8');
     const parsed = parseYaml(content);
     if (!parsed || typeof parsed !== 'object') {
       throw new Error(`Failed to parse spec file ${f}: empty or not a valid YAML object`);
     }
-    return { path: f, kind: (parsed as Record<string, unknown>).kind as string ?? '' };
+    return { path: f, kind: ((parsed as Record<string, unknown>).kind as string) ?? '' };
   });
 
   const orderedSpecs = [
-    ...specKinds.filter(s => s.kind.includes('library')).map(s => s.path),
-    ...specKinds.filter(s => !s.kind.includes('library')).map(s => s.path),
+    ...specKinds.filter((s) => s.kind.includes('library')).map((s) => s.path),
+    ...specKinds.filter((s) => !s.kind.includes('library')).map((s) => s.path),
   ];
 
   for (const specPath of orderedSpecs) {
@@ -84,7 +84,7 @@ export async function build(options: BuildOptions): Promise<BuildResult> {
 
   return {
     outputDir,
-    specs: orderedSpecs.map(s => s.replace(specDir + '/', '')),
+    specs: orderedSpecs.map((s) => s.replace(specDir + '/', '')),
     totalFiles,
   };
 }
@@ -103,8 +103,8 @@ function consolidateMigrations(outputDir: string): void {
   for (const migDir of migrationDirs) {
     if (!existsSync(migDir)) continue;
 
-    const files = readdirSync(migDir).filter(f => f.endsWith('.sql'));
-    const v001Files = files.filter(f => f.startsWith('V001__'));
+    const files = readdirSync(migDir).filter((f) => f.endsWith('.sql'));
+    const v001Files = files.filter((f) => f.startsWith('V001__'));
 
     // Only consolidate if there are multiple V001 files
     if (v001Files.length <= 1) continue;
@@ -121,9 +121,15 @@ function consolidateMigrations(outputDir: string): void {
         const trimmed = line.trim();
         if (!trimmed || trimmed.startsWith('--')) continue;
 
-        if (trimmed.toUpperCase().startsWith('ALTER TABLE') && trimmed.toUpperCase().includes('FOREIGN KEY')) {
+        if (
+          trimmed.toUpperCase().startsWith('ALTER TABLE') &&
+          trimmed.toUpperCase().includes('FOREIGN KEY')
+        ) {
           fkStatements.push(trimmed);
-        } else if (trimmed.toUpperCase().startsWith('CREATE INDEX') || trimmed.toUpperCase().startsWith('CREATE UNIQUE INDEX')) {
+        } else if (
+          trimmed.toUpperCase().startsWith('CREATE INDEX') ||
+          trimmed.toUpperCase().startsWith('CREATE UNIQUE INDEX')
+        ) {
           indexStatements.push(trimmed);
         } else {
           tableStatements.push(trimmed);

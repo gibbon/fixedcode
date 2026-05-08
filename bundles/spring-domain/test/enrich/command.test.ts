@@ -2,13 +2,22 @@ import { describe, it, expect } from 'vitest';
 import { enrichCommand } from '../../src/enrich/command.js';
 
 const aggCtx = {
-  names: { kebab: 'workspaces', pascal: 'Workspace', camel: 'workspace', plural: 'workspaces', pluralKebab: 'workspaces' },
+  names: {
+    kebab: 'workspaces',
+    pascal: 'Workspace',
+    camel: 'workspace',
+    plural: 'workspaces',
+    pluralKebab: 'workspaces',
+  },
   identityField: 'workspaceId',
 };
 
 describe('enrichCommand', () => {
   it('CreateWorkspace → POST /workspaces 201 CREATE', () => {
-    const cmd = enrichCommand({ name: 'CreateWorkspace', body: ['transactionType', 'jurisdiction', 'completionDate?'] }, aggCtx as any);
+    const cmd = enrichCommand(
+      { name: 'CreateWorkspace', body: ['transactionType', 'jurisdiction', 'completionDate?'] },
+      aggCtx as any,
+    );
     expect(cmd.http.method).toBe('POST');
     expect(cmd.http.path).toBe('/workspaces');
     expect(cmd.http.statusCode).toBe(201);
@@ -29,7 +38,7 @@ describe('enrichCommand', () => {
   it('explicit path override takes precedence over convention', () => {
     const cmd = enrichCommand(
       { name: 'GetWorkspacesBySubscriber', path: ['subscriberId'], returns: 'WorkspaceList' },
-      aggCtx as any
+      aggCtx as any,
     );
     expect(cmd.params.path[0].name).toBe('subscriberId');
     expect(cmd.http.path).toBe('/workspaces/{subscriberId}');

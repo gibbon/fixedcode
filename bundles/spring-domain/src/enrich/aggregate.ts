@@ -8,7 +8,7 @@ import type { RawAggregateSpec } from './spec.js';
 
 export function enrichAggregate(name: string, raw: RawAggregateSpec) {
   const attrs = enrichAttributes(raw.attributes);
-  const identityField = attrs.find(a => a.isIdentity)?.name ?? 'id';
+  const identityField = attrs.find((a) => a.isIdentity)?.name ?? 'id';
   const names = generateVariants(name, raw.plural);
   const aggCtx = { names: { pluralKebab: names.pluralKebab, pascal: names.pascal }, identityField };
 
@@ -18,7 +18,7 @@ export function enrichAggregate(name: string, raw: RawAggregateSpec) {
   }
 
   const entities = Object.entries(raw.entities ?? {}).map(([eName, eRaw]) =>
-    enrichEntity(eName, eRaw, identityField)
+    enrichEntity(eName, eRaw, identityField),
   );
 
   return {
@@ -26,8 +26,8 @@ export function enrichAggregate(name: string, raw: RawAggregateSpec) {
     names,
     identityField,
     attributes: attrs,
-    commands: (raw.commands ?? []).map(c => enrichCommand(c, aggCtx)),
-    queries: (raw.queries ?? []).map(q => enrichQuery(q, aggCtx)),
+    commands: (raw.commands ?? []).map((c) => enrichCommand(c, aggCtx)),
+    queries: (raw.queries ?? []).map((q) => enrichQuery(q, aggCtx)),
     events: enrichEvents(raw.events, attrTypeMap),
     entities,
     enumDefaults: raw.enumDefaults ?? {},

@@ -9,11 +9,10 @@ export function createInitCommand() {
     .option('-n, --name <name>', 'Name for the spec')
     .option('-o, --output <dir>', 'Output directory', '.')
     .action(async (opts) => {
-      
       const kind = opts.kind || 'ddd-domain';
       const name = opts.name || 'my-service';
       const output = opts.output;
-      
+
       const specContent = `apiVersion: "1.0"
 kind: ${kind}
 metadata:

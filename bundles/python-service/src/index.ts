@@ -36,12 +36,29 @@ export function generateFiles(ctx: PythonServiceContext): FileEntry[] {
   const files: FileEntry[] = [
     { template: 'pyproject.toml.hbs', output: 'pyproject.toml', ctx: c },
     { template: 'src/__init__.py.hbs', output: `src/${ctx.packageName}/__init__.py`, ctx: c },
-    { template: 'src/__init__.py.hbs', output: `src/${ctx.packageName}/routes/__init__.py`, ctx: c },
-    { template: 'src/__init__.py.hbs', output: `src/${ctx.packageName}/defaults/__init__.py`, ctx: c },
+    {
+      template: 'src/__init__.py.hbs',
+      output: `src/${ctx.packageName}/routes/__init__.py`,
+      ctx: c,
+    },
+    {
+      template: 'src/__init__.py.hbs',
+      output: `src/${ctx.packageName}/defaults/__init__.py`,
+      ctx: c,
+    },
     { template: 'src/main.py.hbs', output: `src/${ctx.packageName}/main.py`, ctx: c },
     { template: 'src/config.py.hbs', output: `src/${ctx.packageName}/config.py`, ctx: c },
-    { template: 'src/routes/health.py.hbs', output: `src/${ctx.packageName}/routes/health.py`, ctx: c },
-    { template: 'src/defaults/custom_routes.py.hbs', output: `src/${ctx.packageName}/defaults/custom_routes.py`, ctx: c, overwrite: false },
+    {
+      template: 'src/routes/health.py.hbs',
+      output: `src/${ctx.packageName}/routes/health.py`,
+      ctx: c,
+    },
+    {
+      template: 'src/defaults/custom_routes.py.hbs',
+      output: `src/${ctx.packageName}/defaults/custom_routes.py`,
+      ctx: c,
+      overwrite: false,
+    },
     { template: 'tests/conftest.py.hbs', output: 'tests/conftest.py', ctx: c },
   ];
 
@@ -65,7 +82,7 @@ export const bundle: Bundle = {
     provides: ['logging', 'health-check', 'error-handling', 'docker'],
     files: {
       'health-check': ['src/*/routes/health.py'],
-      'docker': ['Dockerfile', 'docker-compose.yml'],
+      docker: ['Dockerfile', 'docker-compose.yml'],
     },
   },
 };

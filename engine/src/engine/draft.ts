@@ -99,7 +99,7 @@ function loadBundleExample(bundleDir: string): string | undefined {
   if (!existsSync(examplesDir)) return undefined;
 
   const files = readdirSync(examplesDir)
-    .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
+    .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
     .sort();
 
   if (files.length === 0) return undefined;
@@ -118,7 +118,9 @@ function loadConventions(configDir: string, kind: string): string | undefined {
 
   // Look for a kind-specific conventions section (e.g. "### spring-domain spec conventions")
   const escaped = kind.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const kindRegex = new RegExp(`### ${escaped} spec conventions\\n([\\s\\S]*?)(?=\\n## |\\n### |$)`);
+  const kindRegex = new RegExp(
+    `### ${escaped} spec conventions\\n([\\s\\S]*?)(?=\\n## |\\n### |$)`,
+  );
   const kindMatch = content.match(kindRegex);
   if (kindMatch) {
     return kindMatch[1].trim();
@@ -161,17 +163,16 @@ export async function draft(options: DraftOptions): Promise<string> {
   });
 
   // Build user message — text description + optional context files
-  const contextParts = options.contextFiles?.length
-    ? loadContextFiles(options.contextFiles)
-    : [];
+  const contextParts = options.contextFiles?.length ? loadContextFiles(options.contextFiles) : [];
 
-  const userContent = contextParts.length > 0
-    ? [
-        { type: 'text' as const, text: prompt.user },
-        { type: 'text' as const, text: '\n## Context Files\n' },
-        ...contextParts,
-      ]
-    : prompt.user;
+  const userContent =
+    contextParts.length > 0
+      ? [
+          { type: 'text' as const, text: prompt.user },
+          { type: 'text' as const, text: '\n## Context Files\n' },
+          ...contextParts,
+        ]
+      : prompt.user;
 
   // Call LLM
   const response = await chatCompletion(llmConfig, [
@@ -190,7 +191,10 @@ export async function draft(options: DraftOptions): Promise<string> {
       { role: 'system', content: prompt.system },
       { role: 'user', content: userContent },
       { role: 'assistant', content: response },
-      { role: 'user', content: `The YAML spec has validation errors:\n${validationError}\n\nPlease fix the errors and output the corrected YAML spec only.` },
+      {
+        role: 'user',
+        content: `The YAML spec has validation errors:\n${validationError}\n\nPlease fix the errors and output the corrected YAML spec only.`,
+      },
     ]);
 
     yaml = extractYaml(retryResponse);
@@ -237,7 +241,7 @@ function tryValidate(yaml: string, bundle: Bundle): string | undefined {
     // Enrich validation — this catches what the schema misses
     const metadata = {
       name: ((envelope.metadata as any)?.name as string) ?? 'draft',
-      apiVersion: ((envelope.apiVersion as string) ?? '1.0'),
+      apiVersion: (envelope.apiVersion as string) ?? '1.0',
     };
     bundle.enrich(spec as Record<string, unknown>, metadata);
 
