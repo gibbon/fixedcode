@@ -10,7 +10,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@fixedcode/engine": "file:../../engine",
+    "fixedcode": "file:../../engine",
     "yaml": "^2.8.3"
   },
   "devDependencies": {

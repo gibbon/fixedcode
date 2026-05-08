@@ -27,7 +27,7 @@ my-bundle/
 ## The `Bundle` interface
 
 ```ts
-import type { Bundle, SpecMetadata, Context } from '@fixedcode/engine';
+import type { Bundle, SpecMetadata, Context } from 'fixedcode';
 import { enrich } from './enrich/index.js';
 
 const schema = {

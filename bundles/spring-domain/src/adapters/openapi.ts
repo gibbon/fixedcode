@@ -1,7 +1,7 @@
 /**
  * Adapter that maps spring-domain's EnrichedContext into the OpenAPI generator's input contract.
  */
-import type { Context } from '@fixedcode/engine';
+import type { Context } from 'fixedcode';
 import type {
   OpenApiInput,
   OpenApiOperation,

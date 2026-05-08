@@ -7,7 +7,7 @@ A generator's input contract is its own concern. Bundles wire their enriched con
 ## The `Generator` interface
 
 ```ts
-import type { Generator } from '@fixedcode/engine';
+import type { Generator } from 'fixedcode';
 
 export const openapi: Generator = {
   name: 'openapi',

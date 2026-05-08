@@ -24,7 +24,7 @@ fixedcode registry publish --kind bundle --tags "tag1,tag2"
 
 ## Distribution model in v0.2.0
 
-Only the **engine** (`@fixedcode/engine`) is published to npm in v0.2.0. The `registry.json` shipped at v0.2.0 acts as a **catalog** for discovery — you can `fixedcode registry list` and `fixedcode registry search` to find bundles, but `fixedcode registry install <name>` will **return 404** for the bundles listed below until those packages are published.
+Only the **engine** (`fixedcode`) is published to npm in v0.2.0. The `registry.json` shipped at v0.2.0 acts as a **catalog** for discovery — you can `fixedcode registry list` and `fixedcode registry search` to find bundles, but `fixedcode registry install <name>` will **return 404** for the bundles listed below until those packages are published.
 
 This is intentional for the initial OSS release: it keeps the publishing surface small. Bundles will move to npm in a future release.
 

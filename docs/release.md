@@ -17,14 +17,14 @@ Pre-1.0 — minor (`0.x`) bumps for any user-visible change; patch (`0.x.y`) for
    - `npm publish ./engine --provenance --access public` using the OIDC trusted-publisher token.
    - Create a GitHub Release with auto-generated notes from the matching CHANGELOG section.
    - Attach the `npm pack` tarball.
-6. **Verify on npm**: `npm view @fixedcode/engine@X.Y.Z` and confirm the provenance attestation.
-7. **Smoke test from npm** on a clean machine: `npm install -g @fixedcode/engine && fixedcode --version`.
+6. **Verify on npm**: `npm view fixedcode@X.Y.Z` and confirm the provenance attestation.
+7. **Smoke test from npm** on a clean machine: `npm install -g fixedcode && fixedcode --version`.
 
 ## First-time setup
 
 ### npm trusted publisher (preferred — no long-lived tokens)
 
-1. Reserve `@fixedcode` org and `@fixedcode/engine` package name on npmjs.com.
+1. Reserve `@fixedcode` org and `fixedcode` package name on npmjs.com.
 2. On npm package settings → Publishing access → "Add a trusted publisher".
 3. Provide:
    - Owner: `gibbon`

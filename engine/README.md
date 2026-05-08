@@ -1,10 +1,10 @@
-# @fixedcode/engine
+# fixedcode
 
 The FixedCode CLI and programmatic API.
 
-[![npm version](https://img.shields.io/npm/v/@fixedcode/engine.svg)](https://www.npmjs.com/package/@fixedcode/engine)
+[![npm version](https://img.shields.io/npm/v/fixedcode.svg)](https://www.npmjs.com/package/fixedcode)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/gibbon/fixedcode/blob/master/LICENSE)
-[![Node](https://img.shields.io/node/v/@fixedcode/engine.svg)](https://www.npmjs.com/package/@fixedcode/engine)
+[![Node](https://img.shields.io/node/v/fixedcode.svg)](https://www.npmjs.com/package/fixedcode)
 
 > Spec-driven, deterministic code generation for the AI era. YAML in, production code out, same spec → same code every time.
 
@@ -13,9 +13,9 @@ Full project docs: <https://github.com/gibbon/fixedcode>
 ## Install
 
 ```bash
-npm install -g @fixedcode/engine
+npm install -g fixedcode
 # or as a dev dep:
-npm install --save-dev @fixedcode/engine
+npm install --save-dev fixedcode
 ```
 
 ## CLI
@@ -39,7 +39,7 @@ Run `fixedcode <command> --help` for full options.
 
 ```bash
 # install the CLI
-npm install -g @fixedcode/engine
+npm install -g fixedcode
 
 # install a bundle (registry-hosted)
 fixedcode registry install spring-domain
@@ -66,7 +66,7 @@ import {
   installPackage,
   publishPackage,
   renderTemplates,
-} from '@fixedcode/engine';
+} from 'fixedcode';
 
 await generate({
   specPath: './workspace-domain.yaml',
