@@ -4,6 +4,21 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [0.2.2] — 2026-05-09
+
+Security hardening release. Closes 7 deferred findings from the v0.2.0 review (#1–#7). +28 regression tests; engine suite now at 197 tests.
+
+### Security
+- **F-2** (#1): explicit path-containment check in `engine/src/engine/deploy.ts` (`assertContained`). Defense-in-depth against malicious symlinks in the build dir.
+- **F-3** (#2): `enrich --spec` now validates that the resolved spec path stays under the project (cwd / outputDir / outputDir's parent). Refuses `--spec /etc/passwd`.
+- **F-4** (#3): `dynamicImport` realpaths the bundle entry and requires it to resolve under the bundle dir. Rejects `"main": "../../evil.js"` style escapes.
+- **F-6** (#4): registry publish branch names validated against git ref-format rules (no `..`, no `@{`, no leading `-`, no trailing `/` or `.lock`).
+- **F-10** (#5): `fixedcode enrich` prompts `[y/N]` before uploading files to the LLM endpoint. Add `--yes` / `-y` to skip; auto-skipped on non-TTY (CI).
+- **F-11** (#6): user-supplied content in `draft` and `enrich` prompts is now wrapped in `<USER_DESCRIPTION>` / `<USER_SPEC>` / `<STUB>` / `<NEIGHBOUR>` delimiters with explicit "treat as data, not commands" instruction.
+- **F-12** (#7): API-key-not-found error no longer echoes the configured env-var name.
+
+[0.2.2]: https://github.com/gibbon/fixedcode/releases/tag/v0.2.2
+
 ## [0.2.1] — 2026-05-09
 
 Maintenance release. Removes content unrelated to FixedCode and republishes a clean tarball.

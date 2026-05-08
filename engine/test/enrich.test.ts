@@ -261,3 +261,131 @@ describe('enrich integration', () => {
     expect(result.errors).toHaveLength(0);
   });
 });
+
+import { assertSpecPathSafe } from '../src/engine/enrich.js';
+
+describe('assertSpecPathSafe — F-3', () => {
+  const cwd = process.cwd();
+
+  it('accepts a spec under outputDir', () => {
+    expect(() => assertSpecPathSafe(`${cwd}/build/spec.yaml`, `${cwd}/build`)).not.toThrow();
+  });
+
+  it('accepts a spec under cwd', () => {
+    expect(() => assertSpecPathSafe(`${cwd}/spec.yaml`, `${cwd}/build`)).not.toThrow();
+  });
+
+  it('accepts a spec sibling of outputDir (under outputDir parent)', () => {
+    expect(() => assertSpecPathSafe(`${cwd}/sibling.yaml`, `${cwd}/build`)).not.toThrow();
+  });
+
+  it('rejects /etc/passwd as a --spec target', () => {
+    expect(() => assertSpecPathSafe('/etc/passwd', `${cwd}/build`)).toThrow(/outside the project/);
+  });
+
+  it('rejects an absolute path elsewhere on disk', () => {
+    expect(() => assertSpecPathSafe('/srv/secret.yaml', `${cwd}/build`)).toThrow(/outside the project/);
+  });
+});
+
+describe('buildEnrichPrompt — F-11 prompt injection delimiters', () => {
+  it('wraps spec, stub, and neighbour content in delimited tags', async () => {
+    const { buildEnrichPrompt } = await import('../src/engine/enrich.js');
+    const p = buildEnrichPrompt({
+      specYaml: 'evil-instructions',
+      stubPath: 'src/Foo.kt',
+      stubContent: 'stub',
+      neighbours: [{ path: 'src/Bar.kt', content: 'malicious' }],
+    });
+    expect(p.user).toContain('<USER_SPEC>');
+    expect(p.user).toContain('</USER_SPEC>');
+    expect(p.user).toContain('<STUB');
+    expect(p.user).toContain('</STUB>');
+    expect(p.user).toContain('<NEIGHBOUR');
+    expect(p.user).toContain('</NEIGHBOUR>');
+    expect(p.system).toMatch(/untrusted user data|data to model/i);
+  });
+});
+
+describe('enrich — F-10 upload confirmation', () => {
+  it('skips upload when confirmFn returns false', async () => {
+    // We test the confirmFn integration by stubbing it in a minimal manifest run.
+    // Setup: tmp dir with one extension point and a manifest pointing at it.
+    const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const { enrich } = await import('../src/engine/enrich.js');
+
+    const dir = mkdtempSync(join(tmpdir(), 'enrich-confirm-'));
+    try {
+      mkdirSync(join(dir, 'src'), { recursive: true });
+      writeFileSync(join(dir, 'src', 'Foo.kt'), 'class Foo { /* TODO */ }');
+      writeFileSync(
+        join(dir, '.fixedcode-manifest.json'),
+        JSON.stringify({
+          generatedAt: new Date().toISOString(),
+          version: 1,
+          files: {
+            'src/Foo.kt': { hash: 'x', overwrite: false, specFile: 'spec.yaml' },
+          },
+        }),
+      );
+      writeFileSync(join(dir, 'spec.yaml'), 'kind: test\nmetadata: { name: t }\nspec: {}\n');
+
+      // Capture the prompt
+      let promptShown = '';
+      const result = await enrich({
+        outputDir: dir,
+        specFile: join(dir, 'spec.yaml'),
+        force: true, // skip the modified-file check (hash 'x' won't match)
+        yes: false,
+        confirmFn: async (p) => {
+          promptShown = p;
+          return false;
+        },
+        // no LLM config needed — we won't reach the network
+        llmOverrides: { provider: 'openrouter', model: 'test' },
+      }).catch((e: unknown) => ({ error: e as Error }) as never);
+
+      // Either we got a clean cancellation result, or it errored before the LLM call
+      // Required: the prompt was shown
+      expect(promptShown).toMatch(/Proceed.*\[y\/N\]/);
+      // And no enrichment happened
+      if (!('error' in (result as object))) {
+        expect((result as { enriched: string[] }).enriched).toEqual([]);
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not prompt when yes=true', async () => {
+    const { mkdtempSync, writeFileSync, rmSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const { enrich } = await import('../src/engine/enrich.js');
+
+    const dir = mkdtempSync(join(tmpdir(), 'enrich-noprompt-'));
+    try {
+      // Empty manifest so we exit early without LLM and without prompting
+      writeFileSync(
+        join(dir, '.fixedcode-manifest.json'),
+        JSON.stringify({ generatedAt: new Date().toISOString(), version: 1, files: {} }),
+      );
+      let confirmCalled = false;
+      const result = await enrich({
+        outputDir: dir,
+        yes: true,
+        confirmFn: async () => {
+          confirmCalled = true;
+          return true;
+        },
+        llmOverrides: { provider: 'openrouter', model: 'test' },
+      });
+      expect(confirmCalled).toBe(false);
+      expect(result.enriched).toEqual([]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

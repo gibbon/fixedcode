@@ -26,6 +26,28 @@ export function validateRegistryRepo(repo: string): string {
   return repo;
 }
 
+// Refs that git itself rejects + safe characters only. Catches names with
+// '..', leading '-', whitespace, control chars, '@{', etc.
+const GIT_BRANCH_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._/-]*$/;
+
+export function validateGitBranchName(name: string): string {
+  if (typeof name !== 'string' || name.length === 0) {
+    throw new Error('Invalid git branch name: empty');
+  }
+  if (
+    !GIT_BRANCH_PATTERN.test(name) ||
+    name.includes('..') ||
+    name.includes('@{') ||
+    name.endsWith('/') ||
+    name.endsWith('.lock')
+  ) {
+    throw new Error(
+      `Invalid git branch name: ${JSON.stringify(name)} — must match ${GIT_BRANCH_PATTERN}, no '..', no '@{', no trailing '/' or '.lock'`,
+    );
+  }
+  return name;
+}
+
 // npm package identifier: optional @scope/, name, optional @version-range.
 // Version-range portion intentionally permissive (semver ranges include `^`, `~`,
 // `>=`, `+build`) but disallows whitespace/path separators.
@@ -235,7 +257,7 @@ export async function publishPackage(options: PublishOptions): Promise<string> {
   const registryJson = JSON.stringify(registry, null, 2) + '\n';
 
   // Create a temporary branch, commit, and open PR via gh CLI
-  const branchName = `add-${name.replace(/[@/]/g, '-').replace(/^-/, '')}`;
+  const branchName = validateGitBranchName(`add-${name.replace(/[@/]/g, '-').replace(/^-/, '')}`);
   const tmpDir = resolve(options.packageDir, '.registry-pr-tmp');
 
   try {
