@@ -25,8 +25,20 @@ export function validateRegistryRepo(repo: string): string {
   return repo;
 }
 
+// npm package identifier: optional @scope/, name, optional @version-range.
+// Version-range portion intentionally permissive (semver ranges include `^`, `~`,
+// `>=`, `+build`) but disallows whitespace/path separators.
 const INSTALL_PACKAGE_PATTERN =
-  /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*(?:@[a-z0-9][a-z0-9._-]*)?$/i;
+  /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*(?:@[a-zA-Z0-9._^~>=<+-]+)?$/i;
+
+// GitHub bundle reference: github:owner/repo[#ref]. Used by `fixedcode registry publish`.
+const INSTALL_GITHUB_PATTERN =
+  /^github:[A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9][A-Za-z0-9._-]*(?:#[A-Za-z0-9._/-]+)?$/;
+
+function isSafeInstallTarget(target: string): boolean {
+  if (target.includes('..')) return false;
+  return INSTALL_PACKAGE_PATTERN.test(target) || INSTALL_GITHUB_PATTERN.test(target);
+}
 
 export interface RegistryPackage {
   name: string;
@@ -94,15 +106,15 @@ export function installPackage(
   configSection = 'bundles'
 ): InstallResult {
   // Validate install command against allowlist before executing.
-  // Strict shape: `npm install <single-package>` where <single-package> is a
-  // semver-style npm package identifier (optional @scope/, no relative paths).
+  // Strict shape: `npm install <single-target>` where <single-target> is either
+  // an npm package identifier (optional @scope/, optional @version-range) or
+  // a github:owner/repo[#ref] reference. No `..`, no whitespace, no shell.
   const installParts = pkg.install.split(/\s+/);
   if (
     installParts.length !== 3 ||
     installParts[0] !== 'npm' ||
     installParts[1] !== 'install' ||
-    !INSTALL_PACKAGE_PATTERN.test(installParts[2]) ||
-    installParts[2].includes('..')
+    !isSafeInstallTarget(installParts[2])
   ) {
     throw new Error(`Unsafe install command: ${pkg.install}`);
   }

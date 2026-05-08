@@ -23,6 +23,14 @@ describe('validateBaseUrl', () => {
     expect(() => validateBaseUrl('http://127.0.0.1:11434/v1')).not.toThrow();
   });
 
+  it('accepts http://[::1] (IPv6 loopback)', () => {
+    expect(() => validateBaseUrl('http://[::1]:11434/v1')).not.toThrow();
+  });
+
+  it('rejects an IPv6 non-loopback address', () => {
+    expect(() => validateBaseUrl('http://[2001:db8::1]:11434/v1')).toThrow(/loopback/i);
+  });
+
   it('rejects an attacker-hosted https URL', () => {
     expect(() => validateBaseUrl('https://attacker.example.com/api/v1')).toThrow(
       /not on the LLM allowlist/i,
