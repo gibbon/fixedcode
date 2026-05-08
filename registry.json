@@ -6,14 +6,7 @@
       "description": "Spring/Kotlin DDD domain code — aggregates, entities, commands, queries, events, services, tests",
       "version": "0.1.0",
       "kind": "bundle",
-      "tags": [
-        "spring",
-        "kotlin",
-        "ddd",
-        "domain",
-        "aggregate",
-        "cqrs"
-      ],
+      "tags": ["spring", "kotlin", "ddd", "domain", "aggregate", "cqrs"],
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/bundle-spring-domain",
       "install": "npm install @fixedcode/bundle-spring-domain"
@@ -23,13 +16,7 @@
       "description": "OpenAPI 3.0.3 spec generator — produces API specs from any bundle with HTTP operations",
       "version": "0.1.0",
       "kind": "generator",
-      "tags": [
-        "openapi",
-        "api",
-        "rest",
-        "swagger",
-        "spec"
-      ],
+      "tags": ["openapi", "api", "rest", "swagger", "spec"],
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/generator-openapi",
       "install": "npm install @fixedcode/generator-openapi"
@@ -39,12 +26,7 @@
       "description": "Simple CRUD REST API scaffold",
       "version": "0.1.0",
       "kind": "bundle",
-      "tags": [
-        "crud",
-        "rest",
-        "api",
-        "simple"
-      ],
+      "tags": ["crud", "rest", "api", "simple"],
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/bundle-crud-api",
       "install": "npm install @fixedcode/bundle-crud-api"
