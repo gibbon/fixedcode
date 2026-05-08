@@ -40,10 +40,10 @@ jobs:
           npx tsc --noEmit
           npm run build
 
-      - name: Install + build bundles (engine tests import their dist)
+      - name: Install + build generators (must be built before bundles depend on them)
         run: |
           set -e
-          for d in bundles/*/; do
+          for d in generators/*/; do
             echo "::group::$(basename "$d") install+build"
             (
               cd "$d"
@@ -53,10 +53,10 @@ jobs:
             echo "::endgroup::"
           done
 
-      - name: Install + build generators
+      - name: Install + build bundles
         run: |
           set -e
-          for d in generators/*/; do
+          for d in bundles/*/; do
             echo "::group::$(basename "$d") install+build"
             (
               cd "$d"
