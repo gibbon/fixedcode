@@ -33,13 +33,23 @@ jobs:
         run: npm pack
 
       - name: Publish to npm with provenance
+        id: npm_publish
         working-directory: engine
+        continue-on-error: true
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
+        if: always()
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: engine/*.tgz
+
+      - name: Surface npm publish failure (after creating GH release)
+        if: steps.npm_publish.outcome == 'failure'
+        run: |
+          echo "::warning ::npm publish failed (no trusted publisher / NPM_TOKEN configured)."
+          echo "::warning ::GitHub Release was still created. Publish manually with: cd engine && npm publish --access public"
+          exit 1
