@@ -10,7 +10,9 @@ The FixedCode CLI and programmatic API.
 
 > **No LLM required.** The core engine works fully offline. Only the optional `draft` and `enrich` commands use an LLM, and only if you configure one.
 
-Full project docs: <https://github.com/gibbon/fixedcode>
+- 🌐 Website: <https://fixedcode.ai>
+- 💻 Source: <https://github.com/gibbon/fixedcode>
+- 📦 npm: <https://www.npmjs.com/package/fixedcode>
 
 ## Install
 

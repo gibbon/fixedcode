@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-12">
           <div>
-            <a href="#" className="text-2xl font-bold text-gradient">
+            <a href="/" className="text-2xl font-bold text-gradient">
               FixedCode
             </a>
             <p className="text-gray-500 mt-2 text-sm">
@@ -22,7 +22,19 @@ export default function Footer() {
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="#"
+                    href="https://www.npmjs.com/package/fixedcode"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    npm: fixedcode
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/gibbon/fixedcode/blob/master/docs/architecture.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
                   >
                     Documentation
@@ -30,15 +42,9 @@ export default function Footer() {
                 </li>
                 <li>
                   <a
-                    href="#schemas"
-                    className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
-                  >
-                    Schemas
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#bundles"
+                    href="https://github.com/gibbon/fixedcode/blob/master/docs/bundles.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
                   >
                     Bundles
@@ -53,7 +59,9 @@ export default function Footer() {
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="#"
+                    href="https://github.com/gibbon/fixedcode"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
                   >
                     GitHub
@@ -61,41 +69,59 @@ export default function Footer() {
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="https://github.com/gibbon/fixedcode/blob/master/CHANGELOG.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
                   >
-                    Slides
+                    Changelog
                   </a>
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="https://github.com/gibbon/fixedcode/issues"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
                   >
-                    Changelog
+                    Issues
                   </a>
                 </li>
               </ul>
             </div>
             <div>
               <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                Community
+                Project
               </h4>
               <ul className="space-y-2">
                 <li>
                   <a
-                    href="#"
+                    href="https://github.com/gibbon/fixedcode/blob/master/LICENSE"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
                   >
-                    Discord
+                    Apache-2.0 License
                   </a>
                 </li>
                 <li>
                   <a
-                    href="#"
+                    href="https://github.com/gibbon/fixedcode/blob/master/SECURITY.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
                   >
-                    Twitter
+                    Security
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/gibbon/fixedcode/blob/master/CONTRIBUTING.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    Contributing
                   </a>
                 </li>
               </ul>
