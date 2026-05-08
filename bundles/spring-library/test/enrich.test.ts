@@ -59,7 +59,7 @@ describe('spring-library enrichment', () => {
     expect(ctx.KafkaEnabled).toBe(false);
     expect(ctx.ServerPort).toBe(8080);
     expect(ctx.Version).toBe('0.1.0');
-    expect(ctx.Group).toBe('io.pexa.gap');
+    expect(ctx.Group).toBe('com.example');
   });
 
   it('computes DatabaseReadPort deterministically', () => {

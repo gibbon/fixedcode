@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { renderTemplates } from '@fixedcode/engine/dist/engine/render.js';
+import { renderTemplates } from '@fixedcode/engine';
 import bundle from '../src/index.js';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -76,7 +76,7 @@ describe('spring-library template rendering', () => {
       (r) => r.path.endsWith('.kt') && r.path.includes('workspace'),
     );
     for (const file of domainKotlinFiles) {
-      expect(file.content).toContain('io.pexa.gap.workspace');
+      expect(file.content).toContain('com.example.workspace');
     }
   });
 });
