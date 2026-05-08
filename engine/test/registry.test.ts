@@ -202,6 +202,50 @@ describe('installPackage — input validation', () => {
     };
     expect(() => installPackage(malicious, projectDir)).toThrow('Unsafe install command');
   });
+
+  it('rejects an empty install string', () => {
+    const malicious: RegistryPackage = { ...bundleSpring, install: '' };
+    expect(() => installPackage(malicious, projectDir)).toThrow('Unsafe install command');
+  });
+});
+
+// Note: full installPackage success path requires a writable projectDir and
+// a real `npm install` invocation; we exercise validation only here. The
+// patterns below are the same as those used in installPackage's allow-list.
+
+import {
+  // Re-import to access the internal helper through the module's barrel:
+  // tests rely on the public side-effect (throw / no-throw) of installPackage.
+} from '../src/engine/registry.js';
+
+describe('install allow-list — github: refs', () => {
+  const projectDir = '/tmp/__never_used__';
+  it('accepts npm install github:owner/repo', () => {
+    const pkg: RegistryPackage = { ...bundleSpring, install: 'npm install github:fixedcode-ai/bundle-x' };
+    // Will throw because projectDir is bogus when execFileSync runs;
+    // we want the validator to NOT throw "Unsafe install command".
+    expect(() => installPackage(pkg, projectDir)).not.toThrow(/Unsafe install command/);
+  });
+  it('accepts npm install github:owner/repo#ref', () => {
+    const pkg: RegistryPackage = { ...bundleSpring, install: 'npm install github:fixedcode-ai/bundle-x#main' };
+    expect(() => installPackage(pkg, projectDir)).not.toThrow(/Unsafe install command/);
+  });
+  it('rejects npm install github:owner/../etc', () => {
+    const pkg: RegistryPackage = { ...bundleSpring, install: 'npm install github:owner/../etc' };
+    expect(() => installPackage(pkg, projectDir)).toThrow('Unsafe install command');
+  });
+});
+
+describe('install allow-list — npm version ranges', () => {
+  const projectDir = '/tmp/__never_used__';
+  it('accepts a caret range', () => {
+    const pkg: RegistryPackage = { ...bundleSpring, install: 'npm install foo@^1.2.3' };
+    expect(() => installPackage(pkg, projectDir)).not.toThrow(/Unsafe install command/);
+  });
+  it('accepts a tilde range', () => {
+    const pkg: RegistryPackage = { ...bundleSpring, install: 'npm install foo@~1.2' };
+    expect(() => installPackage(pkg, projectDir)).not.toThrow(/Unsafe install command/);
+  });
 });
 
 describe('validateRegistryRepo', () => {
