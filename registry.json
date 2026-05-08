@@ -6,7 +6,14 @@
       "description": "Spring Boot project skeleton — Gradle, Docker, CI, configs, migrations",
       "version": "0.1.0",
       "kind": "bundle",
-      "tags": ["spring", "kotlin", "library", "skeleton", "gradle", "docker"],
+      "tags": [
+        "spring",
+        "kotlin",
+        "library",
+        "skeleton",
+        "gradle",
+        "docker"
+      ],
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/bundle-spring-library",
       "install": "npm install @fixedcode/bundle-spring-library"
@@ -16,7 +23,14 @@
       "description": "Spring/Kotlin DDD domain code — aggregates, entities, commands, queries, events, services, tests",
       "version": "0.1.0",
       "kind": "bundle",
-      "tags": ["spring", "kotlin", "ddd", "domain", "aggregate", "cqrs"],
+      "tags": [
+        "spring",
+        "kotlin",
+        "ddd",
+        "domain",
+        "aggregate",
+        "cqrs"
+      ],
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/bundle-spring-domain",
       "install": "npm install @fixedcode/bundle-spring-domain"
@@ -26,7 +40,13 @@
       "description": "OpenAPI 3.0.3 spec generator — produces API specs from any bundle with HTTP operations",
       "version": "0.1.0",
       "kind": "generator",
-      "tags": ["openapi", "api", "rest", "swagger", "spec"],
+      "tags": [
+        "openapi",
+        "api",
+        "rest",
+        "swagger",
+        "spec"
+      ],
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/generator-openapi",
       "install": "npm install @fixedcode/generator-openapi"
@@ -36,7 +56,12 @@
       "description": "Simple CRUD REST API scaffold",
       "version": "0.1.0",
       "kind": "bundle",
-      "tags": ["crud", "rest", "api", "simple"],
+      "tags": [
+        "crud",
+        "rest",
+        "api",
+        "simple"
+      ],
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/bundle-crud-api",
       "install": "npm install @fixedcode/bundle-crud-api"
@@ -46,40 +71,16 @@
       "description": "Model Context Protocol server wrapper — expose tools to AI coding agents",
       "version": "0.1.0",
       "kind": "bundle",
-      "tags": ["mcp", "ai", "agent", "tools", "model-context-protocol"],
+      "tags": [
+        "mcp",
+        "ai",
+        "agent",
+        "tools",
+        "model-context-protocol"
+      ],
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/bundle-mcp-wrapper",
       "install": "npm install @fixedcode/bundle-mcp-wrapper"
-    },
-    {
-      "name": "@fixedcode/bundle-rdan-tool-api",
-      "description": "r.dan tool template — external API caller with auth from knowledge base",
-      "version": "0.1.0",
-      "kind": "bundle",
-      "tags": ["rdan", "tool", "api", "rest", "template"],
-      "author": "fixedcode",
-      "repo": "https://github.com/gibbon/fixedcode",
-      "install": "npm install @fixedcode/bundle-rdan-tool-api"
-    },
-    {
-      "name": "@fixedcode/bundle-rdan-agent-specialist",
-      "description": "r.dan agent template — specialist agent with tools, prompt, and model tier",
-      "version": "0.1.0",
-      "kind": "bundle",
-      "tags": ["rdan", "agent", "specialist", "template"],
-      "author": "fixedcode",
-      "repo": "https://github.com/gibbon/fixedcode",
-      "install": "npm install @fixedcode/bundle-rdan-agent-specialist"
-    },
-    {
-      "name": "@fixedcode/bundle-rdan-infra-dashboard-page",
-      "description": "r.dan infra template — dynamic dashboard page with charts, tables, metrics",
-      "version": "0.1.0",
-      "kind": "bundle",
-      "tags": ["rdan", "infra", "dashboard", "page", "charts", "template"],
-      "author": "fixedcode",
-      "repo": "https://github.com/gibbon/fixedcode",
-      "install": "npm install @fixedcode/bundle-rdan-infra-dashboard-page"
     }
   ]
 }

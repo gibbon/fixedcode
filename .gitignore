@@ -2,7 +2,16 @@ node_modules/
 dist/
 out/
 .next/
+.env
+.env.local
 .env*.local
 *.log
 build/
+*-build/
 .worktrees/
+.DS_Store
+*:Zone.Identifier
+*.tsbuildinfo
+coverage/
+.vitest-cache/
+.eslintcache

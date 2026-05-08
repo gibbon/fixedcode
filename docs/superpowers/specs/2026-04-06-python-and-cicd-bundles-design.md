@@ -26,53 +26,7 @@ Two bundles, same layered pattern as Spring:
 | `ts-service` | Project skeleton (Express, Docker, configs, tests) | `spring-library` |
 | `ts-agent` | Agent code (tools, LLM loop, HTTP server) | `spring-domain` |
 
-`ts-service` is usable standalone for plain TypeScript microservices. `ts-agent` layers on top for standalone AI agent services. `rdan-agent` generates agents that plug into the r.dan kernel.
-
-### rdan-agent Bundle
-
-**Separate bundle** — same spec format as `ts-agent` for tools/prompt/model, but generates r.dan-compatible output:
-
-- YAML agent spec (consumed by r.dan kernel)
-- Tool handler files (`export async function handle(input)`)
-- No HTTP server, no state management, no agent loop — kernel provides all of this
-
-**Spec format:**
-```yaml
-apiVersion: "1.0"
-kind: rdan-agent
-metadata:
-  name: coder-agent
-
-spec:
-  model:
-    tier: balanced
-
-  prompt: "You are a coding agent..."
-
-  tools:
-    - name: read-file
-      type: cli
-      config: { command: "cat" }
-    - name: write-file
-      type: function
-      config: { handler: "write-file" }
-```
-
-**Generated file structure:**
-```
-coder-agent/
-├── agent.yaml                         # r.dan agent spec
-├── src/
-│   └── tools/
-│       ├── read-file.ts               # CLI tool (if custom config needed)
-│       └── write-file.ts              # Function tool handler
-├── package.json                       # Tool handler dependencies only
-└── .fixedcode-manifest.json
-```
-
-**CFRs:** None — the kernel provides tracing, metrics, health, auth.
-
-**Why separate bundle:** r.dan agents are fundamentally different from standalone agents — no HTTP server, no state, no loop. Sharing a bundle with a `runtime` flag would mean most templates are conditional. Separate bundles with a shared spec format is cleaner.
+`ts-service` is usable standalone for plain TypeScript microservices. `ts-agent` layers on top for standalone AI agent services.
 
 ### ts-service Bundle
 
@@ -1084,13 +1038,12 @@ spec:
 1. **`ts-service`** — TypeScript project skeleton (validates TS bundle pattern)
 2. **`ts-agent` single mode** — standalone agent with tools
 3. **`ts-agent` orchestrator mode** — multi-agent pipeline
-4. **`rdan-agent`** — r.dan-compatible agent (simpler — kernel does the heavy lifting)
-5. **`python-service`** — Python project skeleton (same pattern, FastAPI)
-6. **`python-agent` single mode** — single agent with tools and middleware
-7. **`python-agent` orchestrator mode** — multi-agent pipeline
-8. **`github-actions-fixedcode`** — FixedCode generation pipeline
-9. **`github-actions-service`** — service CI/CD pipeline
-10. **Additional CI/CD platforms** — GitLab, Bitbucket as needed
+4. **`python-service`** — Python project skeleton (same pattern, FastAPI)
+5. **`python-agent` single mode** — single agent with tools and middleware
+6. **`python-agent` orchestrator mode** — multi-agent pipeline
+7. **`github-actions-fixedcode`** — FixedCode generation pipeline
+8. **`github-actions-service`** — service CI/CD pipeline
+9. **Additional CI/CD platforms** — GitLab, Bitbucket as needed
 
 ---
 
