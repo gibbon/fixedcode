@@ -8,6 +8,8 @@ The FixedCode CLI and programmatic API.
 
 > Spec-driven, deterministic code generation for the AI era. YAML in, production code out, same spec → same code every time.
 
+> **No LLM required.** The core engine works fully offline. Only the optional `draft` and `enrich` commands use an LLM, and only if you configure one.
+
 Full project docs: <https://github.com/gibbon/fixedcode>
 
 ## Install
