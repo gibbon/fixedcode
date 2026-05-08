@@ -6,6 +6,20 @@ import { fileURLToPath } from 'node:url';
 const __dirname = resolve(fileURLToPath(import.meta.url), '..');
 const enginePkg = JSON.parse(readFileSync(resolve(__dirname, '../../package.json'), 'utf-8'));
 
+const BUNDLE_NAME_PATTERN = /^[a-z0-9][a-z0-9_-]*$/i;
+
+export function validateBundleName(name: string): string {
+  if (typeof name !== 'string' || name.length === 0) {
+    throw new Error(`Invalid bundle name: empty`);
+  }
+  if (!BUNDLE_NAME_PATTERN.test(name)) {
+    throw new Error(
+      `Invalid bundle name: ${JSON.stringify(name)} — must match ${BUNDLE_NAME_PATTERN}`,
+    );
+  }
+  return name;
+}
+
 export function createBundleInitCommand() {
   return new Command('bundle')
     .description('Bundle management commands')
@@ -15,6 +29,7 @@ export function createBundleInitCommand() {
       .option('-k, --kind <kind>', 'Bundle kind (e.g., my-domain)', 'my-domain')
       .option('-o, --output <dir>', 'Output directory', './bundles')
       .action(async (name: string, opts) => {
+        validateBundleName(name);
         const outputDir = join(opts.output, name);
         
         if (existsSync(outputDir)) {

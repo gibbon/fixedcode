@@ -3,6 +3,7 @@ import {
   searchRegistry,
   listRegistry,
   installPackage,
+  validateRegistryRepo,
   type Registry,
   type RegistryPackage,
 } from '../src/engine/registry.js';
@@ -168,5 +169,70 @@ describe('installPackage — input validation', () => {
     const cmd = 'npm install $(evil)';
     const malicious: RegistryPackage = { ...bundleSpring, install: cmd };
     expect(() => installPackage(malicious, projectDir)).toThrow(`Unsafe install command: ${cmd}`);
+  });
+
+  it('throws for an install path that escapes via ..', () => {
+    const malicious: RegistryPackage = {
+      ...bundleSpring,
+      install: 'npm install ../../backdoor',
+    };
+    expect(() => installPackage(malicious, projectDir)).toThrow('Unsafe install command');
+  });
+
+  it('throws for an install path that escapes via @scope/../foo', () => {
+    const malicious: RegistryPackage = {
+      ...bundleSpring,
+      install: 'npm install @scope/../etc/evil',
+    };
+    expect(() => installPackage(malicious, projectDir)).toThrow('Unsafe install command');
+  });
+
+  it('throws for an install path that is absolute', () => {
+    const malicious: RegistryPackage = {
+      ...bundleSpring,
+      install: 'npm install /etc/evil',
+    };
+    expect(() => installPackage(malicious, projectDir)).toThrow('Unsafe install command');
+  });
+
+  it('throws for an install path starting with .', () => {
+    const malicious: RegistryPackage = {
+      ...bundleSpring,
+      install: 'npm install ./local-pkg',
+    };
+    expect(() => installPackage(malicious, projectDir)).toThrow('Unsafe install command');
+  });
+});
+
+describe('validateRegistryRepo', () => {
+  it('accepts a normal owner/repo', () => {
+    expect(() => validateRegistryRepo('fixedcode-ai/registry')).not.toThrow();
+  });
+
+  it('accepts repo names with dots and underscores', () => {
+    expect(() => validateRegistryRepo('user_name/repo.name')).not.toThrow();
+  });
+
+  it('rejects flag-style values that gh might interpret as options', () => {
+    expect(() => validateRegistryRepo('--help')).toThrow(/invalid registry repo/i);
+    expect(() => validateRegistryRepo('-R x/y')).toThrow(/invalid registry repo/i);
+  });
+
+  it('rejects values without exactly one slash', () => {
+    expect(() => validateRegistryRepo('justtext')).toThrow(/invalid registry repo/i);
+    expect(() => validateRegistryRepo('a/b/c')).toThrow(/invalid registry repo/i);
+  });
+
+  it('rejects values with spaces', () => {
+    expect(() => validateRegistryRepo('foo bar/baz')).toThrow(/invalid registry repo/i);
+  });
+
+  it('rejects empty string', () => {
+    expect(() => validateRegistryRepo('')).toThrow(/invalid registry repo/i);
+  });
+
+  it('rejects shell metacharacters', () => {
+    expect(() => validateRegistryRepo('foo/bar;rm -rf')).toThrow(/invalid registry repo/i);
+    expect(() => validateRegistryRepo('foo/bar`whoami`')).toThrow(/invalid registry repo/i);
   });
 });

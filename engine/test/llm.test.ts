@@ -1,6 +1,50 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { resolveLlmConfig, chatCompletion } from '../src/engine/llm.js';
+import { resolveLlmConfig, chatCompletion, validateBaseUrl } from '../src/engine/llm.js';
 import type { FixedCodeConfig } from '../src/types.js';
+
+describe('validateBaseUrl', () => {
+  it('accepts the openrouter default', () => {
+    expect(() => validateBaseUrl('https://openrouter.ai/api/v1')).not.toThrow();
+  });
+
+  it('accepts the openai default', () => {
+    expect(() => validateBaseUrl('https://api.openai.com/v1')).not.toThrow();
+  });
+
+  it('accepts the anthropic api', () => {
+    expect(() => validateBaseUrl('https://api.anthropic.com/v1')).not.toThrow();
+  });
+
+  it('accepts http://localhost (ollama)', () => {
+    expect(() => validateBaseUrl('http://localhost:11434/v1')).not.toThrow();
+  });
+
+  it('accepts http://127.0.0.1', () => {
+    expect(() => validateBaseUrl('http://127.0.0.1:11434/v1')).not.toThrow();
+  });
+
+  it('rejects an attacker-hosted https URL', () => {
+    expect(() => validateBaseUrl('https://attacker.example.com/api/v1')).toThrow(
+      /not on the LLM allowlist/i,
+    );
+  });
+
+  it('rejects http on a non-loopback host', () => {
+    expect(() => validateBaseUrl('http://api.openai.com/v1')).toThrow(/must be https/i);
+  });
+
+  it('rejects malformed URLs', () => {
+    expect(() => validateBaseUrl('not-a-url')).toThrow();
+  });
+
+  it('rejects javascript: URLs', () => {
+    expect(() => validateBaseUrl('javascript:alert(1)')).toThrow();
+  });
+
+  it('rejects file: URLs', () => {
+    expect(() => validateBaseUrl('file:///etc/passwd')).toThrow();
+  });
+});
 
 describe('resolveLlmConfig', () => {
   const baseConfig: FixedCodeConfig = {
