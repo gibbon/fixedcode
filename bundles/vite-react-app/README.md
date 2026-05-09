@@ -138,6 +138,35 @@ The Create/Edit pages navigate via `window.location.assign(...)` so they work wi
 
 If you bundle your project with `fixedcode build <dir>`, both specs already live under `<dir>` — set `domainSpec: ./your-domain.yaml` and run `fixedcode build` from the project root.
 
+#### `users-management`
+
+The frontend half of the `users-management` capability — pairs with the `kotlin-spring-bff` recipe of the same name. Provides `AuthProvider` + `useAuth` hook + route guards + sign-in/sign-up pages. Native `fetch` + React `Context` only — **no extra npm deps**.
+
+Generates:
+
+- `src/lib/auth.ts` — typed API client (`signIn`, `signUp`, `me`)
+- `src/lib/auth-storage.ts` — token persistence in `localStorage`
+- `src/auth/AuthProvider.tsx` — **extension point** — context provider with current user + token; rehydrates from storage on mount
+- `src/auth/useAuth.ts` — `useAuth()` hook returning `{user, token, signIn, signUp, signOut, isAuthenticated, isLoading}`
+- `src/auth/RequireAuth.tsx` — guard component (redirects unauthenticated users to `signInPath`)
+- `src/auth/RequireRole.tsx` — guard component for role-gated routes
+- `src/routes/sign-in.tsx` — **extension point** — sign-in page (style/branding owned by the user)
+- `src/routes/sign-up.tsx` — **extension point** — sign-up page
+
+Spec config (under `spec.usersManagement`):
+
+| Field             | Default     | Description                                          |
+| ----------------- | ----------- | ---------------------------------------------------- |
+| `signInPath`      | `/sign-in`  | URL path the guards redirect unauthenticated users to |
+| `signUpPath`      | `/sign-up`  | URL path of the sign-up page                          |
+| `afterSignInPath` | `/`         | Default landing path after a successful sign-in       |
+
+##### Composes with `admin-screen`
+
+When the spec enables both `users-management` and `admin-screen`, the generated `src/admin/index.ts` route table automatically wraps every admin component in `<RequireRole role="ADMIN">` — admin pages are only reachable to signed-in users with the `ADMIN` role. With only `admin-screen` enabled, the route table emits unwrapped components (the bundle has no auth context to gate against).
+
+To swap the default JWT auth for Clerk / Auth0 / Supabase: re-implement `AuthProvider.tsx` against the same `AuthContextValue` shape (it's an extension point, so the recipe will not overwrite your version on regenerate). The rest of the recipe (`useAuth`, the guards, sign-in/up pages) only depends on that shape.
+
 ### Adding a new recipe
 
 1. Add the recipe name to `schema.json` under `properties.recipes.items.enum` and `KNOWN_RECIPES` in `src/enrich/spec.ts`.

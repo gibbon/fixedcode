@@ -8,6 +8,15 @@ spring:
   profiles:
     include:
       - image-upload
+{{#if recipeUsersManagement}}
+      - users-management
+{{/if}}
+{{else}}
+{{#if recipeUsersManagement}}
+  profiles:
+    include:
+      - users-management
+{{/if}}
 {{/if}}
 {{#if features.database}}
 

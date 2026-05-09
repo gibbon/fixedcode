@@ -90,6 +90,37 @@ Generates:
 - `dto/ImageDto.kt`, `exception/ImageNotFoundException.kt`, `exception/ImageProcessingException.kt`
 - `src/main/resources/application-image-upload.yml` — `app.images.dir`, `app.images.maxSizeBytes`, `app.images.allowedMimeTypes` (the main `application.yml` includes this profile automatically)
 
+#### `users-management`
+
+A complete users + auth capability — JWT issuance from email + password, BCrypt hashing, sign-in/up/me endpoints, plus admin-only CRUD over the users table. **Requires `features.database: true`** (it persists users via JPA + Flyway). Generation throws a clear error if the database flag is off.
+
+`JwtService` and `PasswordHasher` are extension points (`overwrite: false`) — swap to Clerk / Auth0 / Supabase / Argon2 by re-implementing the two beans without touching the controllers.
+
+When the recipe is enabled the bundle automatically:
+
+- pulls in `spring-boot-starter-security` and `jjwt` regardless of `features.auth`
+- emits `SecurityConfig` with the rules: `/api/auth/sign-up` and `/api/auth/sign-in` are public; `/api/auth/me` and `/api/**` require auth; `/api/users/**` requires `ROLE_ADMIN`
+- includes the `users-management` Spring profile in `application.yml`
+
+Generates:
+
+- `api/AuthController.kt` — `POST /api/auth/sign-up`, `POST /api/auth/sign-in`, `GET /api/auth/me` (returns `{token, user}` for sign-up/sign-in)
+- `api/UsersController.kt` — `GET /api/users` (paged, admin), `GET /api/users/{id}` (admin), `PUT /api/users/{id}/role` (admin), `DELETE /api/users/{id}` (admin)
+- `auth/JwtService.kt` — **extension point** (`overwrite: false`) — HS256 issuer + verifier
+- `auth/PasswordHasher.kt` — **extension point** (`overwrite: false`) — BCrypt strength 12
+- `auth/JwtAuthenticationFilter.kt` — pulls Bearer token, populates SecurityContext
+- `domain/User.kt`, `domain/UserRepository.kt` — JPA entity + repo (table: `users`)
+- `dto/UserDto.kt`, `dto/SignUpRequest.kt`, `dto/SignInRequest.kt`, `dto/AuthResponse.kt`, `dto/UpdateRoleRequest.kt`
+- `src/main/resources/application-users-management.yml` — `app.auth.jwtSecret` (env: `JWT_SECRET`), `app.auth.tokenTtlMinutes`, dev-profile admin seed flag
+- `src/main/resources/db/migration/V001__users.sql` — initial users table + email index
+
+Spec config (under `spec.usersManagement`):
+
+| Field               | Default               | Description                                                  |
+| ------------------- | --------------------- | ------------------------------------------------------------ |
+| `tokenTtlMinutes`   | `1440` (24h)          | Lifetime of issued JWTs in minutes                           |
+| `defaultAdminEmail` | `admin@example.com`   | Email seeded as the initial ADMIN (dev profile only)         |
+
 ### Adding a new recipe
 
 1. Add the recipe name to `schema.json` under `properties.recipes.items.enum` and `KNOWN_RECIPES` in `src/enrich/spec.ts`.

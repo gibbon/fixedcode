@@ -5,6 +5,7 @@ import {
   type AuthKind,
   type RecipeName,
   type NormalizedImageUploadConfig,
+  type NormalizedUsersManagementConfig,
 } from './spec.js';
 import {
   generateVariants,
@@ -56,6 +57,8 @@ export interface ViteReactAppContext {
   imageUpload: NormalizedImageUploadConfig;
   recipeAdminScreen: boolean;
   adminScreen: AdminScreenContext | AdminScreenDisabledContext;
+  recipeUsersManagement: boolean;
+  usersManagement: NormalizedUsersManagementConfig;
   /** npm dependencies merged into package.json */
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
@@ -152,6 +155,8 @@ export function enrich(
     imageUpload: spec.imageUpload,
     recipeAdminScreen,
     adminScreen,
+    recipeUsersManagement: spec.recipes.includes('users-management'),
+    usersManagement: spec.usersManagement,
     dependencies,
     devDependencies,
   };

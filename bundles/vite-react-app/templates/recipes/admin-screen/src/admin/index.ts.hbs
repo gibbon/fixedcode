@@ -14,8 +14,17 @@
 //     </Routes>
 //
 // See README.md (recipe: admin-screen) for the full snippet.
+{{#if recipeUsersManagement}}
+//
+// users-management recipe is also enabled in this project — every admin
+// component below is automatically wrapped in <RequireRole role="ADMIN">.
+{{/if}}
 
 import AdminLayout from './AdminLayout';
+{{#if recipeUsersManagement}}
+import { createElement } from 'react';
+import { RequireRole } from '../auth/RequireRole';
+{{/if}}
 {{#each adminScreen.aggregates}}
 import {{namePluralPascal}}ListPage from './{{namePluralPascal}}/{{namePluralPascal}}ListPage';
 import {{namePascal}}CreatePage from './{{namePluralPascal}}/{{namePascal}}CreatePage';
@@ -31,10 +40,28 @@ export interface AdminRoute {
 
 export const adminBasePath = '{{adminScreen.basePath}}';
 
+{{#if recipeUsersManagement}}
+function guarded<P extends { id?: string }>(Inner: ComponentType<P>): ComponentType<P> {
+  const Guarded = (props: P) =>
+    createElement(RequireRole, {
+      role: 'ADMIN',
+      children: createElement(Inner, props),
+    });
+  Guarded.displayName = `AdminGuarded(${Inner.displayName ?? Inner.name ?? 'Component'})`;
+  return Guarded;
+}
+
+export const adminRoutes: AdminRoute[] = [
+{{#each adminScreen.aggregates}}  { path: '{{../adminScreen.basePath}}/{{namePluralKebab}}', Component: guarded({{namePluralPascal}}ListPage) as ComponentType<{ id?: string }> },
+  { path: '{{../adminScreen.basePath}}/{{namePluralKebab}}/new', Component: guarded({{namePascal}}CreatePage) as ComponentType<{ id?: string }> },
+  { path: '{{../adminScreen.basePath}}/{{namePluralKebab}}/:id/edit', Component: guarded({{namePascal}}EditPage) as ComponentType<{ id?: string }> },
+{{/each}}];
+{{else}}
 export const adminRoutes: AdminRoute[] = [
 {{#each adminScreen.aggregates}}  { path: '{{../adminScreen.basePath}}/{{namePluralKebab}}', Component: {{namePluralPascal}}ListPage as ComponentType<{ id?: string }> },
   { path: '{{../adminScreen.basePath}}/{{namePluralKebab}}/new', Component: {{namePascal}}CreatePage as ComponentType<{ id?: string }> },
   { path: '{{../adminScreen.basePath}}/{{namePluralKebab}}/:id/edit', Component: {{namePascal}}EditPage as ComponentType<{ id?: string }> },
 {{/each}}];
+{{/if}}
 
 export { AdminLayout };

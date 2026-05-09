@@ -1,11 +1,21 @@
 export type AuthMode = 'jwt' | 'oauth2' | 'none';
 
-export type RecipeName = 'image-upload';
-export const KNOWN_RECIPES: readonly RecipeName[] = ['image-upload'] as const;
+export type RecipeName = 'image-upload' | 'users-management';
+export const KNOWN_RECIPES: readonly RecipeName[] = ['image-upload', 'users-management'] as const;
 
 export interface RawServiceEntry {
   name: string;
   baseUrl: string;
+}
+
+export interface RawUsersManagementConfig {
+  tokenTtlMinutes?: number;
+  defaultAdminEmail?: string;
+}
+
+export interface NormalizedUsersManagementConfig {
+  tokenTtlMinutes: number;
+  defaultAdminEmail: string;
 }
 
 export interface RawBffSpec {
@@ -21,6 +31,7 @@ export interface RawBffSpec {
     docker?: boolean;
   };
   recipes?: string[];
+  usersManagement?: RawUsersManagementConfig;
 }
 
 export interface ParsedBffSpec {
@@ -36,6 +47,7 @@ export interface ParsedBffSpec {
     docker: boolean;
   };
   recipes: RecipeName[];
+  usersManagement: NormalizedUsersManagementConfig;
 }
 
 export function parseSpec(raw: Record<string, unknown>): ParsedBffSpec {
@@ -58,5 +70,9 @@ export function parseSpec(raw: Record<string, unknown>): ParsedBffSpec {
       docker: r.features?.docker ?? true,
     },
     recipes,
+    usersManagement: {
+      tokenTtlMinutes: r.usersManagement?.tokenTtlMinutes ?? 1440,
+      defaultAdminEmail: r.usersManagement?.defaultAdminEmail ?? 'admin@example.com',
+    },
   };
 }

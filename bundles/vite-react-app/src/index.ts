@@ -114,6 +114,55 @@ export function generateFiles(ctx: ViteReactAppContext): FileEntry[] {
     }
   }
 
+  // Recipe: users-management
+  if (ctx.recipeUsersManagement) {
+    files.push(
+      {
+        template: 'recipes/users-management/src/lib/auth.ts.hbs',
+        output: 'src/lib/auth.ts',
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/src/lib/auth-storage.ts.hbs',
+        output: 'src/lib/auth-storage.ts',
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/src/auth/AuthProvider.tsx.hbs',
+        output: 'src/auth/AuthProvider.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/users-management/src/auth/useAuth.ts.hbs',
+        output: 'src/auth/useAuth.ts',
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/src/auth/RequireAuth.tsx.hbs',
+        output: 'src/auth/RequireAuth.tsx',
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/src/auth/RequireRole.tsx.hbs',
+        output: 'src/auth/RequireRole.tsx',
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/src/routes/sign-in.tsx.hbs',
+        output: 'src/routes/sign-in.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/users-management/src/routes/sign-up.tsx.hbs',
+        output: 'src/routes/sign-up.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+    );
+  }
+
   // Recipe: image-upload
   if (ctx.recipeImageUpload) {
     files.push(

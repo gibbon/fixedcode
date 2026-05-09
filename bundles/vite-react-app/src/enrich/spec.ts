@@ -1,8 +1,12 @@
 export type RouterKind = 'tanstack' | 'reactrouter' | 'none';
 export type AuthKind = 'supabase' | 'clerk' | 'none';
 
-export type RecipeName = 'image-upload' | 'admin-screen';
-export const KNOWN_RECIPES: readonly RecipeName[] = ['image-upload', 'admin-screen'] as const;
+export type RecipeName = 'image-upload' | 'admin-screen' | 'users-management';
+export const KNOWN_RECIPES: readonly RecipeName[] = [
+  'image-upload',
+  'admin-screen',
+  'users-management',
+] as const;
 
 export interface RawRoute {
   path: string;
@@ -15,6 +19,18 @@ export interface RawImageUploadConfig {
 
 export interface NormalizedImageUploadConfig {
   apiPath: string;
+}
+
+export interface RawUsersManagementConfig {
+  signInPath?: string;
+  signUpPath?: string;
+  afterSignInPath?: string;
+}
+
+export interface NormalizedUsersManagementConfig {
+  signInPath: string;
+  signUpPath: string;
+  afterSignInPath: string;
 }
 
 export interface RawAdminScreenConfig {
@@ -44,6 +60,7 @@ export interface RawViteReactAppSpec {
   recipes?: string[];
   imageUpload?: RawImageUploadConfig;
   adminScreen?: RawAdminScreenConfig;
+  usersManagement?: RawUsersManagementConfig;
 }
 
 export interface NormalizedSpec {
@@ -61,6 +78,7 @@ export interface NormalizedSpec {
   recipes: RecipeName[];
   imageUpload: NormalizedImageUploadConfig;
   adminScreen: NormalizedAdminScreenConfig;
+  usersManagement: NormalizedUsersManagementConfig;
 }
 
 const DEFAULT_ROUTES: RawRoute[] = [{ path: '/', name: 'Home' }];
@@ -92,6 +110,11 @@ export function parseSpec(raw: Record<string, unknown>): NormalizedSpec {
       domainSpec: spec.adminScreen?.domainSpec ?? null,
       basePath: spec.adminScreen?.basePath ?? '/admin',
       apiBaseUrl: spec.adminScreen?.apiBaseUrl ?? '',
+    },
+    usersManagement: {
+      signInPath: spec.usersManagement?.signInPath ?? '/sign-in',
+      signUpPath: spec.usersManagement?.signUpPath ?? '/sign-up',
+      afterSignInPath: spec.usersManagement?.afterSignInPath ?? '/',
     },
   };
 }

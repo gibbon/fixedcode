@@ -1,15 +1,29 @@
 package {{packageName}}.config
 
+{{#if recipeUsersManagement}}
+import {{packageName}}.auth.JwtAuthenticationFilter
+{{/if}}
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+{{#if recipeUsersManagement}}
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+{{/if}}
 
 /**
  * Generic stateless security baseline.
  * Public: /actuator/health, /api/health, /v3/api-docs/**, /swagger-ui/**.
+{{#if recipeUsersManagement}}
+ * users-management recipe wires:
+ *   /api/auth/sign-up, /api/auth/sign-in           public
+ *   /api/auth/me                                   authenticated
+ *   /api/users/**                                  ROLE_ADMIN
+ *   /api/**                                        authenticated (catch-all)
+ * Tokens are HS256 JWTs issued by AuthController and verified by JwtAuthenticationFilter.
+{{else}}
 {{#if authJwt}}
  * All other endpoints require a valid JWT.
  * TODO: wire your JwtAuthenticationFilter (or oauth2ResourceServer) here.
@@ -18,10 +32,13 @@ import org.springframework.security.web.SecurityFilterChain
  * All other endpoints require an OAuth2 bearer token validated against
  * `spring.security.oauth2.resourceserver.jwt.issuer-uri`.
 {{/if}}
+{{/if}}
  */
 @Configuration
 @EnableWebSecurity
-class SecurityConfig {
+class SecurityConfig{{#if recipeUsersManagement}}(
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+){{/if}} {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -36,11 +53,23 @@ class SecurityConfig {
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html",
+{{#if recipeUsersManagement}}
+                        "/api/auth/sign-up",
+                        "/api/auth/sign-in",
+{{/if}}
                     ).permitAll()
+{{#if recipeUsersManagement}}
+                    .requestMatchers("/api/users/**").hasRole("ADMIN")
+                    .requestMatchers("/api/auth/me").authenticated()
+                    .requestMatchers("/api/**").authenticated()
+{{/if}}
                     .anyRequest().authenticated()
             }
 {{#if authOauth2}}
             .oauth2ResourceServer { rs -> rs.jwt { } }
+{{/if}}
+{{#if recipeUsersManagement}}
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 {{/if}}
 
         return http.build()

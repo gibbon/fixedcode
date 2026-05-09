@@ -1,0 +1,21 @@
+package {{packageName}}.dto
+
+import {{packageName}}.domain.User
+import java.time.Instant
+import java.util.UUID
+
+data class UserDto(
+    val id: UUID,
+    val email: String,
+    val role: String,
+    val createdAt: Instant,
+) {
+    companion object {
+        fun from(user: User): UserDto = UserDto(
+            id = user.id,
+            email = user.email,
+            role = user.role.name,
+            createdAt = user.createdAt,
+        )
+    }
+}
