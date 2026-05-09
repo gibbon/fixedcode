@@ -1,12 +1,18 @@
 export type RouterKind = 'tanstack' | 'reactrouter' | 'none';
 export type AuthKind = 'supabase' | 'clerk' | 'none';
 
-export type RecipeName = 'image-upload' | 'admin-screen' | 'users-management' | 'pricing-page';
+export type RecipeName =
+  | 'image-upload'
+  | 'admin-screen'
+  | 'users-management'
+  | 'pricing-page'
+  | 'dashboard';
 export const KNOWN_RECIPES: readonly RecipeName[] = [
   'image-upload',
   'admin-screen',
   'users-management',
   'pricing-page',
+  'dashboard',
 ] as const;
 
 export interface RawRoute {
@@ -44,6 +50,34 @@ export interface NormalizedAdminScreenConfig {
   domainSpec: string | null;
   basePath: string;
   apiBaseUrl: string;
+}
+
+export type DashboardStatFormat = 'number' | 'currency' | 'percent';
+
+export interface RawDashboardStat {
+  name: string;
+  endpoint: string;
+  units?: string;
+  format?: DashboardStatFormat;
+}
+
+export interface RawDashboardConfig {
+  title?: string;
+  stats?: RawDashboardStat[];
+  timeRanges?: string[];
+}
+
+export interface NormalizedDashboardStat {
+  name: string;
+  endpoint: string;
+  units: string;
+  format: DashboardStatFormat;
+}
+
+export interface NormalizedDashboardConfig {
+  title: string;
+  stats: NormalizedDashboardStat[];
+  timeRanges: string[];
 }
 
 export interface RawPricingFeature {
@@ -109,6 +143,7 @@ export interface RawViteReactAppSpec {
   adminScreen?: RawAdminScreenConfig;
   usersManagement?: RawUsersManagementConfig;
   pricing?: RawPricingConfig;
+  dashboard?: RawDashboardConfig;
 }
 
 export interface NormalizedSpec {
@@ -128,6 +163,7 @@ export interface NormalizedSpec {
   adminScreen: NormalizedAdminScreenConfig;
   usersManagement: NormalizedUsersManagementConfig;
   pricing: NormalizedPricingConfig;
+  dashboard: NormalizedDashboardConfig;
 }
 
 const DEFAULT_ROUTES: RawRoute[] = [{ path: '/', name: 'Home' }];
@@ -166,6 +202,41 @@ export function parseSpec(raw: Record<string, unknown>): NormalizedSpec {
       afterSignInPath: spec.usersManagement?.afterSignInPath ?? '/',
     },
     pricing: normalizePricing(spec.pricing),
+    dashboard: normalizeDashboard(spec.dashboard),
+  };
+}
+
+const VALID_FORMATS: readonly DashboardStatFormat[] = ['number', 'currency', 'percent'];
+
+function normalizeDashboard(raw: RawDashboardConfig | undefined): NormalizedDashboardConfig {
+  const stats: NormalizedDashboardStat[] = Array.isArray(raw?.stats)
+    ? raw!
+        .stats!.filter(
+          (s) =>
+            s &&
+            typeof s.name === 'string' &&
+            s.name.length > 0 &&
+            typeof s.endpoint === 'string' &&
+            s.endpoint.length > 0,
+        )
+        .map((s) => ({
+          name: s.name,
+          endpoint: s.endpoint,
+          units: typeof s.units === 'string' ? s.units : '',
+          format:
+            s.format && (VALID_FORMATS as readonly string[]).includes(s.format)
+              ? s.format
+              : 'number',
+        }))
+    : [];
+  const rawRanges = Array.isArray(raw?.timeRanges)
+    ? raw!.timeRanges!.filter((r): r is string => typeof r === 'string' && r.length > 0)
+    : [];
+  const timeRanges = rawRanges.length > 0 ? rawRanges : ['7d', '30d', '90d'];
+  return {
+    title: typeof raw?.title === 'string' && raw!.title!.length > 0 ? raw!.title! : 'Dashboard',
+    stats,
+    timeRanges,
   };
 }
 

@@ -21,6 +21,7 @@ import {
   type BuildAdminContextOptions,
 } from './recipes/admin-screen.js';
 import { buildPricingPageContext, type PricingPageContext } from './recipes/pricing-page.js';
+import { buildDashboardContext, type DashboardContext } from './recipes/dashboard.js';
 
 export type { AdminAggregate, AdminField, AdminScreenContext } from './recipes/admin-screen.js';
 export type {
@@ -28,6 +29,7 @@ export type {
   PricingTierContext,
   PricingPageContext,
 } from './recipes/pricing-page.js';
+export type { DashboardStatContext, DashboardContext } from './recipes/dashboard.js';
 
 export interface EnrichOptions {
   adminScreen?: BuildAdminContextOptions;
@@ -67,6 +69,13 @@ export interface ViteReactAppContext {
   usersManagement: NormalizedUsersManagementConfig;
   recipePricingPage: boolean;
   pricing: PricingPageContext;
+  recipeDashboard: boolean;
+  dashboard: DashboardContext;
+  /**
+   * True when the dashboard recipe is enabled alongside admin-screen.
+   * Lets the admin-screen sidebar render a Dashboard link as the first item.
+   */
+  hasDashboardRecipe: boolean;
   /** npm dependencies merged into package.json */
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
@@ -144,6 +153,9 @@ export function enrich(
   const recipePricingPage = spec.recipes.includes('pricing-page');
   const pricing = buildPricingPageContext(recipePricingPage, spec.pricing);
 
+  const recipeDashboard = spec.recipes.includes('dashboard');
+  const dashboard = buildDashboardContext(recipeDashboard, spec.dashboard);
+
   return {
     appName,
     port: spec.port,
@@ -170,6 +182,9 @@ export function enrich(
     usersManagement: spec.usersManagement,
     recipePricingPage,
     pricing,
+    recipeDashboard,
+    dashboard,
+    hasDashboardRecipe: recipeDashboard,
     dependencies,
     devDependencies,
   };
