@@ -1,0 +1,48 @@
+package {{packageName}}.config
+
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.web.SecurityFilterChain
+
+/**
+ * Generic stateless security baseline.
+ * Public: /actuator/health, /api/health, /v3/api-docs/**, /swagger-ui/**.
+{{#if authJwt}}
+ * All other endpoints require a valid JWT.
+ * TODO: wire your JwtAuthenticationFilter (or oauth2ResourceServer) here.
+{{/if}}
+{{#if authOauth2}}
+ * All other endpoints require an OAuth2 bearer token validated against
+ * `spring.security.oauth2.resourceserver.jwt.issuer-uri`.
+{{/if}}
+ */
+@Configuration
+@EnableWebSecurity
+class SecurityConfig {
+
+    @Bean
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http
+            .csrf { it.disable() }
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .authorizeHttpRequests { auth ->
+                auth
+                    .requestMatchers(
+                        "/actuator/health",
+                        "/api/health",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                    ).permitAll()
+                    .anyRequest().authenticated()
+            }
+{{#if authOauth2}}
+            .oauth2ResourceServer { rs -> rs.jwt { } }
+{{/if}}
+
+        return http.build()
+    }
+}

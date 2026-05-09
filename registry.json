@@ -40,6 +40,25 @@
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/bundle-vite-react-app",
       "install": "npm install @fixedcode/bundle-vite-react-app"
+    },
+    {
+      "name": "@fixedcode/bundle-kotlin-spring-bff",
+      "description": "Kotlin/Spring Boot 3.3 Backend-For-Frontend scaffold — Resilience4j circuit breakers, typed WebClient per downstream service, optional Caffeine cache, JWT/OAuth2 security, JPA, Docker",
+      "version": "0.1.0",
+      "kind": "bundle",
+      "tags": [
+        "kotlin",
+        "spring",
+        "spring-boot",
+        "bff",
+        "backend-for-frontend",
+        "resilience4j",
+        "circuit-breaker",
+        "webclient"
+      ],
+      "author": "fixedcode",
+      "repo": "https://github.com/fixedcode-io/bundle-kotlin-spring-bff",
+      "install": "npm install @fixedcode/bundle-kotlin-spring-bff"
     }
   ]
 }

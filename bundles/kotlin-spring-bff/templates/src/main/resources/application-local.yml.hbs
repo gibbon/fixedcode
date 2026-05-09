@@ -1,0 +1,21 @@
+# Local development overrides — never use these values in production.
+spring:
+  config:
+    activate:
+      on-profile: local
+{{#if features.database}}
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/{{appName.snake}}
+    username: postgres
+    password: postgres
+{{/if}}
+{{#if authJwt}}
+
+jwt:
+  secret: local-dev-jwt-secret-minimum-32-characters-long
+{{/if}}
+
+logging:
+  level:
+    {{packageName}}: DEBUG

@@ -1,0 +1,21 @@
+package {{packageName}}.api
+
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+
+/**
+ * Lightweight health endpoint.
+ * Spring Boot Actuator already exposes /actuator/health — this is the BFF-side
+ * sibling that downstream UIs hit without needing actuator credentials.
+ */
+@RestController
+@RequestMapping("/api")
+class HealthController {
+
+    @GetMapping("/health")
+    fun health(): Map<String, String> = mapOf(
+        "status" to "UP",
+        "service" to "{{appName.kebab}}",
+    )
+}
