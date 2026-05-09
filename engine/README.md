@@ -36,6 +36,8 @@ npm install --save-dev fixedcode
 | `fixedcode registry list \| search \| install \| publish` | Discover, install, publish bundles. |
 | `fixedcode cfr catalog \| suggest \| check \| report` | Cross-Functional Requirements tooling. |
 | `fixedcode bundle init <name>` | Scaffold a new bundle. |
+| `fixedcode init spec` | Scaffold a single spec file. |
+| `fixedcode init saas-vertical <name>` | Scaffold a multi-spec SaaS starter (domain + BFF + app + marketing). |
 
 Run `fixedcode <command> --help` for full options.
 

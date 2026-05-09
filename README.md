@@ -45,6 +45,19 @@ fixedcode verify   my-domain.yaml build
 fixedcode deploy   build /path/to/your/project
 ```
 
+### Spin up a new SaaS vertical
+
+If you'd rather start from a full multi-spec project (domain + BFF + product app + marketing site, with the image-upload, admin-screen, users-management, pricing-page, and dashboard recipes pre-wired), run:
+
+```bash
+fixedcode init saas-vertical jobs
+cd jobs
+# edit .fixedcode.yaml so each bundle points at a local path or installed package
+fixedcode build specs/ -o build
+```
+
+The generated `jobs/` directory ships with four ready-to-edit YAML specs and a README that walks through the next steps.
+
 ### Optional: LLM-assisted commands
 
 If you'd rather not write specs and extension-point logic by hand, FixedCode can use an LLM. **This is opt-in** — you only need it for the two AI-flavoured commands:
