@@ -1,6 +1,15 @@
 # Feature Bundle Roadmap
 
-**Status:** parked / not yet implemented. Captured 2026-05-09 from an audit of a sibling production codebase that uses fixedcode-style scaffolding.
+**Status:** in progress. First recipe shipped — see "Shipped" below. Captured 2026-05-09 from an audit of a sibling production codebase that uses fixedcode-style scaffolding.
+
+## Shipped
+
+| Capability | Released | Where it lives |
+|---|---|---|
+| `image-upload` (BE) | 0.2.x | `kotlin-spring-bff` recipe — [`bundles/kotlin-spring-bff/templates/recipes/image-upload/`](../bundles/kotlin-spring-bff/templates/recipes/image-upload), wiring in [`src/index.ts`](../bundles/kotlin-spring-bff/src/index.ts), tests in [`test/recipes/image-upload.test.ts`](../bundles/kotlin-spring-bff/test/recipes/image-upload.test.ts). Default storage: local filesystem; `LocalImageService` is an extension point. |
+| `image-gallery-upload` (FE) | 0.2.x | `vite-react-app` recipe — [`bundles/vite-react-app/templates/recipes/image-upload/`](../bundles/vite-react-app/templates/recipes/image-upload), wiring in [`src/index.ts`](../bundles/vite-react-app/src/index.ts), tests in [`test/recipes/image-upload.test.ts`](../bundles/vite-react-app/test/recipes/image-upload.test.ts). Drag-and-drop dropzone (extension point) + gallery + typed client; no extra npm deps. |
+
+These were shipped via Composition Approach **C** (recipes inside the skeleton) — no engine changes; `recipes: [...]` is just a new field on each bundle's spec.
 
 The current bundles (`kotlin-spring-bff`, `vite-react-app`, etc.) get you a *skeleton* — an empty Spring service or React SPA. Real applications need *capabilities* on top: image upload, auth flows, search-with-facets, geo-data serving, etc. This doc lists the capabilities surfaced by the audit, ranked by reusability, and proposes how they should compose with the existing skeleton bundles.
 

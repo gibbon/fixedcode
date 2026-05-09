@@ -61,3 +61,38 @@ fixedcode generate catalog-bff.yaml -o build
 - `SecurityConfig.kt` (when `auth: jwt`) is intentionally generic — it permits health, OpenAPI, and Swagger UI; everything else is `authenticated()`. You wire your own `JwtAuthenticationFilter`.
 - The generated client (`<Name>Client.kt`) ships with a generic `get(path, type)` helper. Add typed methods for each downstream endpoint you call.
 - Database migrations live in `src/main/resources/db/migration/`. The bundle does not generate Flyway scripts — pair this bundle with `spring-domain` (or write them by hand).
+
+## Recipes
+
+A **recipe** is a named feature that the spec opts into. Each recipe expands to a fixed set of additional files inside the generated tree (no engine changes needed — recipes are entirely a bundle concern).
+
+```yaml
+spec:
+  appName: media-bff
+  groupId: com.example
+  recipes:
+    - image-upload
+```
+
+Recipe templates live under `templates/recipes/<recipe-name>/` and are wired into `generateFiles()` behind `ctx.recipe<Name>` flags.
+
+### Available recipes
+
+#### `image-upload`
+
+A complete image upload + serve capability. Defaults to **local filesystem storage** (under `app.images.dir`). The storage layer is a clean extension point — swap to S3 / GCS / Azure Blob / etc. by re-implementing `ImageService` without touching the controller.
+
+Generates:
+
+- `api/ImagesController.kt` — `POST /images` (multipart), `GET /images/{id}` (metadata), `GET /images/{id}/binary` (streams bytes; `?variant=thumbnail` supported), `DELETE /images/{id}`
+- `service/ImageService.kt` — storage-agnostic interface
+- `service/LocalImageService.kt` — **extension point** (`overwrite: false`) — default impl writing to local disk and producing a 256-px-wide thumbnail via `java.awt`
+- `dto/ImageDto.kt`, `exception/ImageNotFoundException.kt`, `exception/ImageProcessingException.kt`
+- `src/main/resources/application-image-upload.yml` — `app.images.dir`, `app.images.maxSizeBytes`, `app.images.allowedMimeTypes` (the main `application.yml` includes this profile automatically)
+
+### Adding a new recipe
+
+1. Add the recipe name to `schema.json` under `properties.recipes.items.enum` and `KNOWN_RECIPES` in `src/enrich/spec.ts`.
+2. Add a `recipe<Name>: boolean` flag to the enriched context.
+3. Drop templates under `templates/recipes/<recipe-name>/` and append them to `generateFiles()` behind the new flag.
+4. Add a `test/recipes/<recipe-name>.test.ts` with on/off cases.

@@ -1,4 +1,11 @@
-import { parseSpec, type NormalizedSpec, type RouterKind, type AuthKind } from './spec.js';
+import {
+  parseSpec,
+  type NormalizedSpec,
+  type RouterKind,
+  type AuthKind,
+  type RecipeName,
+  type NormalizedImageUploadConfig,
+} from './spec.js';
 import {
   generateVariants,
   routePathToFile,
@@ -32,6 +39,9 @@ export interface ViteReactAppContext {
   hasClerk: boolean;
   hasDocker: boolean;
   hasTailwind: boolean;
+  recipes: RecipeName[];
+  recipeImageUpload: boolean;
+  imageUpload: NormalizedImageUploadConfig;
   /** npm dependencies merged into package.json */
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
@@ -111,6 +121,9 @@ export function enrich(
     hasClerk: spec.features.auth === 'clerk',
     hasDocker: spec.features.docker,
     hasTailwind: spec.features.tailwind,
+    recipes: spec.recipes,
+    recipeImageUpload: spec.recipes.includes('image-upload'),
+    imageUpload: spec.imageUpload,
     dependencies,
     devDependencies,
   };

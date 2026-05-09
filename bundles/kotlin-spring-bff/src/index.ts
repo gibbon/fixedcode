@@ -76,6 +76,48 @@ export function generateFiles(ctx: KotlinSpringBffContext): FileEntry[] {
     });
   }
 
+  // Recipe: image-upload
+  if (ctx.recipeImageUpload) {
+    files.push(
+      {
+        template: 'recipes/image-upload/api/ImagesController.kt.hbs',
+        output: `src/main/kotlin/${pkg}/api/ImagesController.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/image-upload/service/ImageService.kt.hbs',
+        output: `src/main/kotlin/${pkg}/service/ImageService.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/image-upload/service/LocalImageService.kt.hbs',
+        output: `src/main/kotlin/${pkg}/service/LocalImageService.kt`,
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/image-upload/dto/ImageDto.kt.hbs',
+        output: `src/main/kotlin/${pkg}/dto/ImageDto.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/image-upload/exception/ImageNotFoundException.kt.hbs',
+        output: `src/main/kotlin/${pkg}/exception/ImageNotFoundException.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/image-upload/exception/ImageProcessingException.kt.hbs',
+        output: `src/main/kotlin/${pkg}/exception/ImageProcessingException.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/image-upload/resources/application-image-upload.yml.hbs',
+        output: 'src/main/resources/application-image-upload.yml',
+        ctx: c,
+      },
+    );
+  }
+
   return files;
 }
 

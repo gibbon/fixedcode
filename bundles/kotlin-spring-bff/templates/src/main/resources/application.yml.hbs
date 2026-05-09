@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: {{appName.kebab}}
+{{#if recipeImageUpload}}
+  profiles:
+    include:
+      - image-upload
+{{/if}}
 {{#if features.database}}
 
   datasource:
