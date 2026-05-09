@@ -1,7 +1,11 @@
 export type AuthMode = 'jwt' | 'oauth2' | 'none';
 
-export type RecipeName = 'image-upload' | 'users-management';
-export const KNOWN_RECIPES: readonly RecipeName[] = ['image-upload', 'users-management'] as const;
+export type RecipeName = 'image-upload' | 'users-management' | 'pagination-filter-sort';
+export const KNOWN_RECIPES: readonly RecipeName[] = [
+  'image-upload',
+  'users-management',
+  'pagination-filter-sort',
+] as const;
 
 export interface RawServiceEntry {
   name: string;
@@ -18,6 +22,16 @@ export interface NormalizedUsersManagementConfig {
   defaultAdminEmail: string;
 }
 
+export interface RawPaginationFilterSortConfig {
+  defaultPageSize?: number;
+  maxPageSize?: number;
+}
+
+export interface NormalizedPaginationFilterSortConfig {
+  defaultPageSize: number;
+  maxPageSize: number;
+}
+
 export interface RawBffSpec {
   appName: string;
   groupId: string;
@@ -32,6 +46,7 @@ export interface RawBffSpec {
   };
   recipes?: string[];
   usersManagement?: RawUsersManagementConfig;
+  paginationFilterSort?: RawPaginationFilterSortConfig;
 }
 
 export interface ParsedBffSpec {
@@ -48,6 +63,7 @@ export interface ParsedBffSpec {
   };
   recipes: RecipeName[];
   usersManagement: NormalizedUsersManagementConfig;
+  paginationFilterSort: NormalizedPaginationFilterSortConfig;
 }
 
 export function parseSpec(raw: Record<string, unknown>): ParsedBffSpec {
@@ -73,6 +89,10 @@ export function parseSpec(raw: Record<string, unknown>): ParsedBffSpec {
     usersManagement: {
       tokenTtlMinutes: r.usersManagement?.tokenTtlMinutes ?? 1440,
       defaultAdminEmail: r.usersManagement?.defaultAdminEmail ?? 'admin@example.com',
+    },
+    paginationFilterSort: {
+      defaultPageSize: r.paginationFilterSort?.defaultPageSize ?? 20,
+      maxPageSize: r.paginationFilterSort?.maxPageSize ?? 100,
     },
   };
 }

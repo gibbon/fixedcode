@@ -181,6 +181,7 @@ spec:
   recipes:
     - users-management
     - image-upload
+    - pagination-filter-sort
   usersManagement:
     tokenTtlMinutes: 1440
     defaultAdminEmail: admin@example.com

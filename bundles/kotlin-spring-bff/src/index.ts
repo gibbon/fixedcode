@@ -154,6 +154,53 @@ export function generateFiles(ctx: KotlinSpringBffContext): FileEntry[] {
     );
   }
 
+  // Recipe: pagination-filter-sort
+  if (ctx.recipePaginationFilterSort) {
+    files.push(
+      {
+        template: 'recipes/pagination-filter-sort/pagination/PageRequest.kt.hbs',
+        output: `src/main/kotlin/${pkg}/pagination/PageRequest.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/pagination-filter-sort/pagination/PageResponse.kt.hbs',
+        output: `src/main/kotlin/${pkg}/pagination/PageResponse.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/pagination-filter-sort/pagination/SortSpec.kt.hbs',
+        output: `src/main/kotlin/${pkg}/pagination/SortSpec.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/pagination-filter-sort/pagination/FilterSpec.kt.hbs',
+        output: `src/main/kotlin/${pkg}/pagination/FilterSpec.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/pagination-filter-sort/pagination/PaginationProperties.kt.hbs',
+        output: `src/main/kotlin/${pkg}/pagination/PaginationProperties.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/pagination-filter-sort/pagination/PageRequestArgumentResolver.kt.hbs',
+        output: `src/main/kotlin/${pkg}/pagination/PageRequestArgumentResolver.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/pagination-filter-sort/pagination/PaginationWebConfig.kt.hbs',
+        output: `src/main/kotlin/${pkg}/pagination/PaginationWebConfig.kt`,
+        ctx: c,
+      },
+      {
+        template:
+          'recipes/pagination-filter-sort/resources/application-pagination-filter-sort.yml.hbs',
+        output: 'src/main/resources/application-pagination-filter-sort.yml',
+        ctx: c,
+      },
+    );
+  }
+
   // Recipe: image-upload
   if (ctx.recipeImageUpload) {
     files.push(

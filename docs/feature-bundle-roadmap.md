@@ -1,6 +1,6 @@
 # Feature Bundle Roadmap
 
-**Status:** SaaS-vertical core complete. 7 capabilities + 1 new skeleton + 1 CLI preset shipped in 0.2.x. Remaining items below are optional next-tier features. Last updated 2026-05-09.
+**Status:** SaaS-vertical core complete. 8 capabilities + 1 new skeleton + 1 CLI preset shipped in 0.2.x. Remaining items below are optional next-tier features. Last updated 2026-05-09.
 
 ## Pick this up in a new session
 
@@ -12,26 +12,25 @@ The composition rules and audit context are at the bottom of this doc for refere
 
 | # | Item | Type | Pairs with | Effort | Why it matters |
 |---|---|---|---|---|---|
-| 1 | `pagination-filter-sort` (BE) | recipe | `kotlin-spring-bff` | ~half day | Spring `Pageable` conventions, `?page&size&sort&filter` query params on every list endpoint. Pairs with the FE half below. |
-| 2 | `pagination-list-ui` (FE) | recipe | `vite-react-app` | ~half day | Index-page pattern: query → list → pagination controls. Pairs with the BE half above. |
-| 3 | `form-validation` (FE) | recipe | `vite-react-app` | ~1 day | react-hook-form + zod plus pre-baked input components (TextField, Select, DatePicker, NumberField). Drops the boilerplate from every admin form. |
-| 4 | `audit-log` (BE) | recipe | `kotlin-spring-bff` | ~1 day | Event publishing on entity change (`EntityCreated`, `EntityUpdated`, `EntityDeleted`); writes to an `audit_log` table; optional Kafka/SQS adapter as extension point. |
-| 5 | `background-jobs` (BE) | recipe | `kotlin-spring-bff` | ~1 day | Spring `@Scheduled` + a `JobRunner` interface (extension point). Provides retry, idempotency-key, and graceful-shutdown wrappers. |
-| 6 | `charts` (FE) | recipe | `vite-react-app` | ~1 day | Wires Recharts (or Tremor — pick one) into the `dashboard` recipe's empty charts slot. Spec lists chart types per stat. |
-| 7 | `modal-dialog-system` (FE) | recipe | `vite-react-app` | ~half day | Native `<dialog>` wrapper + open/close queue + focus trap. Used everywhere in admin flows. |
-| 8 | `geographic-layer-serving` (BE) | recipe | `kotlin-spring-bff` | ~1 week | PostGIS + ST_Simplify + ST_Intersects + GeoJSON endpoints with caching. Only needed for location verticals (real estate, jobs-by-location, schools). |
-| 9 | `map-view-leaflet` (FE) | recipe | `vite-react-app` | ~3 days | Leaflet/MapLibre wrapper with GeoJSON layer + click handlers. Pairs with `geographic-layer-serving`. |
-| 10 | `faceted-search-engine` (BE) | recipe | `kotlin-spring-bff` | ~1 week | Spring Data JPA query builder + facet aggregation. |
-| 11 | `faceted-search-ui` (FE) | recipe | `vite-react-app` | ~3 days | Filter panel + facet drill-down. Pairs with `faceted-search-engine`. |
-| 12 | `blog` (FE) | recipe | `next-marketing-site` | ~1 day | MDX-based blog under `/blog/[slug]`. Front-matter for title/date/author. |
-| 13 | `cta-banner` (FE) | recipe | `next-marketing-site` | ~half day | Site-wide CTA bar with optional dismiss. |
+| 1 | `pagination-list-ui` (FE) | recipe | `vite-react-app` | ~half day | Index-page pattern: query → list → pagination controls. Pairs with the shipped `pagination-filter-sort` BE recipe. |
+| 2 | `form-validation` (FE) | recipe | `vite-react-app` | ~1 day | react-hook-form + zod plus pre-baked input components (TextField, Select, DatePicker, NumberField). Drops the boilerplate from every admin form. |
+| 3 | `audit-log` (BE) | recipe | `kotlin-spring-bff` | ~1 day | Event publishing on entity change (`EntityCreated`, `EntityUpdated`, `EntityDeleted`); writes to an `audit_log` table; optional Kafka/SQS adapter as extension point. |
+| 4 | `background-jobs` (BE) | recipe | `kotlin-spring-bff` | ~1 day | Spring `@Scheduled` + a `JobRunner` interface (extension point). Provides retry, idempotency-key, and graceful-shutdown wrappers. |
+| 5 | `charts` (FE) | recipe | `vite-react-app` | ~1 day | Wires Recharts (or Tremor — pick one) into the `dashboard` recipe's empty charts slot. Spec lists chart types per stat. |
+| 6 | `modal-dialog-system` (FE) | recipe | `vite-react-app` | ~half day | Native `<dialog>` wrapper + open/close queue + focus trap. Used everywhere in admin flows. |
+| 7 | `geographic-layer-serving` (BE) | recipe | `kotlin-spring-bff` | ~1 week | PostGIS + ST_Simplify + ST_Intersects + GeoJSON endpoints with caching. Only needed for location verticals (real estate, jobs-by-location, schools). |
+| 8 | `map-view-leaflet` (FE) | recipe | `vite-react-app` | ~3 days | Leaflet/MapLibre wrapper with GeoJSON layer + click handlers. Pairs with `geographic-layer-serving`. |
+| 9 | `faceted-search-engine` (BE) | recipe | `kotlin-spring-bff` | ~1 week | Spring Data JPA query builder + facet aggregation. |
+| 10 | `faceted-search-ui` (FE) | recipe | `vite-react-app` | ~3 days | Filter panel + facet drill-down. Pairs with `faceted-search-engine`. |
+| 11 | `blog` (FE) | recipe | `next-marketing-site` | ~1 day | MDX-based blog under `/blog/[slug]`. Front-matter for title/date/author. |
+| 12 | `cta-banner` (FE) | recipe | `next-marketing-site` | ~half day | Site-wide CTA bar with optional dismiss. |
 
 ### How to pick one
 
-- **Most cross-vertical leverage:** rows 1–3 (pagination + forms). Every site needs them.
-- **For admin polish:** row 6 (charts) — turns the existing dashboard from placeholders into something you'd ship.
-- **For a location vertical:** rows 8–9 (geo + map).
-- **For a search-heavy vertical:** rows 10–11 (faceted search).
+- **Most cross-vertical leverage:** rows 1–2 (pagination UI + forms). Every site needs them.
+- **For admin polish:** row 5 (charts) — turns the existing dashboard from placeholders into something you'd ship.
+- **For a location vertical:** rows 7–8 (geo + map).
+- **For a search-heavy vertical:** rows 9–10 (faceted search).
 
 ### Pattern to follow
 
@@ -63,6 +62,7 @@ The clearest reference is the most recent shipped recipe in the same bundle:
 | `next-marketing-site` (skeleton) | 0.2.x | New skeleton bundle — static-export Next.js 14, brand-driven Hero/Navbar/Footer, configurable extension-point pages, optional analytics, optional Docker → nginx. |
 | `pricing-page` (FE × 2) | 0.2.x | Same recipe shape in both `vite-react-app` and `next-marketing-site`. Spec-driven tiers (`name/price/period/features/highlight`). |
 | `dashboard` (FE) | 0.2.x | `vite-react-app` recipe — spec-driven stat tiles + time-range selector. Composes with `admin-screen` (Dashboard appears as first sidebar link). No charting library yet. |
+| `pagination-filter-sort` (BE) | 0.2.x | `kotlin-spring-bff` recipe — `?page&size&sort&filter` convention via `PageRequest` + `PageRequestArgumentResolver`. Standalone (no JPA dep). `PageResponse<T>` wire format is what the upcoming `pagination-list-ui` FE recipe will consume. |
 | `saas-vertical` preset (CLI) | 0.2.x | `fixedcode init saas-vertical <name>` — scaffolds 4 specs (domain + BFF + app + marketing) with all the above recipes pre-wired. |
 
 All shipped via Composition Approach **C** — recipes inside the skeleton, no engine changes.

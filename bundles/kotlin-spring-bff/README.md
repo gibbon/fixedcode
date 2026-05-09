@@ -121,6 +121,42 @@ Spec config (under `spec.usersManagement`):
 | `tokenTtlMinutes`   | `1440` (24h)          | Lifetime of issued JWTs in minutes                           |
 | `defaultAdminEmail` | `admin@example.com`   | Email seeded as the initial ADMIN (dev profile only)         |
 
+#### `pagination-filter-sort`
+
+Reusable wire-format and resolver for paginated list endpoints. Pure web utilities — no JPA dependency, no per-aggregate code generation. Works alongside any data layer the BFF talks to.
+
+After enabling, controllers can declare a single `PageRequest` parameter and Spring binds the standard query convention `?page&size&sort&filter` automatically:
+
+```kotlin
+@GetMapping("/widgets")
+fun list(req: PageRequest): PageResponse<WidgetDto> {
+    // req.page, req.size (already capped), req.sort, req.filters all populated
+    val widgets = widgetService.search(req)        // your code
+    val total = widgetService.count(req.filters)   // your code
+    return PageResponse.of(widgets.map(WidgetDto::from), req, total)
+}
+```
+
+Conventions:
+- `?page=0&size=20` — zero-indexed page, default `size` from `app.pagination.defaultPageSize`, capped at `maxPageSize`
+- `?sort=name,asc&sort=createdAt,desc` — repeat the param for multi-key sort; direction defaults to `asc` if omitted
+- `?filter=status:eq:active&filter=name:like:foo` — `field:op:value` triples; supported ops are `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `like`, `in`. Op token may be omitted (`?filter=name:foo` ≡ `name:eq:foo`). For `in`, separate values with `|`.
+
+Generates (under `{packageName}.pagination`):
+- `PageRequest.kt` — request data class with `offset`, `filter(field)`, `filters(field)` helpers
+- `PageResponse.kt` — generic response envelope with `of()` and `map()` factories. The `vite-react-app` `pagination-list-ui` recipe consumes this exact shape.
+- `SortSpec.kt`, `FilterSpec.kt` — typed values + parsers
+- `PaginationProperties.kt` — `@ConfigurationProperties("app.pagination")`
+- `PageRequestArgumentResolver.kt`, `PaginationWebConfig.kt` — register the resolver with Spring MVC
+- `src/main/resources/application-pagination-filter-sort.yml` — `app.pagination.defaultPageSize`, `app.pagination.maxPageSize` (env: `APP_PAGINATION_DEFAULT_PAGE_SIZE`, `APP_PAGINATION_MAX_PAGE_SIZE`)
+
+Spec config (under `spec.paginationFilterSort`):
+
+| Field             | Default | Description                                            |
+| ----------------- | ------- | ------------------------------------------------------ |
+| `defaultPageSize` | `20`    | `size` to use when the client omits the param          |
+| `maxPageSize`     | `100`   | Hard cap applied after parsing — guards against abuse  |
+
 ### Adding a new recipe
 
 1. Add the recipe name to `schema.json` under `properties.recipes.items.enum` and `KNOWN_RECIPES` in `src/enrich/spec.ts`.

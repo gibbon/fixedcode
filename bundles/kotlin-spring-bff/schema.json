@@ -77,8 +77,30 @@
     "recipes": {
       "type": "array",
       "description": "Named feature recipes to include in the generated project",
-      "items": { "type": "string", "enum": ["image-upload", "users-management"] },
+      "items": {
+        "type": "string",
+        "enum": ["image-upload", "users-management", "pagination-filter-sort"]
+      },
       "default": []
+    },
+    "paginationFilterSort": {
+      "type": "object",
+      "description": "Configuration for the pagination-filter-sort recipe (no effect unless the recipe is enabled)",
+      "properties": {
+        "defaultPageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 20,
+          "description": "Default `size` when the client omits it"
+        },
+        "maxPageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 100,
+          "description": "Hard cap applied to `size` after parsing — protects against overly large pages"
+        }
+      },
+      "additionalProperties": false
     },
     "usersManagement": {
       "type": "object",

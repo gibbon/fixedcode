@@ -4,19 +4,12 @@ server:
 spring:
   application:
     name: {{appName.kebab}}
-{{#if recipeImageUpload}}
+{{#if hasRecipeProfiles}}
   profiles:
     include:
-      - image-upload
-{{#if recipeUsersManagement}}
-      - users-management
-{{/if}}
-{{else}}
-{{#if recipeUsersManagement}}
-  profiles:
-    include:
-      - users-management
-{{/if}}
+{{#each recipeProfiles}}
+      - {{this}}
+{{/each}}
 {{/if}}
 {{#if features.database}}
 

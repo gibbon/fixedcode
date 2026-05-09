@@ -4,6 +4,7 @@ import {
   type AuthMode,
   type RecipeName,
   type NormalizedUsersManagementConfig,
+  type NormalizedPaginationFilterSortConfig,
 } from './spec.js';
 import { generateVariants, toFlatPackageSegment, type NamingVariants } from './naming.js';
 
@@ -50,7 +51,12 @@ export interface KotlinSpringBffContext extends Context {
   recipes: RecipeName[];
   recipeImageUpload: boolean;
   recipeUsersManagement: boolean;
+  recipePaginationFilterSort: boolean;
+  /** Spring profiles activated by enabled recipes that ship a profile-specific yml. */
+  recipeProfiles: string[];
+  hasRecipeProfiles: boolean;
   usersManagement: NormalizedUsersManagementConfig;
+  paginationFilterSort: NormalizedPaginationFilterSortConfig;
   /**
    * Effective auth wiring after recipes apply: when users-management is enabled,
    * the bundle becomes a JWT issuer/verifier even if features.auth was 'none'.
@@ -99,6 +105,14 @@ export function enrich(
   // build.gradle conditionals can key off effectiveAuthJwt.
   const effectiveAuthJwt = authJwt || recipeUsersManagement;
 
+  // Order matters: each recipe's `application-<profile>.yml` is included in turn,
+  // so later profiles can override earlier ones if needed.
+  const recipeProfiles: string[] = [];
+  if (spec.recipes.includes('image-upload')) recipeProfiles.push('image-upload');
+  if (recipeUsersManagement) recipeProfiles.push('users-management');
+  if (spec.recipes.includes('pagination-filter-sort'))
+    recipeProfiles.push('pagination-filter-sort');
+
   return {
     appName,
     packageName,
@@ -117,7 +131,11 @@ export function enrich(
     recipes: spec.recipes,
     recipeImageUpload: spec.recipes.includes('image-upload'),
     recipeUsersManagement,
+    recipePaginationFilterSort: spec.recipes.includes('pagination-filter-sort'),
+    recipeProfiles,
+    hasRecipeProfiles: recipeProfiles.length > 0,
     usersManagement: spec.usersManagement,
+    paginationFilterSort: spec.paginationFilterSort,
     effectiveAuthJwt,
   };
 }
