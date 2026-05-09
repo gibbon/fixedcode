@@ -257,6 +257,55 @@ Composes with `admin-screen`: when both recipes are enabled, the admin sidebar (
 
 No charting library is bundled. To add visualisations later, extend `StatResponse` with timeseries fields and drop your favourite (Recharts / Tremor / Chart.js) into the `<section data-slot="charts">` block in `DashboardLayout.tsx` — there's a header comment explaining the integration.
 
+#### `pagination-list-ui`
+
+Reusable hook + components for any list endpoint that follows the BFF `pagination-filter-sort` convention (`?page&size&sort&filter` → `PageResponse<T>`). Standalone — no router coupling, no URL state. **Requires `features.api: true`** (the hook is built on the typed `api()` client in `src/lib/api.ts`).
+
+Usage:
+
+```tsx
+import { usePagedList } from './lib/pagination/usePagedList';
+import Pagination from './components/pagination/Pagination';
+import SortHeader from './components/pagination/SortHeader';
+
+function WidgetsPage() {
+  const list = usePagedList<Widget>('/widgets', {
+    initialSort: [{ field: 'createdAt', direction: 'DESC' }],
+  });
+  return (
+    <>
+      <table>
+        <thead>
+          <tr>
+            <SortHeader field="name" current={list.request.sort} onChange={list.setSort} />
+            <SortHeader field="createdAt" label="Created" current={list.request.sort} onChange={list.setSort} />
+          </tr>
+        </thead>
+        <tbody>{list.data.content.map((w) => <tr key={w.id}>...</tr>)}</tbody>
+      </table>
+      <Pagination data={list.data} size={list.request.size} onPageChange={list.setPage} onSizeChange={list.setSize} />
+    </>
+  );
+}
+```
+
+Generates:
+
+- `src/lib/pagination/types.ts` — `PageRequest`, `PageResponse<T>`, `SortSpec`, `FilterSpec`, `FilterOp` — TS mirror of the BFF wire format
+- `src/lib/pagination/buildQuery.ts` — serialises a `PageRequest` to the query convention
+- `src/lib/pagination/usePagedList.ts` — `usePagedList<T>(endpoint, options?)` hook with `setPage` / `setSize` / `setSort` / `setFilters` / `addFilter` / `removeFilter` / `refresh`. `setSize`/`setSort`/`setFilters` reset to page 0 to avoid showing the wrong slice.
+- `src/components/pagination/Pagination.tsx` — **extension point** (`overwrite: false`) — prev/next + page-size dropdown + "Showing X–Y of Z" label
+- `src/components/pagination/SortHeader.tsx` — **extension point** — clickable `<th>` cycling no-sort → ASC → DESC → no-sort, with `aria-sort`
+
+The components use Tailwind classes by default — restyle freely.
+
+Spec config (under `spec.paginationListUi`):
+
+| Field             | Default                  | Description                                              |
+| ----------------- | ------------------------ | -------------------------------------------------------- |
+| `defaultPageSize` | `20`                     | Initial `size` requested by the hook                     |
+| `pageSizeOptions` | `[10, 20, 50, 100]`      | Choices in the page-size dropdown (deduped + sorted asc) |
+
 ### Adding a new recipe
 
 1. Add the recipe name to `schema.json` under `properties.recipes.items.enum` and `KNOWN_RECIPES` in `src/enrich/spec.ts`.

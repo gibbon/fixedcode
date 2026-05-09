@@ -6,6 +6,7 @@ import {
   type RecipeName,
   type NormalizedImageUploadConfig,
   type NormalizedUsersManagementConfig,
+  type NormalizedPaginationListUiConfig,
 } from './spec.js';
 import {
   generateVariants,
@@ -71,6 +72,8 @@ export interface ViteReactAppContext {
   pricing: PricingPageContext;
   recipeDashboard: boolean;
   dashboard: DashboardContext;
+  recipePaginationListUi: boolean;
+  paginationListUi: NormalizedPaginationListUiConfig;
   /**
    * True when the dashboard recipe is enabled alongside admin-screen.
    * Lets the admin-screen sidebar render a Dashboard link as the first item.
@@ -156,6 +159,16 @@ export function enrich(
   const recipeDashboard = spec.recipes.includes('dashboard');
   const dashboard = buildDashboardContext(recipeDashboard, spec.dashboard);
 
+  const recipePaginationListUi = spec.recipes.includes('pagination-list-ui');
+  // The hook fetches via `src/lib/api.ts`, which is only generated when features.api is true.
+  if (recipePaginationListUi && !spec.features.api) {
+    throw new Error(
+      '[vite-react-app:pagination-list-ui] recipe "pagination-list-ui" requires features.api: true ' +
+        '(the usePagedList hook is built on top of the typed `api()` client in src/lib/api.ts). ' +
+        'Set `features: { api: true }` in your spec.',
+    );
+  }
+
   return {
     appName,
     port: spec.port,
@@ -184,6 +197,8 @@ export function enrich(
     pricing,
     recipeDashboard,
     dashboard,
+    recipePaginationListUi,
+    paginationListUi: spec.paginationListUi,
     hasDashboardRecipe: recipeDashboard,
     dependencies,
     devDependencies,

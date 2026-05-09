@@ -210,6 +210,39 @@ export function generateFiles(ctx: ViteReactAppContext): FileEntry[] {
     );
   }
 
+  // Recipe: pagination-list-ui
+  if (ctx.recipePaginationListUi) {
+    files.push(
+      {
+        template: 'recipes/pagination-list-ui/src/lib/pagination/types.ts.hbs',
+        output: 'src/lib/pagination/types.ts',
+        ctx: c,
+      },
+      {
+        template: 'recipes/pagination-list-ui/src/lib/pagination/buildQuery.ts.hbs',
+        output: 'src/lib/pagination/buildQuery.ts',
+        ctx: c,
+      },
+      {
+        template: 'recipes/pagination-list-ui/src/lib/pagination/usePagedList.ts.hbs',
+        output: 'src/lib/pagination/usePagedList.ts',
+        ctx: c,
+      },
+      {
+        template: 'recipes/pagination-list-ui/src/components/pagination/Pagination.tsx.hbs',
+        output: 'src/components/pagination/Pagination.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/pagination-list-ui/src/components/pagination/SortHeader.tsx.hbs',
+        output: 'src/components/pagination/SortHeader.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+    );
+  }
+
   // Recipe: image-upload
   if (ctx.recipeImageUpload) {
     files.push(

@@ -47,9 +47,35 @@
       "description": "Named feature recipes to include in the generated app",
       "items": {
         "type": "string",
-        "enum": ["image-upload", "admin-screen", "users-management", "pricing-page", "dashboard"]
+        "enum": [
+          "image-upload",
+          "admin-screen",
+          "users-management",
+          "pricing-page",
+          "dashboard",
+          "pagination-list-ui"
+        ]
       },
       "default": []
+    },
+    "paginationListUi": {
+      "type": "object",
+      "description": "Configuration for the pagination-list-ui recipe (no effect unless the recipe is enabled). Designed to consume the `pagination-filter-sort` BFF wire format (`?page&size&sort&filter` → `PageResponse<T>`).",
+      "properties": {
+        "defaultPageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 20,
+          "description": "Initial `size` requested by the hook"
+        },
+        "pageSizeOptions": {
+          "type": "array",
+          "description": "Choices offered by the page-size dropdown in the Pagination component",
+          "items": { "type": "integer", "minimum": 1 },
+          "default": [10, 20, 50, 100]
+        }
+      },
+      "additionalProperties": false
     },
     "usersManagement": {
       "type": "object",

@@ -6,13 +6,15 @@ export type RecipeName =
   | 'admin-screen'
   | 'users-management'
   | 'pricing-page'
-  | 'dashboard';
+  | 'dashboard'
+  | 'pagination-list-ui';
 export const KNOWN_RECIPES: readonly RecipeName[] = [
   'image-upload',
   'admin-screen',
   'users-management',
   'pricing-page',
   'dashboard',
+  'pagination-list-ui',
 ] as const;
 
 export interface RawRoute {
@@ -126,6 +128,16 @@ export interface NormalizedPricingConfig {
   tiers: NormalizedPricingTier[];
 }
 
+export interface RawPaginationListUiConfig {
+  defaultPageSize?: number;
+  pageSizeOptions?: number[];
+}
+
+export interface NormalizedPaginationListUiConfig {
+  defaultPageSize: number;
+  pageSizeOptions: number[];
+}
+
 export interface RawViteReactAppSpec {
   appName: string;
   port?: number;
@@ -144,6 +156,7 @@ export interface RawViteReactAppSpec {
   usersManagement?: RawUsersManagementConfig;
   pricing?: RawPricingConfig;
   dashboard?: RawDashboardConfig;
+  paginationListUi?: RawPaginationListUiConfig;
 }
 
 export interface NormalizedSpec {
@@ -164,6 +177,7 @@ export interface NormalizedSpec {
   usersManagement: NormalizedUsersManagementConfig;
   pricing: NormalizedPricingConfig;
   dashboard: NormalizedDashboardConfig;
+  paginationListUi: NormalizedPaginationListUiConfig;
 }
 
 const DEFAULT_ROUTES: RawRoute[] = [{ path: '/', name: 'Home' }];
@@ -203,6 +217,28 @@ export function parseSpec(raw: Record<string, unknown>): NormalizedSpec {
     },
     pricing: normalizePricing(spec.pricing),
     dashboard: normalizeDashboard(spec.dashboard),
+    paginationListUi: normalizePaginationListUi(spec.paginationListUi),
+  };
+}
+
+function normalizePaginationListUi(
+  raw: RawPaginationListUiConfig | undefined,
+): NormalizedPaginationListUiConfig {
+  const rawOptions = Array.isArray(raw?.pageSizeOptions) ? raw!.pageSizeOptions! : [];
+  const filteredOptions = rawOptions.filter(
+    (n): n is number => typeof n === 'number' && Number.isFinite(n) && n >= 1,
+  );
+  // Deduplicate + sort ascending so the dropdown is predictable.
+  const pageSizeOptions =
+    filteredOptions.length > 0
+      ? Array.from(new Set(filteredOptions)).sort((a, b) => a - b)
+      : [10, 20, 50, 100];
+  return {
+    defaultPageSize:
+      typeof raw?.defaultPageSize === 'number' && raw!.defaultPageSize! >= 1
+        ? raw!.defaultPageSize!
+        : 20,
+    pageSizeOptions,
   };
 }
 

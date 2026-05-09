@@ -208,6 +208,7 @@ spec:
     - users-management
     - dashboard
     - image-upload
+    - pagination-list-ui
   usersManagement:
     signInPath: /sign-in
     signUpPath: /sign-up
