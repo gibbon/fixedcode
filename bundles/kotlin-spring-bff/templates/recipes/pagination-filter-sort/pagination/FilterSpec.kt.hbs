@@ -7,6 +7,12 @@ package {{packageName}}.pagination
  * `?filter=name:foo` is interpreted as `name:eq:foo`.
  *
  * For `in` lists, separate values with `|` — e.g. `?filter=status:in:active|trial`.
+ * The `|` separator has no escape mechanism; values that legitimately contain `|`
+ * cannot be filtered with `in`. Use repeated `eq` filters instead.
+ *
+ * Unknown op tokens are rejected (the parser returns null) — callers see the
+ * filter clause as invalid rather than getting a surprising EQ fallback. Field
+ * names are matched case-sensitively by [PageRequest.filter] / [PageRequest.filters].
  */
 data class FilterSpec(
     val field: String,
@@ -52,13 +58,11 @@ data class FilterSpec(
             } else {
                 val opToken = rest.substring(0, secondColon).trim()
                 val value = rest.substring(secondColon + 1)
-                val op = Op.fromTokenOrNull(opToken)
-                if (op == null) {
-                    // Unknown token — treat the whole rest as a value with EQ.
-                    FilterSpec(field, Op.EQ, rest)
-                } else {
-                    FilterSpec(field, op, value)
-                }
+                // Reject unknown op tokens. Callers can look at the absence of the
+                // filter to surface a 400 — better than a silent EQ fallback that
+                // silently changes query semantics.
+                val op = Op.fromTokenOrNull(opToken) ?: return null
+                FilterSpec(field, op, value)
             }
         }
     }

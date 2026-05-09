@@ -17,9 +17,9 @@ data class PageRequest(
     /** Zero-based offset, ready for `LIMIT/OFFSET` style queries. */
     val offset: Int get() = page * size
 
-    /** Find the first filter for [field] (case-sensitive). */
+    /** Find the first filter for [field]. Field matching is case-sensitive. */
     fun filter(field: String): FilterSpec? = filters.firstOrNull { it.field == field }
 
-    /** All filters for [field] (case-sensitive). */
+    /** All filters for [field]. Field matching is case-sensitive. */
     fun filters(field: String): List<FilterSpec> = filters.filter { it.field == field }
 }

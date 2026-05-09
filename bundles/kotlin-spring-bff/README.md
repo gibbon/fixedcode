@@ -140,7 +140,8 @@ fun list(req: PageRequest): PageResponse<WidgetDto> {
 Conventions:
 - `?page=0&size=20` — zero-indexed page, default `size` from `app.pagination.defaultPageSize`, capped at `maxPageSize`
 - `?sort=name,asc&sort=createdAt,desc` — repeat the param for multi-key sort; direction defaults to `asc` if omitted
-- `?filter=status:eq:active&filter=name:like:foo` — `field:op:value` triples; supported ops are `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `like`, `in`. Op token may be omitted (`?filter=name:foo` ≡ `name:eq:foo`). For `in`, separate values with `|`.
+- `?filter=status:eq:active&filter=name:like:foo` — `field:op:value` triples; supported ops are `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `like`, `in`. Op token may be omitted (`?filter=name:foo` ≡ `name:eq:foo`). Unknown op tokens are rejected (the parser drops the clause; no silent EQ fallback). For `in`, separate values with `|` (no escape mechanism — fall back to repeated `eq` clauses for values that contain `|`).
+- Wire-format response (`PageResponse<T>`): `content`, `page`, `size`, `totalElements`, `totalPages`, `numberOfElements` (= `content.size`), `first`, `last`, `hasNext`, `hasPrevious`. Field naming follows Spring Data `Page` so existing FE table libraries work without remapping.
 
 Generates (under `{packageName}.pagination`):
 - `PageRequest.kt` — request data class with `offset`, `filter(field)`, `filters(field)` helpers

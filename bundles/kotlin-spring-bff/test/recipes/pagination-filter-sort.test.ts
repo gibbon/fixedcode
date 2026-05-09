@@ -1,7 +1,38 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import Handlebars from 'handlebars';
 import { enrich, generateFiles } from '../../src/index.js';
+
+const APP_YML_TPL_PATH = join(
+  __dirname,
+  '..',
+  '..',
+  'templates',
+  'src',
+  'main',
+  'resources',
+  'application.yml.hbs',
+);
+
+function renderApplicationYml(ctx: Record<string, unknown>): string {
+  const hb = Handlebars.create();
+  // Mirror the bundle helpers we use in application.yml.
+  hb.registerHelper('eq', (a: unknown, b: unknown) => a === b);
+  hb.registerHelper('springProp', (...args: unknown[]) => {
+    const params = args.slice(0, -1);
+    const varName = String(params[0] ?? '');
+    const hasDefault = params.length >= 2;
+    const d = hasDefault ? `:${String(params[1] ?? '')}` : '';
+    return `\${${varName}${d}}`;
+  });
+  hb.registerHelper('concat', (...args: unknown[]) => {
+    const params = args.slice(0, -1);
+    return params.map((p) => String(p ?? '')).join('');
+  });
+  const tpl = hb.compile(readFileSync(APP_YML_TPL_PATH, 'utf-8'));
+  return tpl(ctx);
+}
 
 const md = { name: 'my-bff', apiVersion: '1.0' };
 
@@ -131,6 +162,107 @@ describe('kotlin-spring-bff pagination-filter-sort recipe', () => {
     expect(tpl).toContain('{{#if hasRecipeProfiles}}');
     expect(tpl).toContain('{{#each recipeProfiles}}');
     expect(tpl).toContain('- {{this}}');
+  });
+
+  it('application.yml has NO `profiles: include:` block when no recipes are enabled', () => {
+    const ctx = enrich({ appName: 'my-bff', groupId: 'com.example' }, md);
+    const yml = renderApplicationYml(ctx as unknown as Record<string, unknown>);
+    // The `profiles: include:` block belongs under `spring:`. There's an unrelated
+    // `include:` line in the management.endpoints.web block that we want to ignore.
+    expect(yml).not.toMatch(/^\s*profiles:\s*$/m);
+    expect(yml).not.toMatch(/- (image-upload|users-management|pagination-filter-sort)/);
+  });
+
+  it('application.yml renders all enabled recipe profiles in the documented order', () => {
+    const ctx = enrich(
+      {
+        appName: 'my-bff',
+        groupId: 'com.example',
+        features: { database: true },
+        recipes: ['users-management', 'pagination-filter-sort', 'image-upload'],
+      },
+      md,
+    );
+    const yml = renderApplicationYml(ctx as unknown as Record<string, unknown>);
+    // Order is fixed by enrich(), independent of the recipes-array order.
+    const idxImage = yml.indexOf('- image-upload');
+    const idxUsers = yml.indexOf('- users-management');
+    const idxPagination = yml.indexOf('- pagination-filter-sort');
+    expect(idxImage).toBeGreaterThan(0);
+    expect(idxUsers).toBeGreaterThan(idxImage);
+    expect(idxPagination).toBeGreaterThan(idxUsers);
+  });
+
+  it('PaginationWebConfig registers via @EnableConfigurationProperties', () => {
+    const tpl = readFileSync(
+      join(
+        __dirname,
+        '..',
+        '..',
+        'templates',
+        'recipes',
+        'pagination-filter-sort',
+        'pagination',
+        'PaginationWebConfig.kt.hbs',
+      ),
+      'utf-8',
+    );
+    expect(tpl).toContain('@EnableConfigurationProperties(PaginationProperties::class)');
+    expect(tpl).toContain('addArgumentResolvers');
+  });
+
+  it('PageResponse wire format includes numberOfElements/first/last for FE consumers', () => {
+    const tpl = readFileSync(
+      join(
+        __dirname,
+        '..',
+        '..',
+        'templates',
+        'recipes',
+        'pagination-filter-sort',
+        'pagination',
+        'PageResponse.kt.hbs',
+      ),
+      'utf-8',
+    );
+    expect(tpl).toContain('val numberOfElements: Int,');
+    expect(tpl).toContain('val first: Boolean,');
+    expect(tpl).toContain('val last: Boolean,');
+  });
+
+  it('FilterSpec rejects unknown op tokens (returns null) — no silent EQ fallback', () => {
+    const tpl = readFileSync(
+      join(
+        __dirname,
+        '..',
+        '..',
+        'templates',
+        'recipes',
+        'pagination-filter-sort',
+        'pagination',
+        'FilterSpec.kt.hbs',
+      ),
+      'utf-8',
+    );
+    // The parser must `return null` rather than re-using EQ when the op is unknown.
+    expect(tpl).toContain('Op.fromTokenOrNull(opToken) ?: return null');
+  });
+
+  it('SortSpec rejects unknown direction tokens (returns null)', () => {
+    const tpl = readFileSync(
+      join(
+        __dirname,
+        '..',
+        '..',
+        'templates',
+        'recipes',
+        'pagination-filter-sort',
+        'pagination',
+        'SortSpec.kt.hbs',
+      ),
+      'utf-8',
+    );
+    expect(tpl).toMatch(/else -> return null/);
   });
 
   it('PageRequest, FilterSpec, and SortSpec templates document the wire convention', () => {

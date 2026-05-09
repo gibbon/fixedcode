@@ -23,7 +23,7 @@ data class SortSpec(
             val direction = when (parts.getOrNull(1)?.lowercase()) {
                 "desc" -> Direction.DESC
                 "asc", null, "" -> Direction.ASC
-                else -> Direction.ASC
+                else -> return null  // unknown direction token — reject rather than guess
             }
             return SortSpec(field, direction)
         }
