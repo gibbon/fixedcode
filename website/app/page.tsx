@@ -5,7 +5,6 @@ import WhyBoth from "@/components/WhyBoth";
 import AISandwich from "@/components/AISandwich";
 import HowItWorks from "@/components/HowItWorks";
 import BeforeAfter from "@/components/BeforeAfter";
-import ProvenAtScale from "@/components/ProvenAtScale";
 import WhoItsFor from "@/components/WhoItsFor";
 import HowItScales from "@/components/HowItScales";
 import CodeExample from "@/components/CodeExample";
@@ -24,7 +23,6 @@ export default function Home() {
         <AISandwich />
         <HowItWorks />
         <BeforeAfter />
-        <ProvenAtScale />
         <WhoItsFor />
         <HowItScales />
         <CodeExample />
