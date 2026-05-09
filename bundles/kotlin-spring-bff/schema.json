@@ -73,6 +73,12 @@
         }
       },
       "additionalProperties": false
+    },
+    "recipes": {
+      "type": "array",
+      "description": "Named feature recipes to include in the generated project",
+      "items": { "type": "string", "enum": ["image-upload"] },
+      "default": []
     }
   },
   "additionalProperties": false

@@ -58,6 +58,33 @@ export function generateFiles(ctx: ViteReactAppContext): FileEntry[] {
     );
   }
 
+  // Recipe: image-upload
+  if (ctx.recipeImageUpload) {
+    files.push(
+      {
+        template: 'recipes/image-upload/src/types/image.ts.hbs',
+        output: 'src/types/image.ts',
+        ctx: c,
+      },
+      {
+        template: 'recipes/image-upload/src/lib/images.ts.hbs',
+        output: 'src/lib/images.ts',
+        ctx: c,
+      },
+      {
+        template: 'recipes/image-upload/src/components/ImageUpload.tsx.hbs',
+        output: 'src/components/ImageUpload.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/image-upload/src/components/ImageGallery.tsx.hbs',
+        output: 'src/components/ImageGallery.tsx',
+        ctx: c,
+      },
+    );
+  }
+
   return files;
 }
 

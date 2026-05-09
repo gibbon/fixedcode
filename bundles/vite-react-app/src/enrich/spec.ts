@@ -1,9 +1,20 @@
 export type RouterKind = 'tanstack' | 'reactrouter' | 'none';
 export type AuthKind = 'supabase' | 'clerk' | 'none';
 
+export type RecipeName = 'image-upload';
+export const KNOWN_RECIPES: readonly RecipeName[] = ['image-upload'] as const;
+
 export interface RawRoute {
   path: string;
   name: string;
+}
+
+export interface RawImageUploadConfig {
+  apiPath?: string;
+}
+
+export interface NormalizedImageUploadConfig {
+  apiPath: string;
 }
 
 export interface RawViteReactAppSpec {
@@ -18,6 +29,8 @@ export interface RawViteReactAppSpec {
     docker?: boolean;
     tailwind?: boolean;
   };
+  recipes?: string[];
+  imageUpload?: RawImageUploadConfig;
 }
 
 export interface NormalizedSpec {
@@ -32,6 +45,8 @@ export interface NormalizedSpec {
     docker: boolean;
     tailwind: boolean;
   };
+  recipes: RecipeName[];
+  imageUpload: NormalizedImageUploadConfig;
 }
 
 const DEFAULT_ROUTES: RawRoute[] = [{ path: '/', name: 'Home' }];
@@ -40,6 +55,9 @@ export function parseSpec(raw: Record<string, unknown>): NormalizedSpec {
   const spec = raw as unknown as RawViteReactAppSpec;
   const features = spec.features ?? {};
   const routes = spec.routes && spec.routes.length > 0 ? spec.routes : DEFAULT_ROUTES;
+  const recipes: RecipeName[] = Array.isArray(spec.recipes)
+    ? spec.recipes.filter((x): x is RecipeName => (KNOWN_RECIPES as readonly string[]).includes(x))
+    : [];
   return {
     appName: spec.appName,
     port: spec.port ?? 5173,
@@ -51,6 +69,10 @@ export function parseSpec(raw: Record<string, unknown>): NormalizedSpec {
       auth: features.auth ?? 'none',
       docker: features.docker ?? false,
       tailwind: features.tailwind ?? true,
+    },
+    recipes,
+    imageUpload: {
+      apiPath: spec.imageUpload?.apiPath ?? '/images',
     },
   };
 }

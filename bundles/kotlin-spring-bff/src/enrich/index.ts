@@ -1,5 +1,5 @@
 import type { Context, SpecMetadata } from 'fixedcode';
-import { parseSpec, type AuthMode } from './spec.js';
+import { parseSpec, type AuthMode, type RecipeName } from './spec.js';
 import { generateVariants, toFlatPackageSegment, type NamingVariants } from './naming.js';
 
 export interface ServiceContext {
@@ -42,6 +42,8 @@ export interface KotlinSpringBffContext extends Context {
   authJwt: boolean;
   authOauth2: boolean;
   authEnabled: boolean;
+  recipes: RecipeName[];
+  recipeImageUpload: boolean;
 }
 
 export function enrich(
@@ -82,5 +84,7 @@ export function enrich(
     authJwt: spec.features.auth === 'jwt',
     authOauth2: spec.features.auth === 'oauth2',
     authEnabled: spec.features.auth !== 'none',
+    recipes: spec.recipes,
+    recipeImageUpload: spec.recipes.includes('image-upload'),
   };
 }
