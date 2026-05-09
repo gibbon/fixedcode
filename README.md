@@ -150,6 +150,8 @@ See [`docs/cfrs.md`](docs/cfrs.md) for the full catalog.
 - [`docs/registry.md`](docs/registry.md) — how the registry works, publishing
 - [`docs/llm.md`](docs/llm.md) — LLM configuration and security caveats
 - [`docs/release.md`](docs/release.md) — internal: cutting a release
+- [`docs/new-vertical-workflow.md`](docs/new-vertical-workflow.md) — spin up a new SaaS vertical in 30 minutes
+- [`docs/feature-bundle-roadmap.md`](docs/feature-bundle-roadmap.md) — capability/feature recipe roadmap
 
 ## Roadmap
 
