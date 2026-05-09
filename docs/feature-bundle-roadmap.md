@@ -1,104 +1,88 @@
 # Feature Bundle Roadmap
 
-**Status:** in progress. First recipe shipped — see "Shipped" below. Captured 2026-05-09 from an audit of a sibling production codebase that uses fixedcode-style scaffolding.
+**Status:** SaaS-vertical core complete. 7 capabilities + 1 new skeleton + 1 CLI preset shipped in 0.2.x. Remaining items below are optional next-tier features. Last updated 2026-05-09.
+
+## Pick this up in a new session
+
+Start here. The "What's left" table below is the single source of truth for what to build next. Each row is a self-contained piece of work. Pick one, follow the pattern of the most recent shipped sibling, ship.
+
+The composition rules and audit context are at the bottom of this doc for reference, but you don't need to re-read them — the patterns are baked into the existing recipes.
+
+## What's left
+
+| # | Item | Type | Pairs with | Effort | Why it matters |
+|---|---|---|---|---|---|
+| 1 | `pagination-filter-sort` (BE) | recipe | `kotlin-spring-bff` | ~half day | Spring `Pageable` conventions, `?page&size&sort&filter` query params on every list endpoint. Pairs with the FE half below. |
+| 2 | `pagination-list-ui` (FE) | recipe | `vite-react-app` | ~half day | Index-page pattern: query → list → pagination controls. Pairs with the BE half above. |
+| 3 | `form-validation` (FE) | recipe | `vite-react-app` | ~1 day | react-hook-form + zod plus pre-baked input components (TextField, Select, DatePicker, NumberField). Drops the boilerplate from every admin form. |
+| 4 | `audit-log` (BE) | recipe | `kotlin-spring-bff` | ~1 day | Event publishing on entity change (`EntityCreated`, `EntityUpdated`, `EntityDeleted`); writes to an `audit_log` table; optional Kafka/SQS adapter as extension point. |
+| 5 | `background-jobs` (BE) | recipe | `kotlin-spring-bff` | ~1 day | Spring `@Scheduled` + a `JobRunner` interface (extension point). Provides retry, idempotency-key, and graceful-shutdown wrappers. |
+| 6 | `charts` (FE) | recipe | `vite-react-app` | ~1 day | Wires Recharts (or Tremor — pick one) into the `dashboard` recipe's empty charts slot. Spec lists chart types per stat. |
+| 7 | `modal-dialog-system` (FE) | recipe | `vite-react-app` | ~half day | Native `<dialog>` wrapper + open/close queue + focus trap. Used everywhere in admin flows. |
+| 8 | `geographic-layer-serving` (BE) | recipe | `kotlin-spring-bff` | ~1 week | PostGIS + ST_Simplify + ST_Intersects + GeoJSON endpoints with caching. Only needed for location verticals (real estate, jobs-by-location, schools). |
+| 9 | `map-view-leaflet` (FE) | recipe | `vite-react-app` | ~3 days | Leaflet/MapLibre wrapper with GeoJSON layer + click handlers. Pairs with `geographic-layer-serving`. |
+| 10 | `faceted-search-engine` (BE) | recipe | `kotlin-spring-bff` | ~1 week | Spring Data JPA query builder + facet aggregation. |
+| 11 | `faceted-search-ui` (FE) | recipe | `vite-react-app` | ~3 days | Filter panel + facet drill-down. Pairs with `faceted-search-engine`. |
+| 12 | `blog` (FE) | recipe | `next-marketing-site` | ~1 day | MDX-based blog under `/blog/[slug]`. Front-matter for title/date/author. |
+| 13 | `cta-banner` (FE) | recipe | `next-marketing-site` | ~half day | Site-wide CTA bar with optional dismiss. |
+
+### How to pick one
+
+- **Most cross-vertical leverage:** rows 1–3 (pagination + forms). Every site needs them.
+- **For admin polish:** row 6 (charts) — turns the existing dashboard from placeholders into something you'd ship.
+- **For a location vertical:** rows 8–9 (geo + map).
+- **For a search-heavy vertical:** rows 10–11 (faceted search).
+
+### Pattern to follow
+
+Each new recipe follows the convention already established in the shipped recipes:
+
+1. Add `<recipe-name>` to the `recipes` enum in the bundle's `schema.json`.
+2. Add a recipe-config block to the schema if needed (e.g. `pagination: { defaultPageSize: 20 }`).
+3. Add types + normaliser in `src/enrich/spec.ts`.
+4. Create `src/enrich/recipes/<recipe-name>.ts` with the context builder.
+5. Add `templates/recipes/<recipe-name>/` with the file tree to emit.
+6. Wire it into `generateFiles()` in `src/index.ts`.
+7. Mark per-aggregate / user-customisable files as `overwrite: false` (extension points).
+8. Add `test/recipes/<recipe-name>.test.ts` with at least: disabled, enabled, composition (if applicable).
+9. Update the bundle README + this doc's Shipped table.
+
+The clearest reference is the most recent shipped recipe in the same bundle:
+- BE pattern: `bundles/kotlin-spring-bff/templates/recipes/users-management/`
+- FE pattern: `bundles/vite-react-app/src/enrich/recipes/dashboard.ts` + `templates/recipes/dashboard/`
 
 ## Shipped
 
 | Capability | Released | Where it lives |
 |---|---|---|
-| `image-upload` (BE) | 0.2.x | `kotlin-spring-bff` recipe — [`bundles/kotlin-spring-bff/templates/recipes/image-upload/`](../bundles/kotlin-spring-bff/templates/recipes/image-upload), wiring in [`src/index.ts`](../bundles/kotlin-spring-bff/src/index.ts), tests in [`test/recipes/image-upload.test.ts`](../bundles/kotlin-spring-bff/test/recipes/image-upload.test.ts). Default storage: local filesystem; `LocalImageService` is an extension point. |
-| `image-gallery-upload` (FE) | 0.2.x | `vite-react-app` recipe — [`bundles/vite-react-app/templates/recipes/image-upload/`](../bundles/vite-react-app/templates/recipes/image-upload), wiring in [`src/index.ts`](../bundles/vite-react-app/src/index.ts), tests in [`test/recipes/image-upload.test.ts`](../bundles/vite-react-app/test/recipes/image-upload.test.ts). Drag-and-drop dropzone (extension point) + gallery + typed client; no extra npm deps. |
-| `admin-screen` (FE) | 0.2.x | `vite-react-app` recipe — [`bundles/vite-react-app/templates/recipes/admin-screen/`](../bundles/vite-react-app/templates/recipes/admin-screen), wiring in [`src/index.ts`](../bundles/vite-react-app/src/index.ts), enrich in [`src/enrich/recipes/admin-screen.ts`](../bundles/vite-react-app/src/enrich/recipes/admin-screen.ts), tests in [`test/recipes/admin-screen.test.ts`](../bundles/vite-react-app/test/recipes/admin-screen.test.ts). Cross-reads a sibling `spring-domain` spec and emits per-aggregate list/create/edit pages, typed CRUD client, and a sidebar admin layout — wires against the BE endpoints `spring-domain` already produces. |
-| `users-management` (BE) | 0.2.x | `kotlin-spring-bff` recipe — [`bundles/kotlin-spring-bff/templates/recipes/users-management/`](../bundles/kotlin-spring-bff/templates/recipes/users-management), wiring in [`src/index.ts`](../bundles/kotlin-spring-bff/src/index.ts), tests in [`test/recipes/users-management.test.ts`](../bundles/kotlin-spring-bff/test/recipes/users-management.test.ts). JWT issuance from email + password (HS256, JJWT), BCrypt hashing, sign-in/up/me + admin users CRUD. Requires `features.database: true`. `JwtService` and `PasswordHasher` are extension points — swap to Clerk / Auth0 / Supabase / Argon2 by replacing the bean. |
-| `users-management` (FE) | 0.2.x | `vite-react-app` recipe — [`bundles/vite-react-app/templates/recipes/users-management/`](../bundles/vite-react-app/templates/recipes/users-management), wiring in [`src/index.ts`](../bundles/vite-react-app/src/index.ts), tests in [`test/recipes/users-management.test.ts`](../bundles/vite-react-app/test/recipes/users-management.test.ts). `AuthProvider` + `useAuth` hook, sign-in/up pages (extension points), `RequireAuth` / `RequireRole` guards, native fetch — no new npm deps. When co-enabled with `admin-screen`, admin routes are auto-wrapped in `<RequireRole role="ADMIN">`. |
-| `next-marketing-site` (skeleton) | 0.2.x | New skeleton bundle — [`bundles/next-marketing-site/`](../bundles/next-marketing-site), enrich + `generateFiles` in [`src/index.ts`](../bundles/next-marketing-site/src/index.ts), tests in [`test/`](../bundles/next-marketing-site/test). Static-export Next.js 14 marketing site: brand-driven Hero / Navbar / Footer, configurable extension-point pages, Tailwind v4, sensible Metadata API defaults, optional Plausible/Umami analytics, optional multi-stage Docker → nginx. The public face for any new SaaS vertical, paired with the `kotlin-spring-bff` (BFF) and `vite-react-app` (product app) skeletons. Recipes (`blog`, `cta-banner`) ship in follow-up commits. |
-| `dashboard` (FE) | 0.2.x | `vite-react-app` recipe — [`bundles/vite-react-app/templates/recipes/dashboard/`](../bundles/vite-react-app/templates/recipes/dashboard), wiring in [`src/index.ts`](../bundles/vite-react-app/src/index.ts), enrich in [`src/enrich/recipes/dashboard.ts`](../bundles/vite-react-app/src/enrich/recipes/dashboard.ts), tests in [`test/recipes/dashboard.test.ts`](../bundles/vite-react-app/test/recipes/dashboard.test.ts). Drop-in admin/metrics dashboard: spec-driven stat tiles (`name/endpoint/units/format`), time-range selector (`7d/30d/90d` default), router-agnostic mount, native fetch, no charting library, no new deps. Composes with `admin-screen` — when both are enabled, `Dashboard` appears as the first link in the admin sidebar via the `hasDashboardRecipe` context flag. |
-| `saas-vertical` preset (CLI) | 0.2.x | New `fixedcode init saas-vertical <name>` sub-command — [`engine/src/cli/init.ts`](../engine/src/cli/init.ts), tests in [`engine/test/init.test.ts`](../engine/test/init.test.ts). One command scaffolds a multi-spec project (`spring-domain` + `kotlin-spring-bff` + `vite-react-app` + `next-marketing-site`) with the `image-upload`, `admin-screen`, `users-management`, `pricing-page`, and `dashboard` recipes pre-wired. Generic sample content (`Job` / `Application` aggregates) so it works for any vertical. |
-| `pricing-page` (FE × 2) | 0.2.x | Same recipe shape, two skeletons. `vite-react-app` — [`templates/recipes/pricing-page/`](../bundles/vite-react-app/templates/recipes/pricing-page), wiring in [`src/index.ts`](../bundles/vite-react-app/src/index.ts), enrich in [`src/enrich/recipes/pricing-page.ts`](../bundles/vite-react-app/src/enrich/recipes/pricing-page.ts), tests in [`test/recipes/pricing-page.test.ts`](../bundles/vite-react-app/test/recipes/pricing-page.test.ts) — drops a `<PricingPage>` component (extension point) plus a router-agnostic `pricing` route. `next-marketing-site` — [`templates/recipes/pricing-page/`](../bundles/next-marketing-site/templates/recipes/pricing-page), wiring in [`src/index.ts`](../bundles/next-marketing-site/src/index.ts), enrich in [`src/enrich/recipes/pricing-page.ts`](../bundles/next-marketing-site/src/enrich/recipes/pricing-page.ts), tests in [`test/recipes/pricing-page.test.ts`](../bundles/next-marketing-site/test/recipes/pricing-page.test.ts) — drops an `app/pricing/page.tsx` App Router page and auto-appends a `/pricing` nav link. Spec-driven tiers (`name/price/period/features/ctaText/ctaHref/highlight`) ship a new vertical's pricing in YAML rather than copy-paste. No new npm deps. |
+| `image-upload` (BE) | 0.2.x | `kotlin-spring-bff` recipe — local FS + `LocalImageService` extension point. |
+| `image-gallery-upload` (FE) | 0.2.x | `vite-react-app` recipe — drop-zone + gallery + typed client; no extra deps. |
+| `admin-screen` (FE) | 0.2.x | `vite-react-app` recipe — cross-reads a sibling `spring-domain` spec; per-aggregate list/create/edit pages + sidebar admin layout. |
+| `users-management` (BE) | 0.2.x | `kotlin-spring-bff` recipe — JWT issuance, BCrypt hashing, sign-in/up/me + admin users CRUD. `JwtService` + `PasswordHasher` are extension points. |
+| `users-management` (FE) | 0.2.x | `vite-react-app` recipe — `AuthProvider` + `useAuth` + `RequireAuth`/`RequireRole`. Auto-wraps admin routes when both `users-management` and `admin-screen` are enabled. |
+| `next-marketing-site` (skeleton) | 0.2.x | New skeleton bundle — static-export Next.js 14, brand-driven Hero/Navbar/Footer, configurable extension-point pages, optional analytics, optional Docker → nginx. |
+| `pricing-page` (FE × 2) | 0.2.x | Same recipe shape in both `vite-react-app` and `next-marketing-site`. Spec-driven tiers (`name/price/period/features/highlight`). |
+| `dashboard` (FE) | 0.2.x | `vite-react-app` recipe — spec-driven stat tiles + time-range selector. Composes with `admin-screen` (Dashboard appears as first sidebar link). No charting library yet. |
+| `saas-vertical` preset (CLI) | 0.2.x | `fixedcode init saas-vertical <name>` — scaffolds 4 specs (domain + BFF + app + marketing) with all the above recipes pre-wired. |
 
-These were shipped via Composition Approach **C** (recipes inside the skeleton) — no engine changes; `recipes: [...]` is just a new field on each bundle's spec.
+All shipped via Composition Approach **C** — recipes inside the skeleton, no engine changes.
 
-The current bundles (`kotlin-spring-bff`, `vite-react-app`, etc.) get you a *skeleton* — an empty Spring service or React SPA. Real applications need *capabilities* on top: image upload, auth flows, search-with-facets, geo-data serving, etc. This doc lists the capabilities surfaced by the audit, ranked by reusability, and proposes how they should compose with the existing skeleton bundles.
+---
 
-## Inventory
+## Reference: composition approaches
 
-### Backend capabilities (pair with `kotlin-spring-bff`)
+The engine generates one tree per spec. Three options for composing features into that tree:
 
-| Capability | Reusability | Composition | Notes |
-|---|---|---|---|
-| `image-upload` | High — every vertical | Recipe in skeleton | Thumbnails, WEBP, S3/GCS/local backend. Touches almost every site. |
-| `auth-supabase` | High — every vertical | Recipe (BE half) | JwtVerifier + SecurityConfig + Supabase JWKS. Pairs with `vite-react-app` FE half. |
-| `pagination-filter-sort` | High — every list endpoint | Built-in to skeleton | Spring Data `Pageable` conventions, `?page&size&sort` query params. |
-| `caching-caffeine` | Medium | Already a flag in `kotlin-spring-bff` | Just bump from on/off → policies-per-method. |
-| `circuit-breaker-resilience4j` | Medium | Already in `kotlin-spring-bff` per service | |
-| `audit-log` | Medium | Recipe | Event publishing on entity change. |
-| `background-jobs` | Medium | Recipe | Spring `@Scheduled` + a `JobRunner` skeleton. |
-| `geographic-layer-serving` | Medium (location verticals only) | Recipe or its own bundle | PostGIS + ST_Simplify + ST_Intersects + GeoJSON. |
-| `pdf-report` | Low | Don't bundle | OpenPDF + per-vertical templates; too bespoke. |
-| `payments-stripe` | Low | Don't bundle | Domain-specific. |
-| `recommendation-engine` | Low | Don't bundle | Ranking/scoring is the product's IP. |
+**A. Feature flags in the skeleton spec** — `features: { imageUpload: true }`. Skeleton bakes in template branches. Easy, but skeleton must know every feature ahead of time.
 
-### Frontend capabilities (pair with `vite-react-app`)
+**B. Composable feature bundles** — each feature is its own bundle; engine merges trees. Most flexible. **Needs engine work** that hasn't been done. Defer until C is genuinely unwieldy.
 
-| Capability | Reusability | Composition | Notes |
-|---|---|---|---|
-| `auth-supabase-ui` | High | Recipe (FE half of `auth-supabase`) | `useAuth` hook, sign-in/up routes, `<RequireAuth>` guard. |
-| `form-validation` | High | Recipe | react-hook-form + zod, plus pre-baked input components (TextField, Select, DatePicker). |
-| `pagination-list-ui` | High | Recipe | Index-page pattern: query → list → pagination controls. Pairs with backend's `pagination-filter-sort`. |
-| `image-gallery-upload` | Medium | Recipe (FE half of `image-upload`) | Drop-zone, progress, gallery view. |
-| `faceted-search-ui` | Medium | Recipe | Filter panel + facet drill-down. Pairs with backend's `faceted-search-engine`. |
-| `map-view-leaflet` | Medium (location verticals only) | Recipe | Leaflet/MapLibre wrapper, GeoJSON layer, click handlers. |
-| `modal-dialog-system` | Medium | Recipe | Headless UI `<Dialog>` wrapper + queue. |
+**C. Recipes inside the skeleton** — skeleton has internal registry of named recipes; spec lists which to enable. **What we use today.** No engine changes. Best for a medium-sized set of features per skeleton (~10 each is fine).
 
-## Composition approaches
+## Reference: things to NOT bundle
 
-The engine currently generates one tree per spec. To compose features into that tree, three options:
+- PDF report templates, payment provider integrations, recommendation/scoring engines, analytics aggregations — domain-specific. Belong in extension-point files, not the skeleton.
 
-### A. Feature flags in the skeleton spec
-```yaml
-spec:
-  features:
-    imageUpload: true
-    auth: supabase
-```
-Skeleton author bakes in template branches. No engine changes. Limited to features the skeleton anticipated.
+## Reference: original audit context
 
-### B. Composable feature bundles
-Each feature is a tiny bundle with its own templates. The engine merges trees from multiple bundles into one project.
-
-```yaml
-bundles:
-  kotlin-spring-bff: ...
-  feature-image-upload: ...
-  feature-auth-supabase: ...
-```
-
-Most flexible, but **needs engine work**: a contribution-merge pipeline that hasn't been built. Gets messy fast (file conflicts, ordering, dependency graph).
-
-### C. Recipes inside the skeleton
-Skeleton has an internal registry of named feature recipes. Spec lists which to enable.
-
-```yaml
-spec:
-  recipes:
-    - image-upload
-    - auth-supabase
-    - faceted-search
-```
-
-Each recipe expands to a known set of files in the skeleton's templates. No engine changes. Best for a curated medium-sized set of features per skeleton.
-
-**Recommended path:** Start with **C** (recipes) for the top 3 cross-vertical features. Defer **B** until the recipe registry per skeleton is genuinely getting unwieldy (~10+ features).
-
-## Build order (when you come back to this)
-
-1. `image-upload` (BE) + `image-gallery-upload` (FE) — every vertical needs media. ~1 week.
-2. `auth-supabase` (BE+FE pair) — eliminates ~40% of skeleton boilerplate. ~3 days.
-3. `form-validation` (FE) — biggest FE time-sink in vertical builds. ~4 days.
-4. `pagination-filter-sort` (BE) + `pagination-list-ui` (FE) — every list endpoint. ~2 days.
-5. `geographic-layer-serving` (BE) — only if you're building location verticals (jobs, real estate, etc.). ~1 week.
-6. `faceted-search-engine` (BE) + `faceted-search-ui` (FE) — couples both halves; useful for ~60% of verticals. ~2 weeks.
-
-## Things to NOT bundle
-
-- PDF report templates, payment provider integrations, recommendation/scoring engines, analytics aggregations — these are domain-specific and belong in extension-point files, not the skeleton.
+This roadmap came out of a sibling-codebase audit (`~/projects/socials/ai-meme-saas`, the codebase behind `searchschools.com.au`). The audit identified recurring patterns across 4 backends and 2 frontends. The Shipped column above closes the universal "every vertical needs this" cases. The "What's left" section is the long tail.
