@@ -59,6 +59,25 @@
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/bundle-kotlin-spring-bff",
       "install": "npm install @fixedcode/bundle-kotlin-spring-bff"
+    },
+    {
+      "name": "@fixedcode/bundle-next-marketing-site",
+      "description": "Static-export Next.js 14 marketing site scaffold — App Router, Tailwind v4, brand-driven Hero/Navbar/Footer, configurable extension-point pages, optional Plausible/Umami analytics, optional multi-stage Docker → nginx",
+      "version": "0.1.0",
+      "kind": "bundle",
+      "tags": [
+        "next",
+        "nextjs",
+        "react",
+        "typescript",
+        "marketing",
+        "landing-page",
+        "tailwind",
+        "static-export"
+      ],
+      "author": "fixedcode",
+      "repo": "https://github.com/fixedcode-io/bundle-next-marketing-site",
+      "install": "npm install @fixedcode/bundle-next-marketing-site"
     }
   ]
 }

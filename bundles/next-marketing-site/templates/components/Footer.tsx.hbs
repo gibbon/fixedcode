@@ -1,0 +1,52 @@
+import Link from 'next/link';
+
+export default function Footer() {
+  const year = new Date().getFullYear();
+  return (
+    <footer className="border-t border-border py-12 px-6">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div>
+          <Link href="/" className="text-lg font-semibold">
+            {{brand.nameEscaped}}
+          </Link>
+          <p className="text-sm text-foreground/60 mt-1">{{brand.taglineEscaped}}</p>
+        </div>
+{{#if socialLinks.hasAny}}        <div className="flex items-center gap-5 text-sm text-foreground/60">
+{{#if socialLinks.github}}          <a
+            href="{{socialLinks.github}}"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground transition-colors"
+          >
+            GitHub
+          </a>
+{{/if}}{{#if socialLinks.twitter}}          <a
+            href="{{socialLinks.twitter}}"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground transition-colors"
+          >
+            Twitter
+          </a>
+{{/if}}{{#if socialLinks.linkedin}}          <a
+            href="{{socialLinks.linkedin}}"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground transition-colors"
+          >
+            LinkedIn
+          </a>
+{{/if}}{{#if socialLinks.email}}          <a
+            href="mailto:{{socialLinks.email}}"
+            className="hover:text-foreground transition-colors"
+          >
+            Email
+          </a>
+{{/if}}        </div>
+{{/if}}      </div>
+      <div className="max-w-6xl mx-auto mt-10 pt-6 border-t border-border text-xs text-foreground/50">
+        &copy; {year} {{brand.nameEscaped}}. All rights reserved.
+      </div>
+    </footer>
+  );
+}

@@ -1,0 +1,22 @@
+import Link from 'next/link';
+
+export default function Hero() {
+  return (
+    <section className="flex-1 flex items-center justify-center px-6 py-24">
+      <div className="max-w-3xl text-center">
+        <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight mb-6">
+          {{hero.headlineEscaped}}
+        </h1>
+        <p className="text-xl text-foreground/70 mb-10 leading-relaxed">
+          {{hero.subheadEscaped}}
+        </p>
+        <Link
+          href="{{hero.ctaHref}}"
+          className="inline-flex items-center justify-center h-12 px-8 rounded-md bg-brand text-white font-medium hover:opacity-90 transition-opacity"
+        >
+          {{hero.ctaTextEscaped}}
+        </Link>
+      </div>
+    </section>
+  );
+}

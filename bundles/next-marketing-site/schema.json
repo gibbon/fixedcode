@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["appName", "brand"],
+  "properties": {
+    "appName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "App name in kebab-case"
+    },
+    "brand": {
+      "type": "object",
+      "required": ["name", "tagline"],
+      "properties": {
+        "name": { "type": "string", "description": "Brand display name" },
+        "tagline": {
+          "type": "string",
+          "description": "Short brand tagline (used in metadata + footer)"
+        },
+        "primaryColor": {
+          "type": "string",
+          "description": "Optional CSS hex colour used as a CSS custom property",
+          "default": "#0a0a0a"
+        }
+      },
+      "additionalProperties": false
+    },
+    "hero": {
+      "type": "object",
+      "properties": {
+        "headline": { "type": "string" },
+        "subhead": { "type": "string" },
+        "ctaText": { "type": "string" },
+        "ctaHref": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "navLinks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "href"],
+        "properties": {
+          "label": { "type": "string" },
+          "href": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "pages": {
+      "type": "array",
+      "description": "Additional static pages to scaffold (each becomes app/<slug>/page.tsx)",
+      "items": {
+        "type": "object",
+        "required": ["slug", "title"],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "description": "Kebab-case URL segment (also used as the route folder)"
+          },
+          "title": { "type": "string", "description": "Page title used in metadata + heading" },
+          "description": { "type": "string", "description": "Optional meta description override" }
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "socialLinks": {
+      "type": "object",
+      "description": "Optional links rendered in the footer",
+      "properties": {
+        "github": { "type": "string" },
+        "twitter": { "type": "string" },
+        "linkedin": { "type": "string" },
+        "email": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "recipes": {
+      "type": "array",
+      "description": "Opt-in extras (placeholder — recipes ship in follow-up commits)",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "docker": {
+          "type": "boolean",
+          "default": false,
+          "description": "Multi-stage Node 22 → nginx Dockerfile that serves the static export"
+        },
+        "analytics": {
+          "enum": ["none", "plausible", "umami"],
+          "default": "none",
+          "description": "Optional head-only analytics snippet"
+        },
+        "analyticsDomain": {
+          "type": "string",
+          "description": "Domain registered with the analytics provider (only used when analytics != none)"
+        },
+        "analyticsScriptUrl": {
+          "type": "string",
+          "description": "Override the default analytics script URL (umami requires this; plausible defaults to plausible.io)"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,19 @@
+{
+  "name": "{{appName.kebab}}",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    {{#each dependencies}}"{{@key}}": "{{this}}"{{#unless @last}},{{/unless}}
+    {{/each}}
+  },
+  "devDependencies": {
+    {{#each devDependencies}}"{{@key}}": "{{this}}"{{#unless @last}},{{/unless}}
+    {{/each}}
+  }
+}

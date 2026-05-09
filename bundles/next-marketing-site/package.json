@@ -1,0 +1,27 @@
+{
+  "name": "@fixedcode/bundle-next-marketing-site",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "fixedcode": "file:../../engine",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "handlebars": "^4.7.8",
+    "typescript": "^5.7.2",
+    "vitest": "^3.2.4"
+  }
+}

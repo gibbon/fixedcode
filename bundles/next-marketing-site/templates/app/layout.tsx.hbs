@@ -1,0 +1,52 @@
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+export const metadata: Metadata = {
+  title: {
+    default: '{{brand.nameEscaped}} — {{brand.taglineEscaped}}',
+    template: '%s — {{brand.nameEscaped}}',
+  },
+  description: '{{brand.taglineEscaped}}',
+  applicationName: '{{brand.nameEscaped}}',
+  openGraph: {
+    title: '{{brand.nameEscaped}}',
+    description: '{{brand.taglineEscaped}}',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '{{brand.nameEscaped}}',
+    description: '{{brand.taglineEscaped}}',
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en">
+      <head>
+{{#if hasPlausible}}        <script
+          defer
+          data-domain="{{analyticsDomain}}"
+          src="{{analyticsScriptUrl}}"
+        />
+{{/if}}{{#if hasUmami}}        <script
+          defer
+          data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+          src={process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL}
+        />
+{{/if}}      </head>
+      <body className={`${inter.variable} font-sans antialiased bg-background text-foreground`}>
+        {children}
+      </body>
+    </html>
+  );
+}

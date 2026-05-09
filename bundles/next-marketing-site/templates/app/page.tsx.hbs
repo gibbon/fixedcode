@@ -1,0 +1,16 @@
+import Navbar from '@/components/Navbar';
+import Hero from '@/components/Hero';
+import Footer from '@/components/Footer';
+
+// Extension point — compose your landing page sections here.
+// Generated once; future regenerations will not overwrite this file.
+export default function HomePage() {
+  return (
+    <main className="min-h-screen flex flex-col">
+      <Navbar />
+      <Hero />
+      {/* TODO: drop additional sections here (features, testimonials, FAQ, etc.) */}
+      <Footer />
+    </main>
+  );
+}

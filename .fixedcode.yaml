@@ -8,6 +8,7 @@ bundles:
   ts-agent: './bundles/ts-agent'
   vite-react-app: './bundles/vite-react-app'
   kotlin-spring-bff: './bundles/kotlin-spring-bff'
+  next-marketing-site: './bundles/next-marketing-site'
 
 generators:
   openapi: './generators/openapi'

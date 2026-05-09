@@ -103,6 +103,7 @@ A `.fixedcode-manifest.json` in the output dir tracks every generated file with 
 | [`crud-api`](bundles/crud-api) | bundle | Minimal CRUD REST API (template-only). |
 | [`vite-react-app`](bundles/vite-react-app) | bundle | Vite + React 19 + TypeScript SPA: TanStack Router, Tailwind v4, optional Supabase auth, optional Docker. |
 | [`kotlin-spring-bff`](bundles/kotlin-spring-bff) | bundle | Kotlin + Spring Boot 3.3 Backend-For-Frontend: Resilience4j circuit breakers, typed WebClient per downstream service, optional Caffeine cache, JWT/OAuth2 security, JPA, Docker. |
+| [`next-marketing-site`](bundles/next-marketing-site) | bundle | Static-export Next.js 14 marketing site: brand-driven Hero / Navbar / Footer, configurable extension-point pages, Tailwind v4, optional Plausible/Umami analytics, optional Docker → nginx. |
 | [`ddd-spike`](bundles/ddd-spike) | bundle | Original DDD reference bundle. |
 | [`openapi`](generators/openapi) | generator | OpenAPI 3.0.3 spec from a domain context (used by `spring-domain`). |
 
