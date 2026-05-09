@@ -131,9 +131,9 @@ export default function AISandwich() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     {layer.isCenter ? (
-                      <FactoryIcon className="w-6 h-6 text-blue-400" />
+                      <FactoryIcon className="w-6 h-6" />
                     ) : (
-                      <RobotIcon className="w-6 h-6 text-purple-400" />
+                      <RobotIcon className="w-6 h-6" />
                     )}
                     <h3
                       className={`text-xl font-bold ${

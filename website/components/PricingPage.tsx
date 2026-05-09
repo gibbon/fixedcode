@@ -10,9 +10,10 @@ const tiers = [
     price: "$0",
     period: "non-commercial / trial",
     description: "Full CLI for personal projects, evaluation, and non-commercial use. No time limit.",
-    icon: <PersonIcon className="w-7 h-7 text-purple-400" />,
+    icon: <PersonIcon className="w-7 h-7" />,
     color: "border-border",
     bgColor: "",
+    accentText: "text-foreground/80",
     ctaText: "Install from npm",
     ctaHref: "https://www.npmjs.com/package/fixedcode",
     ctaClass: "border border-border text-gray-300 hover:bg-surface-light",
@@ -34,11 +35,13 @@ const tiers = [
     price: "$99",
     period: "/month per team",
     description: "Shared schemas across a team. Consistent patterns without coordination overhead.",
-    icon: <RobotIcon className="w-7 h-7 text-blue-400" />,
-    color: "border-blue-500/30",
+    icon: <RobotIcon className="w-7 h-7" />,
+    color: "border-border",
     bgColor: "",
+    accentText: "text-foreground",
     ctaText: "Start Free Trial",
-    ctaClass: "border border-blue-500/30 text-blue-400 hover:bg-blue-500/10",
+    ctaHref: "https://github.com/gibbon/fixedcode",
+    ctaClass: "border border-border text-foreground hover:bg-surface-light",
     features: [
       { text: "Everything in Free", included: true },
       { text: "Shared team schema registry", included: true },
@@ -57,9 +60,10 @@ const tiers = [
     price: "$499",
     period: "/month",
     description: "Encode your platform's standards. Every service gets every CFR from day zero.",
-    icon: <FactoryIcon className="w-7 h-7 text-cyan-400" />,
-    color: "border-cyan-500/30",
-    bgColor: "ring-1 ring-purple-500/20",
+    icon: <FactoryIcon className="w-7 h-7" />,
+    color: "border-foreground/40",
+    bgColor: "",
+    accentText: "text-foreground",
     highlight: true,
     ctaText: "Contact Us",
     ctaClass: "bg-gradient text-white hover:opacity-90",
@@ -81,11 +85,12 @@ const tiers = [
     price: "Custom",
     period: "",
     description: "Provable compliance for AI-generated code. Audit trails for regulators.",
-    icon: <FactoryIcon className="w-7 h-7 text-green-400" />,
-    color: "border-green-500/30",
+    icon: <FactoryIcon className="w-7 h-7" />,
+    color: "border-border",
     bgColor: "",
+    accentText: "text-foreground",
     ctaText: "Talk to Us",
-    ctaClass: "border border-green-500/30 text-green-400 hover:bg-green-500/10",
+    ctaClass: "border border-border text-foreground hover:bg-surface-light",
     features: [
       { text: "Everything in Organisation", included: true },
       { text: "Full audit logs — who generated what, when, from which template", included: true },
@@ -125,12 +130,12 @@ export default function PricingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: i * 0.1 }}
             className={`rounded-xl border ${tier.color} ${tier.bgColor} bg-surface p-6 flex flex-col relative ${
-              tier.highlight ? "shadow-lg shadow-purple-500/10" : ""
+              tier.highlight ? "shadow-md" : ""
             }`}
           >
             {tier.highlight && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="text-[10px] font-semibold px-3 py-1 rounded-full bg-gradient text-white uppercase tracking-wider">
+                <span className="text-[10px] font-semibold px-3 py-1 rounded-full bg-foreground text-background uppercase tracking-wider">
                   Most Popular
                 </span>
               </div>

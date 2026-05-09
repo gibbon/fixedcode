@@ -122,7 +122,7 @@ export default function AISandwichDetail() {
           {/* Layer 2 */}
           <div className="rounded-xl border border-blue-500/30 bg-surface p-6 ring-1 ring-purple-500/20 shadow-lg shadow-black/50">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-bold text-gradient">
+              <h3 className="text-xl font-bold text-foreground">
                 Layer 2: FixedCode (Deterministic)
               </h3>
               <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gradient text-white">
@@ -343,8 +343,8 @@ export default function AISandwichDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="rounded-xl border border-purple-500/20 bg-surface p-6">
             <div className="flex items-center gap-2 mb-3">
-              <PersonIcon className="w-5 h-5 text-purple-400" />
-              <h3 className="text-lg font-semibold text-purple-400">
+              <PersonIcon className="w-5 h-5" />
+              <h3 className="text-lg font-semibold text-foreground">
                 Domain Knowledge
               </h3>
             </div>
@@ -360,8 +360,8 @@ export default function AISandwichDetail() {
           </div>
           <div className="rounded-xl border border-blue-500/20 bg-surface p-6">
             <div className="flex items-center gap-2 mb-3">
-              <FactoryIcon className="w-5 h-5 text-blue-400" />
-              <h3 className="text-lg font-semibold text-blue-400">
+              <FactoryIcon className="w-5 h-5" />
+              <h3 className="text-lg font-semibold text-foreground">
                 Platform Knowledge
               </h3>
             </div>

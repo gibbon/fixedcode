@@ -187,7 +187,7 @@ export default function Hero() {
             href="https://www.npmjs.com/package/fixedcode"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient text-white font-medium text-sm hover:opacity-90 transition-opacity shadow-lg shadow-purple-500/20"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient text-white font-medium text-sm hover:opacity-90 transition-opacity shadow-md"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M0 0v24h24V0H0zm19.2 19.2H12V8.4h7.2v10.8z" />
