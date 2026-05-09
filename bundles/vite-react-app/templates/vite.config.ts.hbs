@@ -1,0 +1,24 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+{{#if hasTanstackRouter}}import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
+{{/if}}{{#if hasTailwind}}import tailwindcss from '@tailwindcss/vite';
+{{/if}}import path from 'node:path';
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [
+    react(),
+    {{#if hasTanstackRouter}}TanStackRouterVite(),
+    {{/if}}{{#if hasTailwind}}tailwindcss(),
+    {{/if}}
+  ],
+  server: {
+    port: {{port}},
+    host: true,
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+});

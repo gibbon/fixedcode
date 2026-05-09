@@ -1,0 +1,13 @@
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  {{#if hasApi}}readonly {{apiUrlEnvVar}}: string;
+  {{/if}}{{#if hasSupabase}}readonly VITE_SUPABASE_URL: string;
+  readonly VITE_SUPABASE_ANON_KEY: string;
+  {{/if}}{{#if hasClerk}}readonly VITE_CLERK_PUBLISHABLE_KEY: string;
+  {{/if}}
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

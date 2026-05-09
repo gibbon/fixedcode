@@ -1,0 +1,53 @@
+# {{appName.pascal}}
+
+Vite + React 19 + TypeScript SPA.
+
+## Stack
+
+- React 19, TypeScript ~5.7, Vite 6
+{{#if hasTanstackRouter}}- TanStack Router (code-based routes in `src/router.tsx`)
+{{/if}}{{#if hasReactRouter}}- React Router v7
+{{/if}}{{#if hasTailwind}}- Tailwind CSS v4 (via `@tailwindcss/vite`)
+{{/if}}{{#if hasApi}}- Typed `fetch` wrapper at `src/lib/api.ts`
+{{/if}}{{#if hasSupabase}}- Supabase client at `src/lib/supabase.ts`
+{{/if}}{{#if hasClerk}}- Clerk for auth
+{{/if}}{{#if hasDocker}}- Docker (multi-stage build → nginx static serve)
+{{/if}}
+## Development
+
+```bash
+cp .env.example .env   # then fill in values
+npm install
+npm run dev            # starts on http://localhost:{{port}}
+```
+
+## Build
+
+```bash
+npm run build
+npm run preview
+```
+
+## Type-check & lint
+
+```bash
+npm run typecheck
+npm run lint
+```
+
+## Routes
+
+| Path | Component |
+|------|-----------|
+{{#each routes}}| `{{path}}` | `{{componentName}}` (`src/routes/{{routeFile}}.tsx`) |
+{{/each}}
+
+Route files are **extension points** — generated once, then yours to edit. Regenerating the project will not overwrite them.
+{{#if hasDocker}}
+## Docker
+
+```bash
+docker build -t {{appName.kebab}} .
+docker run -p 8080:80 {{appName.kebab}}
+```
+{{/if}}
