@@ -58,6 +58,16 @@ export function generateFiles(ctx: NextMarketingSiteContext): FileEntry[] {
     );
   }
 
+  // Recipe: pricing-page
+  if (ctx.recipePricingPage) {
+    files.push({
+      template: 'recipes/pricing-page/app/pricing/page.tsx.hbs',
+      output: 'app/pricing/page.tsx',
+      ctx: c,
+      overwrite: false,
+    });
+  }
+
   return files;
 }
 

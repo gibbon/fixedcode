@@ -1,5 +1,12 @@
-import { parseSpec, type NormalizedSpec, type AnalyticsKind } from './spec.js';
+import { parseSpec, type NormalizedSpec, type AnalyticsKind, type RecipeName } from './spec.js';
 import { escapeHtml, generateVariants, toPascalCase, type NamingVariants } from './naming.js';
+import { buildPricingPageContext, type PricingPageContext } from './recipes/pricing-page.js';
+
+export type {
+  PricingFeatureContext,
+  PricingTierContext,
+  PricingPageContext,
+} from './recipes/pricing-page.js';
 
 export interface EnrichedNavLink {
   label: string;
@@ -50,7 +57,9 @@ export interface NextMarketingSiteContext {
   pages: EnrichedPage[];
   hasPages: boolean;
   socialLinks: EnrichedSocialLinks;
-  recipes: string[];
+  recipes: RecipeName[];
+  recipePricingPage: boolean;
+  pricing: PricingPageContext;
   hasDocker: boolean;
   analytics: AnalyticsKind;
   hasAnalytics: boolean;
@@ -97,7 +106,23 @@ export function enrich(
   const spec: NormalizedSpec = parseSpec(raw);
   const appName = generateVariants(spec.appName);
 
-  const navLinks: EnrichedNavLink[] = spec.navLinks.map((l) => ({
+  const recipePricingPage = spec.recipes.includes('pricing-page');
+  const pricing = buildPricingPageContext(recipePricingPage, spec.pricing);
+
+  // When the pricing-page recipe is enabled, ensure /pricing is reachable from
+  // the nav. Skip if the user has already wired a Pricing link (by href or by
+  // label) — we never duplicate a link.
+  const rawNavLinks = [...spec.navLinks];
+  if (recipePricingPage) {
+    const hasPricingLink = rawNavLinks.some(
+      (l) => l.href === '/pricing' || /pricing/i.test(l.label),
+    );
+    if (!hasPricingLink) {
+      rawNavLinks.push({ label: 'Pricing', href: '/pricing' });
+    }
+  }
+
+  const navLinks: EnrichedNavLink[] = rawNavLinks.map((l) => ({
     label: l.label,
     labelEscaped: escapeHtml(l.label),
     href: l.href,
@@ -147,6 +172,8 @@ export function enrich(
       hasAny: hasAnySocial,
     },
     recipes: spec.recipes,
+    recipePricingPage,
+    pricing,
     hasDocker: spec.features.docker,
     analytics: spec.features.analytics,
     hasAnalytics: spec.features.analytics !== 'none',

@@ -1,11 +1,12 @@
 export type RouterKind = 'tanstack' | 'reactrouter' | 'none';
 export type AuthKind = 'supabase' | 'clerk' | 'none';
 
-export type RecipeName = 'image-upload' | 'admin-screen' | 'users-management';
+export type RecipeName = 'image-upload' | 'admin-screen' | 'users-management' | 'pricing-page';
 export const KNOWN_RECIPES: readonly RecipeName[] = [
   'image-upload',
   'admin-screen',
   'users-management',
+  'pricing-page',
 ] as const;
 
 export interface RawRoute {
@@ -45,6 +46,52 @@ export interface NormalizedAdminScreenConfig {
   apiBaseUrl: string;
 }
 
+export interface RawPricingFeature {
+  text?: string;
+  included?: boolean;
+}
+
+export interface RawPricingTier {
+  name: string;
+  price: string;
+  period?: string;
+  audience?: string;
+  description?: string;
+  features?: RawPricingFeature[];
+  ctaText?: string;
+  ctaHref?: string;
+  highlight?: boolean;
+}
+
+export interface RawPricingConfig {
+  headline?: string;
+  subhead?: string;
+  tiers?: RawPricingTier[];
+}
+
+export interface NormalizedPricingFeature {
+  text: string;
+  included: boolean;
+}
+
+export interface NormalizedPricingTier {
+  name: string;
+  price: string;
+  period: string;
+  audience: string;
+  description: string;
+  features: NormalizedPricingFeature[];
+  ctaText: string;
+  ctaHref: string;
+  highlight: boolean;
+}
+
+export interface NormalizedPricingConfig {
+  headline: string;
+  subhead: string;
+  tiers: NormalizedPricingTier[];
+}
+
 export interface RawViteReactAppSpec {
   appName: string;
   port?: number;
@@ -61,6 +108,7 @@ export interface RawViteReactAppSpec {
   imageUpload?: RawImageUploadConfig;
   adminScreen?: RawAdminScreenConfig;
   usersManagement?: RawUsersManagementConfig;
+  pricing?: RawPricingConfig;
 }
 
 export interface NormalizedSpec {
@@ -79,6 +127,7 @@ export interface NormalizedSpec {
   imageUpload: NormalizedImageUploadConfig;
   adminScreen: NormalizedAdminScreenConfig;
   usersManagement: NormalizedUsersManagementConfig;
+  pricing: NormalizedPricingConfig;
 }
 
 const DEFAULT_ROUTES: RawRoute[] = [{ path: '/', name: 'Home' }];
@@ -116,5 +165,34 @@ export function parseSpec(raw: Record<string, unknown>): NormalizedSpec {
       signUpPath: spec.usersManagement?.signUpPath ?? '/sign-up',
       afterSignInPath: spec.usersManagement?.afterSignInPath ?? '/',
     },
+    pricing: normalizePricing(spec.pricing),
+  };
+}
+
+function normalizePricing(raw: RawPricingConfig | undefined): NormalizedPricingConfig {
+  const tiers: NormalizedPricingTier[] = Array.isArray(raw?.tiers)
+    ? raw!.tiers!.map((t) => ({
+        name: t.name,
+        price: t.price,
+        period: t.period ?? '',
+        audience: t.audience ?? '',
+        description: t.description ?? '',
+        features: Array.isArray(t.features)
+          ? t.features
+              .filter((f) => typeof f.text === 'string' && f.text.length > 0)
+              .map((f) => ({
+                text: f.text as string,
+                included: f.included !== false,
+              }))
+          : [],
+        ctaText: t.ctaText ?? 'Get started',
+        ctaHref: t.ctaHref ?? '#',
+        highlight: t.highlight === true,
+      }))
+    : [];
+  return {
+    headline: raw?.headline ?? 'Pricing',
+    subhead: raw?.subhead ?? '',
+    tiers,
   };
 }

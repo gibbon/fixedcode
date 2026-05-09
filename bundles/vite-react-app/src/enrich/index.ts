@@ -20,8 +20,14 @@ import {
   type AdminScreenDisabledContext,
   type BuildAdminContextOptions,
 } from './recipes/admin-screen.js';
+import { buildPricingPageContext, type PricingPageContext } from './recipes/pricing-page.js';
 
 export type { AdminAggregate, AdminField, AdminScreenContext } from './recipes/admin-screen.js';
+export type {
+  PricingFeatureContext,
+  PricingTierContext,
+  PricingPageContext,
+} from './recipes/pricing-page.js';
 
 export interface EnrichOptions {
   adminScreen?: BuildAdminContextOptions;
@@ -59,6 +65,8 @@ export interface ViteReactAppContext {
   adminScreen: AdminScreenContext | AdminScreenDisabledContext;
   recipeUsersManagement: boolean;
   usersManagement: NormalizedUsersManagementConfig;
+  recipePricingPage: boolean;
+  pricing: PricingPageContext;
   /** npm dependencies merged into package.json */
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
@@ -133,6 +141,9 @@ export function enrich(
     options.adminScreen ?? {},
   );
 
+  const recipePricingPage = spec.recipes.includes('pricing-page');
+  const pricing = buildPricingPageContext(recipePricingPage, spec.pricing);
+
   return {
     appName,
     port: spec.port,
@@ -157,6 +168,8 @@ export function enrich(
     adminScreen,
     recipeUsersManagement: spec.recipes.includes('users-management'),
     usersManagement: spec.usersManagement,
+    recipePricingPage,
+    pricing,
     dependencies,
     devDependencies,
   };

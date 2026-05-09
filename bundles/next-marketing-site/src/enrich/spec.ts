@@ -1,5 +1,54 @@
 export type AnalyticsKind = 'none' | 'plausible' | 'umami';
 
+export type RecipeName = 'pricing-page';
+export const KNOWN_RECIPES: readonly RecipeName[] = ['pricing-page'] as const;
+
+export interface RawPricingFeature {
+  text?: string;
+  included?: boolean;
+}
+
+export interface RawPricingTier {
+  name: string;
+  price: string;
+  period?: string;
+  audience?: string;
+  description?: string;
+  features?: RawPricingFeature[];
+  ctaText?: string;
+  ctaHref?: string;
+  highlight?: boolean;
+}
+
+export interface RawPricingConfig {
+  headline?: string;
+  subhead?: string;
+  tiers?: RawPricingTier[];
+}
+
+export interface NormalizedPricingFeature {
+  text: string;
+  included: boolean;
+}
+
+export interface NormalizedPricingTier {
+  name: string;
+  price: string;
+  period: string;
+  audience: string;
+  description: string;
+  features: NormalizedPricingFeature[];
+  ctaText: string;
+  ctaHref: string;
+  highlight: boolean;
+}
+
+export interface NormalizedPricingConfig {
+  headline: string;
+  subhead: string;
+  tiers: NormalizedPricingTier[];
+}
+
 export interface RawNavLink {
   label: string;
   href: string;
@@ -48,6 +97,7 @@ export interface RawNextMarketingSiteSpec {
   socialLinks?: RawSocialLinks;
   recipes?: string[];
   features?: RawFeatures;
+  pricing?: RawPricingConfig;
 }
 
 export interface NormalizedBrand {
@@ -84,8 +134,9 @@ export interface NormalizedSpec {
   navLinks: RawNavLink[];
   pages: RawPage[];
   socialLinks: NormalizedSocialLinks;
-  recipes: string[];
+  recipes: RecipeName[];
   features: NormalizedFeatures;
+  pricing: NormalizedPricingConfig;
 }
 
 const DEFAULT_HERO: NormalizedHero = {
@@ -124,12 +175,45 @@ export function parseSpec(raw: Record<string, unknown>): NormalizedSpec {
       linkedin: social.linkedin ?? null,
       email: social.email ?? null,
     },
-    recipes: Array.isArray(spec.recipes) ? spec.recipes : [],
+    recipes: Array.isArray(spec.recipes)
+      ? spec.recipes.filter((x): x is RecipeName =>
+          (KNOWN_RECIPES as readonly string[]).includes(x),
+        )
+      : [],
     features: {
       docker: features.docker ?? false,
       analytics: features.analytics ?? 'none',
       analyticsDomain: features.analyticsDomain ?? '',
       analyticsScriptUrl: features.analyticsScriptUrl ?? '',
     },
+    pricing: normalizePricing(spec.pricing),
+  };
+}
+
+function normalizePricing(raw: RawPricingConfig | undefined): NormalizedPricingConfig {
+  const tiers: NormalizedPricingTier[] = Array.isArray(raw?.tiers)
+    ? raw!.tiers!.map((t) => ({
+        name: t.name,
+        price: t.price,
+        period: t.period ?? '',
+        audience: t.audience ?? '',
+        description: t.description ?? '',
+        features: Array.isArray(t.features)
+          ? t.features
+              .filter((f) => typeof f.text === 'string' && f.text.length > 0)
+              .map((f) => ({
+                text: f.text as string,
+                included: f.included !== false,
+              }))
+          : [],
+        ctaText: t.ctaText ?? 'Get started',
+        ctaHref: t.ctaHref ?? '#',
+        highlight: t.highlight === true,
+      }))
+    : [];
+  return {
+    headline: raw?.headline ?? 'Pricing',
+    subhead: raw?.subhead ?? '',
+    tiers,
   };
 }
