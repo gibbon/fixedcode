@@ -8,8 +8,26 @@
   --color-surface: #111111;
   --color-surface-light: #1a1a1a;
   --color-border: #222222;
-  --color-accent: #d97706;
-  --color-accent-fg: #fff7ed;
+
+  /* Polished-metal accent (chrome / brushed steel). Multi-stop linear gradient
+     with reflection-style highlights. Used for .text-gradient and .bg-gradient. */
+  --metal-text: linear-gradient(
+    180deg,
+    #fafafa 0%,
+    #d4d4d4 35%,
+    #f5f5f5 50%,
+    #a3a3a3 70%,
+    #e5e5e5 100%
+  );
+  --metal-bg: linear-gradient(
+    135deg,
+    #c8c8c8 0%,
+    #f5f5f5 25%,
+    #b8b8b8 50%,
+    #ededed 75%,
+    #a3a3a3 100%
+  );
+  --metal-fg: #0a0a0a;
 }
 
 html:not(.dark) {
@@ -18,8 +36,24 @@ html:not(.dark) {
   --color-surface: #f5f5f5;
   --color-surface-light: #ebebeb;
   --color-border: #e0e0e0;
-  --color-accent: #b45309;
-  --color-accent-fg: #ffffff;
+
+  /* Light mode: deeper steel so it stays legible on white. */
+  --metal-text: linear-gradient(
+    180deg,
+    #6b6b6b 0%,
+    #2a2a2a 40%,
+    #525252 60%,
+    #1a1a1a 100%
+  );
+  --metal-bg: linear-gradient(
+    135deg,
+    #525252 0%,
+    #8a8a8a 30%,
+    #3f3f3f 55%,
+    #707070 80%,
+    #2a2a2a 100%
+  );
+  --metal-fg: #ffffff;
 }
 
 * {
@@ -49,8 +83,8 @@ h3 {
 }
 
 ::selection {
-  background: var(--color-accent);
-  color: var(--color-accent-fg);
+  background: #d4d4d4;
+  color: #0a0a0a;
 }
 
 /* Light mode overrides */
@@ -97,16 +131,25 @@ html:not(.dark) .border-border {
 }
 
 @layer utilities {
-  /* Flattened — was a purple/blue/cyan gradient. Now a single editorial accent. */
+  /* Polished-metal text — was a purple/blue/cyan gradient. */
   .text-gradient {
-    color: var(--color-accent);
-    background: none;
-    -webkit-text-fill-color: currentColor;
+    background: var(--metal-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    /* Subtle chrome lift */
+    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.08));
   }
 
   .bg-gradient {
-    background: var(--color-accent);
-    color: var(--color-accent-fg);
+    background: var(--metal-bg);
+    color: var(--metal-fg);
+    /* Tiny inner highlight + outer lift to read as polished metal */
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+      0 1px 2px rgba(0, 0, 0, 0.15);
   }
 
   .bg-gradient-subtle {
@@ -114,7 +157,7 @@ html:not(.dark) .border-border {
   }
 
   .border-gradient {
-    border-color: var(--color-accent);
+    border-image: var(--metal-bg) 1;
   }
 
   /* Glows used to be coloured shadows. Flatten to a soft neutral lift. */
