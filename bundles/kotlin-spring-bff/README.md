@@ -158,6 +158,54 @@ Spec config (under `spec.paginationFilterSort`):
 | `defaultPageSize` | `20`    | `size` to use when the client omits the param          |
 | `maxPageSize`     | `100`   | Hard cap applied after parsing — guards against abuse  |
 
+#### `audit-log`
+
+Append-only audit ledger for any aggregate change. Domain code calls `AuditLogPublisher.created/updated/deleted(aggregateType, aggregateId, payload)`; a Spring event listener writes one row per call to the `audit_log` Postgres table, then forwards the persisted entry to `AuditLogOutboundAdapter` so you can wire Kafka / SQS / Datadog without touching the publisher contract. **Requires `features.database: true`**.
+
+Usage in your service code:
+
+```kotlin
+class WidgetService(
+    private val repo: WidgetRepository,
+    private val audit: AuditLogPublisher,
+) {
+    fun create(spec: WidgetSpec): Widget {
+        val w = repo.save(Widget.from(spec))
+        audit.created(aggregateType = "Widget", aggregateId = w.id.toString(), payload = w)
+        return w
+    }
+}
+```
+
+Actor resolution order (in `AuditLogEventListener`):
+1. Explicit `event.actor` argument on the publisher call.
+2. Spring Security principal name when an authenticated user is in scope.
+3. The configured `actorHeader` (default `X-Actor`) — used for service-to-service calls. Set `actorHeader: ''` to disable header lookup entirely (the listener won't constructor-inject `HttpServletRequest`, so it works cleanly from `@Scheduled` jobs and other non-request contexts).
+4. `null` — recorded as an unknown / system actor.
+
+Generates:
+
+- `audit/AuditAction.kt` — enum `{CREATED, UPDATED, DELETED}`
+- `audit/AuditEvent.kt` — Spring application-event payload
+- `audit/AuditLog.kt` — JPA entity (table `audit_log`)
+- `audit/AuditLogRepository.kt` — Spring Data repo with three pre-baked finders (`byAggregateTypeAndAggregateId`, `byAggregateType`, `byActor`)
+- `audit/AuditLogPublisher.kt` — `@Component` facade with `created()/updated()/deleted()`
+- `audit/AuditLogEventListener.kt` — `@EventListener` that persists + forwards
+- `audit/AuditLogOutboundAdapter.kt` — **extension point** (`overwrite: false`) — no-op default; replace the body to emit Kafka/SQS/Splunk records
+- `dto/AuditLogDto.kt` — wire format (payload sent through verbatim as a raw JSON string)
+- `api/AuditLogController.kt` — **extension point** (`overwrite: false`) — `GET /api/audit-log` with optional `aggregateType`/`aggregateId`/`actor` filters. Disable scaffolding via `auditLog.adminEndpoint: false`.
+- `src/main/resources/application-audit-log.yml` — `app.audit.actorHeader` (env: `APP_AUDIT_ACTOR_HEADER`)
+- `src/main/resources/db/migration/V100__audit_log.sql` — **`overwrite: false`** (Flyway forbids retroactive edits) — versioned at `V100` to sit clear of any aggregate migrations the `spring-domain` bundle generates (`V001..V099`)
+
+When paired with `users-management`, `SecurityConfig` automatically locks `/api/audit-log/**` to `ROLE_ADMIN`.
+
+Spec config (under `spec.auditLog`):
+
+| Field            | Default     | Description                                                                                                          |
+| ---------------- | ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| `actorHeader`    | `X-Actor`   | Header used to resolve the acting user when no Security principal is present. Set to `""` to disable header lookup.  |
+| `adminEndpoint`  | `true`      | Whether to scaffold `AuditLogController`. Set to `false` if you want only the publisher/listener plumbing.           |
+
 ### Adding a new recipe
 
 1. Add the recipe name to `schema.json` under `properties.recipes.items.enum` and `KNOWN_RECIPES` in `src/enrich/spec.ts`.

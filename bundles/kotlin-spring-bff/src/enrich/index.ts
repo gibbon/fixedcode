@@ -5,6 +5,7 @@ import {
   type RecipeName,
   type NormalizedUsersManagementConfig,
   type NormalizedPaginationFilterSortConfig,
+  type NormalizedAuditLogConfig,
 } from './spec.js';
 import { generateVariants, toFlatPackageSegment, type NamingVariants } from './naming.js';
 
@@ -52,11 +53,13 @@ export interface KotlinSpringBffContext extends Context {
   recipeImageUpload: boolean;
   recipeUsersManagement: boolean;
   recipePaginationFilterSort: boolean;
+  recipeAuditLog: boolean;
   /** Spring profiles activated by enabled recipes that ship a profile-specific yml. */
   recipeProfiles: string[];
   hasRecipeProfiles: boolean;
   usersManagement: NormalizedUsersManagementConfig;
   paginationFilterSort: NormalizedPaginationFilterSortConfig;
+  auditLog: NormalizedAuditLogConfig;
   /**
    * Effective auth wiring after recipes apply: when users-management is enabled,
    * the bundle becomes a JWT issuer/verifier even if features.auth was 'none'.
@@ -98,6 +101,15 @@ export function enrich(
     );
   }
 
+  const recipeAuditLog = spec.recipes.includes('audit-log');
+  if (recipeAuditLog && !spec.features.database) {
+    throw new Error(
+      '[kotlin-spring-bff:audit-log] recipe "audit-log" requires features.database: true ' +
+        '(it persists audit entries via Spring Data JPA + Flyway). ' +
+        'Set `features: { database: true }` in your spec.',
+    );
+  }
+
   const authJwt = spec.features.auth === 'jwt';
   const authOauth2 = spec.features.auth === 'oauth2';
   const authEnabled = spec.features.auth !== 'none' || recipeUsersManagement;
@@ -112,6 +124,7 @@ export function enrich(
   if (recipeUsersManagement) recipeProfiles.push('users-management');
   if (spec.recipes.includes('pagination-filter-sort'))
     recipeProfiles.push('pagination-filter-sort');
+  if (recipeAuditLog) recipeProfiles.push('audit-log');
 
   return {
     appName,
@@ -132,10 +145,12 @@ export function enrich(
     recipeImageUpload: spec.recipes.includes('image-upload'),
     recipeUsersManagement,
     recipePaginationFilterSort: spec.recipes.includes('pagination-filter-sort'),
+    recipeAuditLog,
     recipeProfiles,
     hasRecipeProfiles: recipeProfiles.length > 0,
     usersManagement: spec.usersManagement,
     paginationFilterSort: spec.paginationFilterSort,
+    auditLog: spec.auditLog,
     effectiveAuthJwt,
   };
 }

@@ -182,6 +182,7 @@ spec:
     - users-management
     - image-upload
     - pagination-filter-sort
+    - audit-log
   usersManagement:
     tokenTtlMinutes: 1440
     defaultAdminEmail: admin@example.com

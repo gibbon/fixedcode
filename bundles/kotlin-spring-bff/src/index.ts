@@ -201,6 +201,72 @@ export function generateFiles(ctx: KotlinSpringBffContext): FileEntry[] {
     );
   }
 
+  // Recipe: audit-log
+  if (ctx.recipeAuditLog) {
+    files.push(
+      {
+        template: 'recipes/audit-log/audit/AuditAction.kt.hbs',
+        output: `src/main/kotlin/${pkg}/audit/AuditAction.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/audit-log/audit/AuditEvent.kt.hbs',
+        output: `src/main/kotlin/${pkg}/audit/AuditEvent.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/audit-log/audit/AuditLog.kt.hbs',
+        output: `src/main/kotlin/${pkg}/audit/AuditLog.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/audit-log/audit/AuditLogRepository.kt.hbs',
+        output: `src/main/kotlin/${pkg}/audit/AuditLogRepository.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/audit-log/audit/AuditLogPublisher.kt.hbs',
+        output: `src/main/kotlin/${pkg}/audit/AuditLogPublisher.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/audit-log/audit/AuditLogEventListener.kt.hbs',
+        output: `src/main/kotlin/${pkg}/audit/AuditLogEventListener.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/audit-log/audit/AuditLogOutboundAdapter.kt.hbs',
+        output: `src/main/kotlin/${pkg}/audit/AuditLogOutboundAdapter.kt`,
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/audit-log/dto/AuditLogDto.kt.hbs',
+        output: `src/main/kotlin/${pkg}/dto/AuditLogDto.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/audit-log/resources/application-audit-log.yml.hbs',
+        output: 'src/main/resources/application-audit-log.yml',
+        ctx: c,
+      },
+      {
+        template: 'recipes/audit-log/resources/db/V100__audit_log.sql.hbs',
+        output: 'src/main/resources/db/migration/V100__audit_log.sql',
+        ctx: c,
+        overwrite: false,
+      },
+    );
+    if (ctx.auditLog.adminEndpoint) {
+      files.push({
+        template: 'recipes/audit-log/api/AuditLogController.kt.hbs',
+        output: `src/main/kotlin/${pkg}/api/AuditLogController.kt`,
+        ctx: c,
+        overwrite: false,
+      });
+    }
+  }
+
   // Recipe: image-upload
   if (ctx.recipeImageUpload) {
     files.push(

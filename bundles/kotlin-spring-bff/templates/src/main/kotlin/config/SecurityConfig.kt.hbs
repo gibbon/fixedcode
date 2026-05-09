@@ -60,6 +60,9 @@ class SecurityConfig{{#if recipeUsersManagement}}(
                     ).permitAll()
 {{#if recipeUsersManagement}}
                     .requestMatchers("/api/users/**").hasRole("ADMIN")
+{{#if recipeAuditLog}}
+                    .requestMatchers("/api/audit-log/**").hasRole("ADMIN")
+{{/if}}
                     .requestMatchers("/api/auth/me").authenticated()
                     .requestMatchers("/api/**").authenticated()
 {{/if}}

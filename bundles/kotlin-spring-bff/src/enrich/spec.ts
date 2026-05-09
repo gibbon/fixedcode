@@ -1,10 +1,15 @@
 export type AuthMode = 'jwt' | 'oauth2' | 'none';
 
-export type RecipeName = 'image-upload' | 'users-management' | 'pagination-filter-sort';
+export type RecipeName =
+  | 'image-upload'
+  | 'users-management'
+  | 'pagination-filter-sort'
+  | 'audit-log';
 export const KNOWN_RECIPES: readonly RecipeName[] = [
   'image-upload',
   'users-management',
   'pagination-filter-sort',
+  'audit-log',
 ] as const;
 
 export interface RawServiceEntry {
@@ -32,6 +37,17 @@ export interface NormalizedPaginationFilterSortConfig {
   maxPageSize: number;
 }
 
+export interface RawAuditLogConfig {
+  actorHeader?: string;
+  adminEndpoint?: boolean;
+}
+
+export interface NormalizedAuditLogConfig {
+  actorHeader: string;
+  hasActorHeader: boolean;
+  adminEndpoint: boolean;
+}
+
 export interface RawBffSpec {
   appName: string;
   groupId: string;
@@ -47,6 +63,7 @@ export interface RawBffSpec {
   recipes?: string[];
   usersManagement?: RawUsersManagementConfig;
   paginationFilterSort?: RawPaginationFilterSortConfig;
+  auditLog?: RawAuditLogConfig;
 }
 
 export interface ParsedBffSpec {
@@ -64,6 +81,7 @@ export interface ParsedBffSpec {
   recipes: RecipeName[];
   usersManagement: NormalizedUsersManagementConfig;
   paginationFilterSort: NormalizedPaginationFilterSortConfig;
+  auditLog: NormalizedAuditLogConfig;
 }
 
 export function parseSpec(raw: Record<string, unknown>): ParsedBffSpec {
@@ -94,5 +112,15 @@ export function parseSpec(raw: Record<string, unknown>): ParsedBffSpec {
       defaultPageSize: r.paginationFilterSort?.defaultPageSize ?? 20,
       maxPageSize: r.paginationFilterSort?.maxPageSize ?? 100,
     },
+    auditLog: normalizeAuditLog(r.auditLog),
+  };
+}
+
+function normalizeAuditLog(raw: RawAuditLogConfig | undefined): NormalizedAuditLogConfig {
+  const actorHeader = typeof raw?.actorHeader === 'string' ? raw!.actorHeader! : 'X-Actor';
+  return {
+    actorHeader,
+    hasActorHeader: actorHeader.length > 0,
+    adminEndpoint: raw?.adminEndpoint !== false,
   };
 }

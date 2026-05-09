@@ -79,7 +79,7 @@
       "description": "Named feature recipes to include in the generated project",
       "items": {
         "type": "string",
-        "enum": ["image-upload", "users-management", "pagination-filter-sort"]
+        "enum": ["image-upload", "users-management", "pagination-filter-sort", "audit-log"]
       },
       "default": []
     },
@@ -98,6 +98,23 @@
           "minimum": 1,
           "default": 100,
           "description": "Hard cap applied to `size` after parsing — protects against overly large pages"
+        }
+      },
+      "additionalProperties": false
+    },
+    "auditLog": {
+      "type": "object",
+      "description": "Configuration for the audit-log recipe (no effect unless audit-log is enabled).",
+      "properties": {
+        "actorHeader": {
+          "type": "string",
+          "default": "X-Actor",
+          "description": "Header used to resolve the acting user when no Spring Security principal is present (useful for service-to-service calls). Set to an empty string to disable header-based actor resolution."
+        },
+        "adminEndpoint": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to scaffold the admin-only `GET /api/audit-log` controller. Disable if you don't want the BFF to expose audit data."
         }
       },
       "additionalProperties": false
