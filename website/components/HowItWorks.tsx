@@ -14,7 +14,7 @@ const steps = [
     title: "Request",
     badge: "Human",
     badgeClass: "bg-purple-500/20 text-purple-400",
-    icon: <PersonIcon className="w-7 h-7 text-purple-400" />,
+    icon: <PersonIcon className="w-7 h-7" />,
     description: "Anyone creates a ticket, Slack message, or doc. Plain English requirements. No YAML, no terminal. The role doesn't matter — PM, developer, domain expert.",
     code: [
       { text: "# Ticket ORD-42 (Jira / Linear / Notion / Slack)", color: "text-gray-500" },
@@ -32,7 +32,7 @@ const steps = [
     title: "Translate",
     badge: "AI Agent",
     badgeClass: "bg-purple-500/20 text-purple-400",
-    icon: <RobotIcon className="w-7 h-7 text-purple-400" />,
+    icon: <RobotIcon className="w-7 h-7" />,
     description: "AI agent picks up the request from any source. Translates plain English into a YAML domain spec conforming to the org's schema. Asks clarifying questions if needed.",
     code: [
       { text: "# Agent drafts from ORD-42:", color: "text-gray-500" },
@@ -56,7 +56,7 @@ const steps = [
     title: "Generate + Deploy",
     badge: "Automated",
     badgeClass: "bg-blue-500/20 text-blue-400",
-    icon: <FactoryIcon className="w-7 h-7 text-blue-400" />,
+    icon: <FactoryIcon className="w-7 h-7" />,
     description: "Spec pushed to standards repo. CI triggers fixedcode generate. Code pushed to service repo. CI/CD deploys. Every CFR built in automatically.",
     code: [
       { text: "$ fixedcode generate --spec order.yaml", color: "text-gray-400" },
@@ -73,7 +73,7 @@ const steps = [
     title: "Enrich",
     badge: "Human + AI",
     badgeClass: "bg-cyan-500/20 text-cyan-400",
-    icon: <PersonIcon className="w-7 h-7 text-cyan-400" />,
+    icon: <PersonIcon className="w-7 h-7" />,
     description: "The same person — PM, developer, whoever — fills in business logic in extension points with AI assistance. The 10% that's unique. The role boundary has dissolved.",
     code: [
       { text: "// extensions/OrderValidator.kt", color: "text-gray-500" },

@@ -100,9 +100,9 @@ export default function SchemaTypes() {
               className="flex items-center gap-2 mb-4"
             >
               {gi === 0 ? (
-                <FactoryIcon className="w-5 h-5 text-blue-400" />
+                <FactoryIcon className="w-5 h-5" />
               ) : (
-                <RobotIcon className="w-5 h-5 text-purple-400" />
+                <RobotIcon className="w-5 h-5" />
               )}
               <h3 className={`text-sm font-semibold uppercase tracking-wider ${group.categoryColor}`}>
                 {group.category}

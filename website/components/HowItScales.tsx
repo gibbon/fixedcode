@@ -6,28 +6,28 @@ import { PersonIcon, RobotIcon, FactoryIcon } from "./Icons";
 const tiers = [
   {
     name: "Individual",
-    icon: <PersonIcon className="w-6 h-6 text-purple-400" />,
+    icon: <PersonIcon className="w-6 h-6" />,
     description: "Capture and replay patterns from AI-generated code. Lock in what works. Never re-prompt for the same structure.",
     color: "border-purple-500/20",
     tagColor: "bg-purple-500/20 text-purple-400",
   },
   {
     name: "Team",
-    icon: <RobotIcon className="w-6 h-6 text-blue-400" />,
+    icon: <RobotIcon className="w-6 h-6" />,
     description: "Share proven patterns across a team. Shared schemas become the team's golden path. Consistent structure without coordination.",
     color: "border-blue-500/20",
     tagColor: "bg-blue-500/20 text-blue-400",
   },
   {
     name: "Platform",
-    icon: <FactoryIcon className="w-6 h-6 text-cyan-400" />,
+    icon: <FactoryIcon className="w-6 h-6" />,
     description: "Encode every CFR into schemas. Every service gets every cross-functional requirement from day zero. Violations structurally impossible.",
     color: "border-cyan-500/20",
     tagColor: "bg-cyan-500/20 text-cyan-400",
   },
   {
     name: "Enterprise",
-    icon: <FactoryIcon className="w-6 h-6 text-green-400" />,
+    icon: <FactoryIcon className="w-6 h-6" />,
     description: "Provable compliance for AI-generated code. Full audit trail. Manifest tracking. Pipeline integrations. Regulated industry ready.",
     color: "border-green-500/20",
     tagColor: "bg-green-500/20 text-green-400",

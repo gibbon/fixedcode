@@ -6,7 +6,7 @@ import { RobotIcon, FactoryIcon } from "./Icons";
 const approaches = [
   {
     title: "AI Generation Alone",
-    icon: <RobotIcon className="w-6 h-6 text-purple-400" />,
+    icon: <RobotIcon className="w-6 h-6" />,
     borderClass: "border-purple-500/20",
     bgClass: "bg-purple-500/[0.03]",
     color: "text-purple-400",
@@ -24,7 +24,7 @@ const approaches = [
   },
   {
     title: "Scaffolding Alone",
-    icon: <FactoryIcon className="w-6 h-6 text-blue-400" />,
+    icon: <FactoryIcon className="w-6 h-6" />,
     borderClass: "border-blue-500/20",
     bgClass: "bg-blue-500/[0.03]",
     color: "text-blue-400",
@@ -126,13 +126,13 @@ export default function WhyBoth() {
           <div className="flex items-center gap-3 mb-4">
             <div className="flex items-center -space-x-2">
               <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center ring-2 ring-background">
-                <RobotIcon className="w-5 h-5 text-purple-400" />
+                <RobotIcon className="w-5 h-5" />
               </div>
               <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center ring-2 ring-background">
-                <FactoryIcon className="w-5 h-5 text-blue-400" />
+                <FactoryIcon className="w-5 h-5" />
               </div>
             </div>
-            <h3 className="text-lg font-semibold text-gradient">
+            <h3 className="text-lg font-semibold text-foreground">
               FixedCode: AI + Deterministic Together
             </h3>
           </div>

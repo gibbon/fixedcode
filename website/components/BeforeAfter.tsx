@@ -54,10 +54,10 @@ export default function BeforeAfter() {
           >
             <div className="flex items-center gap-2 mb-6">
               <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                <PersonIcon className="w-5 h-5 text-red-400" />
+                <PersonIcon className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-red-400">
+                <h3 className="text-lg font-semibold text-foreground">
                   Today: Handoffs everywhere
                 </h3>
                 <p className="text-xs text-red-400/60">PM, dev, platform — rigid roles, rigid boundaries</p>
@@ -89,10 +89,10 @@ export default function BeforeAfter() {
           >
             <div className="flex items-center gap-2 mb-6">
               <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                <FactoryIcon className="w-5 h-5 text-cyan-400" />
+                <FactoryIcon className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-cyan-400">
+                <h3 className="text-lg font-semibold text-foreground">
                   With FixedCode: Roles blur
                 </h3>
                 <p className="text-xs text-cyan-400/60">Domain knowledge matters, not job title</p>
