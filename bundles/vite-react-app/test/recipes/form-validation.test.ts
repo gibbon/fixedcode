@@ -12,6 +12,7 @@ const TEMPLATE_DIR = join(__dirname, '..', '..', 'templates');
 
 const FORM_VALIDATION_OUTPUTS = [
   'src/lib/forms/useZodForm.ts',
+  'src/lib/forms/getFieldError.ts',
   'src/components/forms/Form.tsx',
   'src/components/forms/FieldError.tsx',
   'src/components/forms/TextField.tsx',
@@ -43,7 +44,7 @@ describe('vite-react-app form-validation recipe', () => {
     }
   });
 
-  it('generates all 7 form files and adds the validation deps when enabled', () => {
+  it('generates all form files and adds the validation deps when enabled', () => {
     const ctx = enrich(
       { appName: 'forms-app', recipes: ['form-validation'] },
       meta,
@@ -89,13 +90,56 @@ describe('vite-react-app form-validation recipe', () => {
     expect(rendered).toContain('export function useZodForm<S extends ZodTypeAny>');
   });
 
-  it('NumberField registers with valueAsNumber so Zod sees a typed number', () => {
+  it('NumberField registers with setValueAs so empty input → undefined (not NaN)', () => {
     const rendered = renderTemplate(
       'recipes/form-validation/src/components/forms/NumberField.tsx.hbs',
       {} as Record<string, unknown>,
     );
-    expect(rendered).toContain("form.register(name, { valueAsNumber: true })");
+    expect(rendered).toContain('setValueAs:');
+    // Empty string maps to undefined so z.number().optional() works without
+    // tripping over "Expected number, received nan".
+    expect(rendered).toContain("v === ''");
+    expect(rendered).toContain('Number(v)');
     expect(rendered).toContain('type="number"');
+  });
+
+  it('Select placeholder is selectable (not disabled) — required-ness comes from Zod', () => {
+    const rendered = renderTemplate(
+      'recipes/form-validation/src/components/forms/Select.tsx.hbs',
+      {} as Record<string, unknown>,
+    );
+    // Old behaviour: <option value="" disabled>. New: just <option value="">.
+    expect(rendered).toMatch(/<option value="">\{placeholder\}<\/option>/);
+    expect(rendered).not.toMatch(/<option value="" disabled>/);
+  });
+
+  it('field components use getFieldError + fieldId for nested-path support', () => {
+    for (const file of [
+      'TextField.tsx.hbs',
+      'NumberField.tsx.hbs',
+      'Select.tsx.hbs',
+      'DatePicker.tsx.hbs',
+    ]) {
+      const rendered = renderTemplate(
+        `recipes/form-validation/src/components/forms/${file}`,
+        {} as Record<string, unknown>,
+      );
+      expect(rendered, file).toContain('getFieldError(form.formState.errors, name)');
+      expect(rendered, file).toContain('fieldId(name)');
+      expect(rendered, file).not.toContain('as never');
+    }
+  });
+
+  it('getFieldError walks dotted paths and returns leaf FieldErrors only', () => {
+    const rendered = renderTemplate(
+      'recipes/form-validation/src/lib/forms/getFieldError.ts.hbs',
+      {} as Record<string, unknown>,
+    );
+    expect(rendered).toContain("name.split('.')");
+    // Leaf detection: only return when the cursor object has `type` (RHF FieldError shape).
+    expect(rendered).toContain("'type' in cursor");
+    // fieldId sanitises dots so admin.role → admin-role.
+    expect(rendered).toContain("name.replace(/\\./g, '-')");
   });
 
   it('TextField/Select/DatePicker emit aria-invalid + aria-describedby for accessibility', () => {
@@ -125,7 +169,7 @@ describe('vite-react-app form-validation recipe', () => {
       'recipes/form-validation/src/components/forms/Select.tsx.hbs',
       {} as Record<string, unknown>,
     );
-    expect(rendered).toMatch(/placeholder \?[\s\S]*?<option value="" disabled>/);
+    expect(rendered).toMatch(/placeholder \? <option value="">\{placeholder\}<\/option>/);
   });
 
   it('composes with admin-screen + pagination-list-ui', () => {

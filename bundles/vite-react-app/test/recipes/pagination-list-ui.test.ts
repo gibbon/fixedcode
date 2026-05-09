@@ -152,9 +152,14 @@ describe('vite-react-app pagination-list-ui recipe', () => {
       ctx as unknown as Record<string, unknown>,
     );
     expect(rendered).toContain('const DEFAULT_PAGE_SIZE = 40;');
-    // setSize/setSort/setFilters all reset to page 0 — important UX invariant.
-    expect(rendered).toContain("setRequest((prev) => ({ ...prev, sort, page: 0 }))");
-    expect(rendered).toContain("setRequest((prev) => ({ ...prev, filters, page: 0 }))");
+    // setSort/setFilters short-circuit when the new array is structurally equal
+    // — avoids an unnecessary network round-trip when callers re-emit the same
+    // value (e.g. controlled toolbars that fire onChange on every keystroke).
+    expect(rendered).toContain('sortEquals(prev.sort, sort)');
+    expect(rendered).toContain('filtersEqual(prev.filters, filters)');
+    // Both setters reset to page 0 — important UX invariant.
+    expect(rendered).toMatch(/sort,\s*page:\s*0/);
+    expect(rendered).toMatch(/filters,\s*page:\s*0/);
   });
 
   it('Pagination component renders pageSizeOptions array literally', () => {

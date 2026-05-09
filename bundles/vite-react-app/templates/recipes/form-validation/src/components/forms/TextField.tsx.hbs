@@ -4,6 +4,7 @@
 
 import type { InputHTMLAttributes } from 'react';
 import type { FieldPath, FieldValues, UseFormReturn } from 'react-hook-form';
+import { fieldId, getFieldError } from '../../lib/forms/getFieldError';
 import FieldError from './FieldError';
 
 export interface TextFieldProps<TValues extends FieldValues>
@@ -25,13 +26,14 @@ export default function TextField<TValues extends FieldValues>({
   className,
   ...inputProps
 }: TextFieldProps<TValues>) {
-  const error = form.formState.errors[name];
-  const errorId = `${name}-error`;
-  const descriptionId = description ? `${name}-description` : undefined;
+  const error = getFieldError(form.formState.errors, name);
+  const id = fieldId(name);
+  const errorId = `${id}-error`;
+  const descriptionId = description ? `${id}-description` : undefined;
 
   return (
     <div className={className ?? 'flex flex-col'}>
-      <label htmlFor={name} className="text-sm font-medium text-neutral-700">
+      <label htmlFor={id} className="text-sm font-medium text-neutral-700">
         {label}
       </label>
       {description ? (
@@ -40,7 +42,7 @@ export default function TextField<TValues extends FieldValues>({
         </p>
       ) : null}
       <input
-        id={name}
+        id={id}
         type={type}
         aria-invalid={error ? true : undefined}
         aria-describedby={
@@ -50,7 +52,7 @@ export default function TextField<TValues extends FieldValues>({
         {...inputProps}
         {...form.register(name)}
       />
-      <FieldError error={error as never} id={errorId} />
+      <FieldError error={error} id={errorId} />
     </div>
   );
 }

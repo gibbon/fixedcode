@@ -252,6 +252,11 @@ export function generateFiles(ctx: ViteReactAppContext): FileEntry[] {
         ctx: c,
       },
       {
+        template: 'recipes/form-validation/src/lib/forms/getFieldError.ts.hbs',
+        output: 'src/lib/forms/getFieldError.ts',
+        ctx: c,
+      },
+      {
         template: 'recipes/form-validation/src/components/forms/Form.tsx.hbs',
         output: 'src/components/forms/Form.tsx',
         ctx: c,

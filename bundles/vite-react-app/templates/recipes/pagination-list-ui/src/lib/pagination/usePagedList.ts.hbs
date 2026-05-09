@@ -54,6 +54,22 @@ export interface UsePagedListResult<T> {
 
 const DEFAULT_PAGE_SIZE = {{paginationListUi.defaultPageSize}};
 
+function sortEquals(a: SortSpec[], b: SortSpec[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].field !== b[i].field || a[i].direction !== b[i].direction) return false;
+  }
+  return true;
+}
+
+function filtersEqual(a: FilterSpec[], b: FilterSpec[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].field !== b[i].field || a[i].op !== b[i].op || a[i].value !== b[i].value) return false;
+  }
+  return true;
+}
+
 export function usePagedList<T>(
   endpoint: string,
   options: UsePagedListOptions = {},
@@ -112,11 +128,13 @@ export function usePagedList<T>(
   }, []);
 
   const setSort = useCallback((sort: SortSpec[]) => {
-    setRequest((prev) => ({ ...prev, sort, page: 0 }));
+    setRequest((prev) => (sortEquals(prev.sort, sort) ? prev : { ...prev, sort, page: 0 }));
   }, []);
 
   const setFilters = useCallback((filters: FilterSpec[]) => {
-    setRequest((prev) => ({ ...prev, filters, page: 0 }));
+    setRequest((prev) =>
+      filtersEqual(prev.filters, filters) ? prev : { ...prev, filters, page: 0 },
+    );
   }, []);
 
   const addFilter = useCallback((filter: FilterSpec) => {
