@@ -1,0 +1,38 @@
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  Outlet,
+  Link,
+} from '@tanstack/react-router';
+{{#each routes}}import {{componentName}} from './routes/{{routeFile}}';
+{{/each}}
+const rootRoute = createRootRoute({
+  component: () => (
+    <div className="min-h-screen">
+      <nav>
+        {{#each routes}}<Link to="{{path}}">{{name}}</Link>{{#unless @last}} | {{/unless}}{{/each}}
+      </nav>
+      <Outlet />
+    </div>
+  ),
+});
+
+{{#each routes}}const {{componentName}}Route = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '{{path}}',
+  component: {{componentName}},
+});
+{{/each}}
+const routeTree = rootRoute.addChildren([
+  {{#each routes}}{{componentName}}Route{{#unless @last}},
+  {{/unless}}{{/each}}
+]);
+
+export const router = createRouter({ routeTree });
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router;
+  }
+}

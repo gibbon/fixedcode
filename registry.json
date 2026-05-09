@@ -30,6 +30,16 @@
       "author": "fixedcode",
       "repo": "https://github.com/fixedcode-io/bundle-crud-api",
       "install": "npm install @fixedcode/bundle-crud-api"
+    },
+    {
+      "name": "@fixedcode/bundle-vite-react-app",
+      "description": "Vite + React 19 + TypeScript SPA scaffold — TanStack Router, Tailwind v4, optional Supabase auth, optional Docker",
+      "version": "0.1.0",
+      "kind": "bundle",
+      "tags": ["vite", "react", "typescript", "spa", "frontend", "tailwind", "tanstack-router"],
+      "author": "fixedcode",
+      "repo": "https://github.com/fixedcode-io/bundle-vite-react-app",
+      "install": "npm install @fixedcode/bundle-vite-react-app"
     }
   ]
 }

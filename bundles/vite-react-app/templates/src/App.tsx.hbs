@@ -1,0 +1,16 @@
+{{#unless hasTanstackRouter}}{{#each routes}}{{#if @first}}import {{componentName}} from './routes/{{routeFile}}';
+{{/if}}{{/each}}
+{{/unless}}export default function App() {
+  return (
+    <div className="min-h-screen">
+      <header>
+        <h1>{{appName.pascal}}</h1>
+      </header>
+      <main>
+        {{#if hasTanstackRouter}}
+        {/* Routing is handled by TanStack Router in main.tsx */}
+        {{else}}{{#each routes}}{{#if @first}}<{{componentName}} />{{/if}}{{/each}}{{/if}}
+      </main>
+    </div>
+  );
+}

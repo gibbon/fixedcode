@@ -6,6 +6,8 @@ bundles:
   python-agent: './bundles/python-agent'
   ts-service: './bundles/ts-service'
   ts-agent: './bundles/ts-agent'
+  vite-react-app: './bundles/vite-react-app'
+  kotlin-spring-bff: './bundles/kotlin-spring-bff'
 
 generators:
   openapi: './generators/openapi'

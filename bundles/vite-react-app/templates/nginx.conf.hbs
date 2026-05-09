@@ -1,0 +1,17 @@
+server {
+  listen 80;
+  server_name _;
+  root /usr/share/nginx/html;
+  index index.html;
+
+  # SPA fallback — route all unknown paths to index.html so client-side routing works.
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+
+  # Long cache for hashed assets.
+  location /assets/ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+  }
+}

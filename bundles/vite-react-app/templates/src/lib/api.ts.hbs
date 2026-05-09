@@ -1,0 +1,56 @@
+// Typed fetch wrapper. Reads the API base URL from import.meta.env.{{apiUrlEnvVar}}.
+//
+// Usage:
+//   const data = await api<MyType>('/some/endpoint');
+//   const created = await api<MyType>('/some/endpoint', { method: 'POST', body: { ... } });
+
+const BASE_URL = import.meta.env.{{apiUrlEnvVar}} ?? '{{apiBaseUrl}}';
+
+export interface ApiOptions extends Omit<RequestInit, 'body'> {
+  body?: unknown;
+}
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly body: unknown,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+export async function api<T = unknown>(path: string, opts: ApiOptions = {}): Promise<T> {
+  const url = path.startsWith('http') ? path : `${BASE_URL}${path}`;
+  const { body, headers, ...rest } = opts;
+
+  const init: RequestInit = {
+    ...rest,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(headers ?? {}),
+    },
+  };
+  if (body !== undefined) {
+    init.body = typeof body === 'string' ? body : JSON.stringify(body);
+  }
+
+  const res = await fetch(url, init);
+  const text = await res.text();
+  const parsed = text ? safeJson(text) : null;
+
+  if (!res.ok) {
+    throw new ApiError(`${res.status} ${res.statusText}`, res.status, parsed);
+  }
+
+  return parsed as T;
+}
+
+function safeJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}

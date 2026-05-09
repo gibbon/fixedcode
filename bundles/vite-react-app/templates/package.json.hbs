@@ -1,0 +1,21 @@
+{
+  "name": "{{appName.kebab}}",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    {{#each dependencies}}"{{@key}}": "{{this}}"{{#unless @last}},{{/unless}}
+    {{/each}}
+  },
+  "devDependencies": {
+    {{#each devDependencies}}"{{@key}}": "{{this}}"{{#unless @last}},{{/unless}}
+    {{/each}}
+  }
+}
