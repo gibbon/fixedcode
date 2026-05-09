@@ -2,7 +2,7 @@ import type { Bundle, Context, FileEntry, SpecMetadata } from 'fixedcode';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { parseSpec } from './enrich/spec.js';
+import { parseSpec, type NormalizedOutboxConfig, type RecipeName } from './enrich/spec.js';
 import { enrichAggregate } from './enrich/aggregate.js';
 import { generateVariants } from './enrich/naming.js';
 import { toOpenApi } from './adapters/openapi.js';
@@ -17,6 +17,9 @@ export interface EnrichedContext extends Context {
   packageDot: string;
   service: { port?: number; package: string };
   aggregates: ReturnType<typeof enrichAggregate>[];
+  recipes: RecipeName[];
+  recipeTransactionalOutbox: boolean;
+  outbox: NormalizedOutboxConfig;
 }
 
 export function enrich(raw: Record<string, unknown>, _metadata: SpecMetadata): EnrichedContext {
@@ -31,6 +34,9 @@ export function enrich(raw: Record<string, unknown>, _metadata: SpecMetadata): E
     packageDot: spec.service.package,
     service: spec.service,
     aggregates: Object.entries(spec.aggregates).map(([name, agg]) => enrichAggregate(name, agg)),
+    recipes: spec.recipes,
+    recipeTransactionalOutbox: spec.recipes.includes('transactional-outbox'),
+    outbox: spec.outbox,
   };
 }
 
@@ -169,8 +175,82 @@ export function generateFiles(ctx: EnrichedContext): FileEntry[] {
     }
   }
 
+  // Recipe: transactional-outbox
+  if (ctx.recipeTransactionalOutbox) {
+    const recipeCtx = ctx as unknown as Record<string, unknown>;
+    files.push(
+      {
+        template: 'recipes/transactional-outbox/outbox/OutboxEvent.kt.hbs',
+        output: `src/main/kotlin/${pkg}/outbox/OutboxEvent.kt`,
+        ctx: recipeCtx,
+      },
+      {
+        template: 'recipes/transactional-outbox/outbox/OutboxRepository.kt.hbs',
+        output: `src/main/kotlin/${pkg}/outbox/OutboxRepository.kt`,
+        ctx: recipeCtx,
+      },
+      {
+        template: 'recipes/transactional-outbox/outbox/OutboxRecorder.kt.hbs',
+        output: `src/main/kotlin/${pkg}/outbox/OutboxRecorder.kt`,
+        ctx: recipeCtx,
+      },
+      {
+        template: 'recipes/transactional-outbox/outbox/MessagePublisher.kt.hbs',
+        output: `src/main/kotlin/${pkg}/outbox/MessagePublisher.kt`,
+        ctx: recipeCtx,
+      },
+      {
+        template: 'recipes/transactional-outbox/outbox/NoopMessagePublisher.kt.hbs',
+        output: `src/main/kotlin/${pkg}/outbox/NoopMessagePublisher.kt`,
+        ctx: recipeCtx,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/transactional-outbox/outbox/OutboxProperties.kt.hbs',
+        output: `src/main/kotlin/${pkg}/outbox/OutboxProperties.kt`,
+        ctx: recipeCtx,
+      },
+      {
+        template: 'recipes/transactional-outbox/outbox/OutboxConfig.kt.hbs',
+        output: `src/main/kotlin/${pkg}/outbox/OutboxConfig.kt`,
+        ctx: recipeCtx,
+      },
+      {
+        template: 'recipes/transactional-outbox/outbox/OutboxRelay.kt.hbs',
+        output: `src/main/kotlin/${pkg}/outbox/OutboxRelay.kt`,
+        ctx: recipeCtx,
+      },
+      {
+        template: 'recipes/transactional-outbox/resources/application-outbox.yml.hbs',
+        output: 'src/main/resources/application-outbox.yml',
+        ctx: recipeCtx,
+      },
+      {
+        template: 'recipes/transactional-outbox/resources/db/V099__outbox.sql.hbs',
+        output: 'src/main/resources/db/migration/V099__outbox.sql',
+        ctx: recipeCtx,
+        overwrite: false,
+      },
+    );
+  }
+
   return files;
 }
+
+export const helpers = {
+  /**
+   * Render a Spring property reference: `${VAR:default}`. Avoids the headache
+   * of emitting literal `${...}` braces alongside Handlebars `{{ }}` (the
+   * trailing `}` collides with Handlebars' close-tag tokenizer).
+   */
+  springProp: (...args: unknown[]) => {
+    const params = args.slice(0, -1);
+    const varName = String(params[0] ?? '');
+    const hasDefault = params.length >= 2;
+    const d = hasDefault ? `:${String(params[1] ?? '')}` : '';
+    return `\${${varName}${d}}`;
+  },
+};
 
 export const bundle: Bundle = {
   kind: 'spring-domain',
@@ -178,6 +258,7 @@ export const bundle: Bundle = {
   enrich: enrich as Bundle['enrich'],
   generateFiles: generateFiles as unknown as Bundle['generateFiles'],
   templates: 'templates',
+  helpers,
   adapters: {
     openapi: toOpenApi as unknown as (ctx: Context) => Record<string, unknown>,
   },

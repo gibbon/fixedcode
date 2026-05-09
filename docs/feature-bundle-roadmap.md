@@ -1,6 +1,6 @@
 # Feature Bundle Roadmap
 
-**Status:** SaaS-vertical core complete. 11 capabilities + 1 new skeleton + 1 CLI preset shipped in 0.2.x. Remaining items below are optional next-tier features. Last updated 2026-05-09.
+**Status:** SaaS-vertical core complete. 12 capabilities + 1 new skeleton + 1 CLI preset shipped in 0.2.x. Remaining items below are optional next-tier features. Last updated 2026-05-10.
 
 ## Pick this up in a new session
 
@@ -63,6 +63,7 @@ The clearest reference is the most recent shipped recipe in the same bundle:
 | `pagination-list-ui` (FE) | 0.2.x | `vite-react-app` recipe — `usePagedList<T>` hook + `Pagination` + `SortHeader` components. TS types mirror the BE wire format exactly. Local state, no router coupling. Requires `features.api: true`. |
 | `form-validation` (FE) | 0.2.x | `vite-react-app` recipe — `useZodForm` + `Form` wrapper + `TextField`, `NumberField`, `Select`, `DatePicker`, `FieldError`. Adds `react-hook-form` + `zod` + `@hookform/resolvers`. Type-inferred values, accessible inline errors. |
 | `audit-log` (BE) | 0.2.x | `kotlin-spring-bff` recipe — `AuditLogPublisher.created/updated/deleted()` facade fires Spring events; listener writes to `audit_log` table (V100 migration) + forwards to `AuditLogOutboundAdapter` (extension point) for Kafka/SQS. SecurityConfig auto-locks `/api/audit-log/**` to `ROLE_ADMIN` when paired with `users-management`. |
+| `transactional-outbox` (BE) | 0.2.x | `spring-domain` recipe — first recipe in this bundle. `OutboxRecorder.record(event)` writes to `outbox_event` (V099 migration) inside the caller's transaction (`Propagation.MANDATORY`). `@Scheduled` `OutboxRelay` drains under pessimistic lock and ships through a `MessagePublisher` extension point. |
 | `saas-vertical` preset (CLI) | 0.2.x | `fixedcode init saas-vertical <name>` — scaffolds 4 specs (domain + BFF + app + marketing) with all the above recipes pre-wired. |
 
 All shipped via Composition Approach **C** — recipes inside the skeleton, no engine changes.

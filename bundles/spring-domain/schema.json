@@ -19,6 +19,37 @@
     },
     "remote_aggregates": {
       "type": "object"
+    },
+    "recipes": {
+      "type": "array",
+      "description": "Named feature recipes to layer on top of the generated domain code",
+      "items": { "type": "string", "enum": ["transactional-outbox"] },
+      "default": []
+    },
+    "outbox": {
+      "type": "object",
+      "description": "Configuration for the transactional-outbox recipe (no effect unless the recipe is enabled).",
+      "properties": {
+        "pollIntervalMs": {
+          "type": "integer",
+          "minimum": 100,
+          "default": 5000,
+          "description": "How often the OutboxRelay polls for unpublished events"
+        },
+        "batchSize": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 100,
+          "description": "Max rows fetched per poll"
+        },
+        "maxAttempts": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10,
+          "description": "After this many failed publish attempts, the row is left for an operator to inspect"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "definitions": {

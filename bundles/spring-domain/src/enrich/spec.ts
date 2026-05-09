@@ -26,14 +26,36 @@ export interface RawQuerySpec {
 
 export type RawEntitySpec = RawAggregateSpec;
 
+export type RecipeName = 'transactional-outbox';
+export const KNOWN_RECIPES: readonly RecipeName[] = ['transactional-outbox'] as const;
+
+export interface RawOutboxConfig {
+  pollIntervalMs?: number;
+  batchSize?: number;
+  maxAttempts?: number;
+}
+
+export interface NormalizedOutboxConfig {
+  pollIntervalMs: number;
+  batchSize: number;
+  maxAttempts: number;
+}
+
 export interface RawDomainSpec {
   boundedContext: string;
   service: { port?: number; package: string };
   aggregates: Record<string, RawAggregateSpec>;
   remote_aggregates?: Record<string, unknown>;
+  recipes?: string[];
+  outbox?: RawOutboxConfig;
 }
 
-export function parseSpec(raw: Record<string, unknown>): RawDomainSpec {
+export interface ParsedDomainSpec extends RawDomainSpec {
+  recipes: RecipeName[];
+  outbox: NormalizedOutboxConfig;
+}
+
+export function parseSpec(raw: Record<string, unknown>): ParsedDomainSpec {
   if (!raw.boundedContext || typeof raw.boundedContext !== 'string') {
     throw new Error('spec.boundedContext is required and must be a string');
   }
@@ -47,5 +69,17 @@ export function parseSpec(raw: Record<string, unknown>): RawDomainSpec {
   if (!raw.aggregates || typeof raw.aggregates !== 'object') {
     throw new Error('spec.aggregates is required');
   }
-  return raw as unknown as RawDomainSpec;
+  const r = raw as unknown as RawDomainSpec;
+  const recipes: RecipeName[] = Array.isArray(r.recipes)
+    ? r.recipes.filter((x): x is RecipeName => (KNOWN_RECIPES as readonly string[]).includes(x))
+    : [];
+  return {
+    ...r,
+    recipes,
+    outbox: {
+      pollIntervalMs: r.outbox?.pollIntervalMs ?? 5000,
+      batchSize: r.outbox?.batchSize ?? 100,
+      maxAttempts: r.outbox?.maxAttempts ?? 10,
+    },
+  };
 }

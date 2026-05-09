@@ -23,6 +23,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/pluralize": "^0.0.33",
+    "handlebars": "^4.7.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   }
