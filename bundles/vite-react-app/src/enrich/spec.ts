@@ -1,8 +1,8 @@
 export type RouterKind = 'tanstack' | 'reactrouter' | 'none';
 export type AuthKind = 'supabase' | 'clerk' | 'none';
 
-export type RecipeName = 'image-upload';
-export const KNOWN_RECIPES: readonly RecipeName[] = ['image-upload'] as const;
+export type RecipeName = 'image-upload' | 'admin-screen';
+export const KNOWN_RECIPES: readonly RecipeName[] = ['image-upload', 'admin-screen'] as const;
 
 export interface RawRoute {
   path: string;
@@ -15,6 +15,18 @@ export interface RawImageUploadConfig {
 
 export interface NormalizedImageUploadConfig {
   apiPath: string;
+}
+
+export interface RawAdminScreenConfig {
+  domainSpec?: string;
+  basePath?: string;
+  apiBaseUrl?: string;
+}
+
+export interface NormalizedAdminScreenConfig {
+  domainSpec: string | null;
+  basePath: string;
+  apiBaseUrl: string;
 }
 
 export interface RawViteReactAppSpec {
@@ -31,6 +43,7 @@ export interface RawViteReactAppSpec {
   };
   recipes?: string[];
   imageUpload?: RawImageUploadConfig;
+  adminScreen?: RawAdminScreenConfig;
 }
 
 export interface NormalizedSpec {
@@ -47,6 +60,7 @@ export interface NormalizedSpec {
   };
   recipes: RecipeName[];
   imageUpload: NormalizedImageUploadConfig;
+  adminScreen: NormalizedAdminScreenConfig;
 }
 
 const DEFAULT_ROUTES: RawRoute[] = [{ path: '/', name: 'Home' }];
@@ -73,6 +87,11 @@ export function parseSpec(raw: Record<string, unknown>): NormalizedSpec {
     recipes,
     imageUpload: {
       apiPath: spec.imageUpload?.apiPath ?? '/images',
+    },
+    adminScreen: {
+      domainSpec: spec.adminScreen?.domainSpec ?? null,
+      basePath: spec.adminScreen?.basePath ?? '/admin',
+      apiBaseUrl: spec.adminScreen?.apiBaseUrl ?? '',
     },
   };
 }

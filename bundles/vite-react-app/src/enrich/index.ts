@@ -13,6 +13,18 @@ import {
   toUpperSnakeCase,
   type NamingVariants,
 } from './naming.js';
+import {
+  buildAdminScreenContext,
+  type AdminScreenContext,
+  type AdminScreenDisabledContext,
+  type BuildAdminContextOptions,
+} from './recipes/admin-screen.js';
+
+export type { AdminAggregate, AdminField, AdminScreenContext } from './recipes/admin-screen.js';
+
+export interface EnrichOptions {
+  adminScreen?: BuildAdminContextOptions;
+}
 
 export interface EnrichedRoute {
   path: string;
@@ -42,6 +54,8 @@ export interface ViteReactAppContext {
   recipes: RecipeName[];
   recipeImageUpload: boolean;
   imageUpload: NormalizedImageUploadConfig;
+  recipeAdminScreen: boolean;
+  adminScreen: AdminScreenContext | AdminScreenDisabledContext;
   /** npm dependencies merged into package.json */
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
@@ -71,6 +85,7 @@ const BASE_DEV_DEPS: Record<string, string> = {
 export function enrich(
   raw: Record<string, unknown>,
   _metadata: { name: string; apiVersion: string; description?: string },
+  options: EnrichOptions = {},
 ): ViteReactAppContext {
   const spec: NormalizedSpec = parseSpec(raw);
   const appName = generateVariants(spec.appName);
@@ -104,6 +119,17 @@ export function enrich(
     dependencies['@clerk/clerk-react'] = '^5.20.0';
   }
 
+  const recipeAdminScreen = spec.recipes.includes('admin-screen');
+  const adminScreen = buildAdminScreenContext(
+    {
+      enabled: recipeAdminScreen,
+      domainSpec: spec.adminScreen.domainSpec,
+      basePath: spec.adminScreen.basePath,
+      apiBaseUrl: spec.adminScreen.apiBaseUrl,
+    },
+    options.adminScreen ?? {},
+  );
+
   return {
     appName,
     port: spec.port,
@@ -124,6 +150,8 @@ export function enrich(
     recipes: spec.recipes,
     recipeImageUpload: spec.recipes.includes('image-upload'),
     imageUpload: spec.imageUpload,
+    recipeAdminScreen,
+    adminScreen,
     dependencies,
     devDependencies,
   };

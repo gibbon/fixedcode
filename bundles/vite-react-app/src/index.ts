@@ -58,6 +58,62 @@ export function generateFiles(ctx: ViteReactAppContext): FileEntry[] {
     );
   }
 
+  // Recipe: admin-screen
+  if (ctx.recipeAdminScreen && ctx.adminScreen.enabled) {
+    files.push(
+      {
+        template: 'recipes/admin-screen/src/admin/AdminLayout.tsx.hbs',
+        output: 'src/admin/AdminLayout.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/admin-screen/src/admin/index.ts.hbs',
+        output: 'src/admin/index.ts',
+        ctx: c,
+      },
+    );
+    for (const agg of ctx.adminScreen.aggregates) {
+      const aggCtx = { ...c, agg };
+      const dir = `src/admin/${agg.namePluralPascal}`;
+      files.push(
+        {
+          template: 'recipes/admin-screen/src/admin/aggregate/types.ts.hbs',
+          output: `${dir}/types.ts`,
+          ctx: aggCtx,
+        },
+        {
+          template: 'recipes/admin-screen/src/admin/aggregate/Client.ts.hbs',
+          output: `${dir}/${agg.namePascal}Client.ts`,
+          ctx: aggCtx,
+        },
+        {
+          template: 'recipes/admin-screen/src/admin/aggregate/ListPage.tsx.hbs',
+          output: `${dir}/${agg.namePluralPascal}ListPage.tsx`,
+          ctx: aggCtx,
+        },
+        {
+          template: 'recipes/admin-screen/src/admin/aggregate/CreatePage.tsx.hbs',
+          output: `${dir}/${agg.namePascal}CreatePage.tsx`,
+          ctx: aggCtx,
+          overwrite: false,
+        },
+        {
+          template: 'recipes/admin-screen/src/admin/aggregate/EditPage.tsx.hbs',
+          output: `${dir}/${agg.namePascal}EditPage.tsx`,
+          ctx: aggCtx,
+          overwrite: false,
+        },
+        {
+          template: 'recipes/admin-screen/src/admin/aggregate/Form.tsx.hbs',
+          output: `${dir}/${agg.namePascal}Form.tsx`,
+          ctx: aggCtx,
+          overwrite: false,
+        },
+      );
+    }
+  }
+
   // Recipe: image-upload
   if (ctx.recipeImageUpload) {
     files.push(
@@ -88,12 +144,18 @@ export function generateFiles(ctx: ViteReactAppContext): FileEntry[] {
   return files;
 }
 
+export const helpers = {
+  eq: (a: unknown, b: unknown) => a === b,
+  json: (v: unknown) => JSON.stringify(v),
+};
+
 export const bundle: Bundle = {
   kind: 'vite-react-app',
   specSchema: schema,
   enrich: enrich as unknown as Bundle['enrich'],
   generateFiles: generateFiles as unknown as (ctx: Context) => FileEntry[],
   templates: 'templates',
+  helpers: helpers as unknown as Bundle['helpers'],
   cfrs: {
     provides: ['docker'],
     files: {
