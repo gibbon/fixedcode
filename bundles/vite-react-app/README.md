@@ -167,6 +167,57 @@ When the spec enables both `users-management` and `admin-screen`, the generated 
 
 To swap the default JWT auth for Clerk / Auth0 / Supabase: re-implement `AuthProvider.tsx` against the same `AuthContextValue` shape (it's an extension point, so the recipe will not overwrite your version on regenerate). The rest of the recipe (`useAuth`, the guards, sign-in/up pages) only depends on that shape.
 
+#### `pricing-page`
+
+Drops a `<PricingPage>` component plus a router-agnostic `pricing` route file. Pricing tiers are spec data — add a new vertical's pricing in YAML rather than copy-pasting a component.
+
+```yaml
+spec:
+  appName: paid-app
+  recipes:
+    - pricing-page
+  pricing:
+    headline: "Plans"
+    subhead: "Start free, scale as you grow."
+    tiers:
+      - name: Free
+        price: "$0"
+        period: "/forever"
+        audience: "Solo dev"
+        description: "For tinkering."
+        features:
+          - { text: "CLI" }
+          - { text: "Team registry", included: false }
+        ctaText: "Install"
+        ctaHref: "/install"
+      - name: Team
+        price: "$99"
+        period: "/month"
+        audience: "Engineering team"
+        description: "Shared schemas."
+        highlight: true
+        features:
+          - { text: "Shared registry" }
+        ctaHref: "/trial"
+```
+
+Generates:
+
+- `src/components/PricingPage.tsx` — **extension point** (`overwrite: false`). Tier data is inlined at generation time. Customise the markup; re-run `fixedcode generate` to refresh tier data only when you add `<PricingPage>` props or rename CSS classes the recipe doesn't manage.
+- `src/routes/pricing.tsx` — **extension point**. Default-exports a React component mounting `<PricingPage>`. Wire it into your router yourself (snippets in the file header) — the recipe deliberately does NOT modify `src/router.tsx` so it composes with the `admin-screen` recipe's pattern.
+
+Spec config (under `spec.pricing`):
+
+| Field      | Default     | Description                                                  |
+| ---------- | ----------- | ------------------------------------------------------------ |
+| `headline` | `"Pricing"` | Heading shown above the tier grid                            |
+| `subhead`  | (none)      | Optional subhead under the headline                          |
+| `tiers`    | `[]`        | Array of tier objects (see below)                            |
+
+Per-tier fields: `name` (required), `price` (required), `period`, `audience`, `description`, `features: [{ text, included? }]`, `ctaText` (default `"Get started"`), `ctaHref` (default `"#"`), `highlight` (default `false`).
+
+Highlight behaviour: exactly the tiers with `highlight: true` render a "Most popular" badge and an inverted CTA. No new npm deps; uses the same Tailwind tokens as the rest of the bundle.
+
 ### Adding a new recipe
 
 1. Add the recipe name to `schema.json` under `properties.recipes.items.enum` and `KNOWN_RECIPES` in `src/enrich/spec.ts`.

@@ -47,7 +47,7 @@
       "description": "Named feature recipes to include in the generated app",
       "items": {
         "type": "string",
-        "enum": ["image-upload", "admin-screen", "users-management"]
+        "enum": ["image-upload", "admin-screen", "users-management", "pricing-page"]
       },
       "default": []
     },
@@ -79,6 +79,44 @@
         },
         "basePath": { "type": "string", "default": "/admin" },
         "apiBaseUrl": { "type": "string", "default": "" }
+      },
+      "additionalProperties": false
+    },
+    "pricing": {
+      "type": "object",
+      "description": "Pricing tiers rendered by the pricing-page recipe (no effect unless pricing-page is enabled)",
+      "properties": {
+        "headline": { "type": "string", "default": "Pricing" },
+        "subhead": { "type": "string" },
+        "tiers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "price"],
+            "properties": {
+              "name": { "type": "string" },
+              "price": { "type": "string" },
+              "period": { "type": "string" },
+              "audience": { "type": "string" },
+              "description": { "type": "string" },
+              "features": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": { "type": "string" },
+                    "included": { "type": "boolean", "default": true }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "ctaText": { "type": "string", "default": "Get started" },
+              "ctaHref": { "type": "string" },
+              "highlight": { "type": "boolean", "default": false }
+            },
+            "additionalProperties": false
+          }
+        }
       },
       "additionalProperties": false
     }

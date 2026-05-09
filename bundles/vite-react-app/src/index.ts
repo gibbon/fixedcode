@@ -163,6 +163,24 @@ export function generateFiles(ctx: ViteReactAppContext): FileEntry[] {
     );
   }
 
+  // Recipe: pricing-page
+  if (ctx.recipePricingPage) {
+    files.push(
+      {
+        template: 'recipes/pricing-page/src/components/PricingPage.tsx.hbs',
+        output: 'src/components/PricingPage.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/pricing-page/src/routes/pricing.tsx.hbs',
+        output: 'src/routes/pricing.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+    );
+  }
+
   // Recipe: image-upload
   if (ctx.recipeImageUpload) {
     files.push(

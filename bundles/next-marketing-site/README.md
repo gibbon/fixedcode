@@ -52,7 +52,55 @@ spec:
 
 ## Recipes
 
-Recipes are opt-in extras that expand to additional template files behind a `recipes:` flag (same convention as `vite-react-app`). The first batch — `pricing-page`, `blog`, `cta-banner` — will land in follow-up commits. To plug a new recipe in:
+Recipes are opt-in extras that expand to additional template files behind a `recipes:` flag (same convention as `vite-react-app`).
+
+### Available recipes
+
+#### `pricing-page`
+
+Drops an `app/pricing/page.tsx` Next.js App Router page. Pricing tiers are spec data — add a new vertical's pricing in YAML rather than copy-pasting a component.
+
+```yaml
+spec:
+  recipes:
+    - pricing-page
+  pricing:
+    headline: "Plans"
+    subhead: "Start free, scale as you grow."
+    tiers:
+      - name: Free
+        price: "$0"
+        period: "/forever"
+        audience: "Solo dev"
+        description: "For tinkering."
+        features:
+          - { text: "CLI" }
+          - { text: "Team registry", included: false }
+        ctaText: "Install"
+        ctaHref: "/install"
+      - name: Team
+        price: "$99"
+        period: "/month"
+        audience: "Engineering team"
+        highlight: true
+        features:
+          - { text: "Shared registry" }
+        ctaHref: "/trial"
+```
+
+Generates:
+
+- `app/pricing/page.tsx` — **extension point** (`overwrite: false`). Tier data is inlined at generation time. Static-export friendly (no client hooks).
+
+Side-effect on `enrich()`: when this recipe is enabled, a `{ label: "Pricing", href: "/pricing" }` entry is auto-appended to `spec.navLinks` if no existing nav link points to `/pricing` (and no link's label already mentions "pricing"). The Footer/Navbar templates are not edited — the link surfaces purely as data flowing into the existing components.
+
+Per-tier fields: `name` (required), `price` (required), `period`, `audience`, `description`, `features: [{ text, included? }]`, `ctaText` (default `"Get started"`), `ctaHref` (default `"#"`), `highlight` (default `false`).
+
+Highlight behaviour: exactly the tiers with `highlight: true` render a "Most popular" badge and an inverted CTA. No new npm deps; uses the same Tailwind tokens as the rest of the bundle.
+
+The landing page (`app/page.tsx`) is intentionally NOT modified by the recipe — keep CTA composition explicit. Add a "see pricing" CTA to `app/page.tsx` yourself (it's an extension point).
+
+### Adding a new recipe
 
 1. Add the recipe name to `schema.json` under `properties.recipes.items.enum`.
 2. Drop templates under `templates/recipes/<recipe-name>/`.
