@@ -74,6 +74,7 @@ export interface ViteReactAppContext {
   dashboard: DashboardContext;
   recipePaginationListUi: boolean;
   paginationListUi: NormalizedPaginationListUiConfig;
+  recipeFormValidation: boolean;
   /**
    * True when the dashboard recipe is enabled alongside admin-screen.
    * Lets the admin-screen sidebar render a Dashboard link as the first item.
@@ -169,6 +170,13 @@ export function enrich(
     );
   }
 
+  const recipeFormValidation = spec.recipes.includes('form-validation');
+  if (recipeFormValidation) {
+    dependencies['react-hook-form'] = '^7.55.0';
+    dependencies['zod'] = '^3.24.0';
+    dependencies['@hookform/resolvers'] = '^3.9.0';
+  }
+
   return {
     appName,
     port: spec.port,
@@ -199,6 +207,7 @@ export function enrich(
     dashboard,
     recipePaginationListUi,
     paginationListUi: spec.paginationListUi,
+    recipeFormValidation,
     hasDashboardRecipe: recipeDashboard,
     dependencies,
     devDependencies,

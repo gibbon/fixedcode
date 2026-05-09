@@ -243,6 +243,53 @@ export function generateFiles(ctx: ViteReactAppContext): FileEntry[] {
     );
   }
 
+  // Recipe: form-validation
+  if (ctx.recipeFormValidation) {
+    files.push(
+      {
+        template: 'recipes/form-validation/src/lib/forms/useZodForm.ts.hbs',
+        output: 'src/lib/forms/useZodForm.ts',
+        ctx: c,
+      },
+      {
+        template: 'recipes/form-validation/src/components/forms/Form.tsx.hbs',
+        output: 'src/components/forms/Form.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/form-validation/src/components/forms/FieldError.tsx.hbs',
+        output: 'src/components/forms/FieldError.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/form-validation/src/components/forms/TextField.tsx.hbs',
+        output: 'src/components/forms/TextField.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/form-validation/src/components/forms/NumberField.tsx.hbs',
+        output: 'src/components/forms/NumberField.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/form-validation/src/components/forms/Select.tsx.hbs',
+        output: 'src/components/forms/Select.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/form-validation/src/components/forms/DatePicker.tsx.hbs',
+        output: 'src/components/forms/DatePicker.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+    );
+  }
+
   // Recipe: image-upload
   if (ctx.recipeImageUpload) {
     files.push(

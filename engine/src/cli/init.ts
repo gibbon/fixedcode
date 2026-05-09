@@ -209,6 +209,7 @@ spec:
     - dashboard
     - image-upload
     - pagination-list-ui
+    - form-validation
   usersManagement:
     signInPath: /sign-in
     signUpPath: /sign-up

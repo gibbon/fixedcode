@@ -306,6 +306,64 @@ Spec config (under `spec.paginationListUi`):
 | `defaultPageSize` | `20`                     | Initial `size` requested by the hook                     |
 | `pageSizeOptions` | `[10, 20, 50, 100]`      | Choices in the page-size dropdown (deduped + sorted asc) |
 
+#### `form-validation`
+
+react-hook-form + Zod plus a baseline of accessible input components. Drops the boilerplate from every admin form: define a Zod schema, get type-inferred values, get inline error messages with `aria-invalid` + `aria-describedby` for free.
+
+When enabled, the recipe adds `react-hook-form`, `zod`, and `@hookform/resolvers` to `dependencies`.
+
+Usage:
+
+```tsx
+import { z } from 'zod';
+import { useZodForm } from './lib/forms/useZodForm';
+import Form from './components/forms/Form';
+import TextField from './components/forms/TextField';
+import NumberField from './components/forms/NumberField';
+import Select from './components/forms/Select';
+import DatePicker from './components/forms/DatePicker';
+
+const schema = z.object({
+  email: z.string().email(),
+  age: z.number().min(18, 'Must be 18 or older'),
+  role: z.enum(['admin', 'user']),
+  startsOn: z.string().date(),
+});
+
+function CreateUserForm() {
+  const form = useZodForm(schema, { defaultValues: { role: 'user' } });
+  return (
+    <Form form={form} onSubmit={(values) => createUser(values)}>
+      <TextField form={form} name="email" label="Email" type="email" />
+      <NumberField form={form} name="age" label="Age" />
+      <Select
+        form={form}
+        name="role"
+        label="Role"
+        options={[
+          { value: 'admin', label: 'Admin' },
+          { value: 'user', label: 'User' },
+        ]}
+      />
+      <DatePicker form={form} name="startsOn" label="Starts on" />
+      <button type="submit">Save</button>
+    </Form>
+  );
+}
+```
+
+Generates:
+
+- `src/lib/forms/useZodForm.ts` — typed wrapper around `useForm` that wires `zodResolver` and infers the form shape from the schema. Defaults validation `mode: 'onBlur'` (override per-call). Overwritable.
+- `src/components/forms/Form.tsx` — **extension point** — `<Form form onSubmit rootError>` wrapper, `noValidate` so HTML5 validation doesn't double up with Zod
+- `src/components/forms/FieldError.tsx` — **extension point** — error message rendered with the right `id` for `aria-describedby`
+- `src/components/forms/TextField.tsx` — **extension point** — `<input type="text">` (override `type` for email/password/url)
+- `src/components/forms/NumberField.tsx` — **extension point** — registers with `valueAsNumber: true` so `z.number()` validates against a typed number, not a string
+- `src/components/forms/Select.tsx` — **extension point** — accepts `options: { value, label, disabled? }[]` plus an optional `placeholder`
+- `src/components/forms/DatePicker.tsx` — **extension point** — native `<input type="date">`; value is the ISO `YYYY-MM-DD` string the input emits — validate with `z.string().date()` or coerce in the schema if you want a `Date`
+
+The components use Tailwind classes by default — restyle freely.
+
 ### Adding a new recipe
 
 1. Add the recipe name to `schema.json` under `properties.recipes.items.enum` and `KNOWN_RECIPES` in `src/enrich/spec.ts`.

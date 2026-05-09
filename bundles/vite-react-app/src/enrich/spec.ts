@@ -7,7 +7,8 @@ export type RecipeName =
   | 'users-management'
   | 'pricing-page'
   | 'dashboard'
-  | 'pagination-list-ui';
+  | 'pagination-list-ui'
+  | 'form-validation';
 export const KNOWN_RECIPES: readonly RecipeName[] = [
   'image-upload',
   'admin-screen',
@@ -15,6 +16,7 @@ export const KNOWN_RECIPES: readonly RecipeName[] = [
   'pricing-page',
   'dashboard',
   'pagination-list-ui',
+  'form-validation',
 ] as const;
 
 export interface RawRoute {
