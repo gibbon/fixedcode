@@ -1,0 +1,26 @@
+import type { Metadata } from 'next';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+
+export const metadata: Metadata = {
+  title: '{{page.titleEscaped}}',
+  description: {{json page.description}},
+};
+
+// Extension point — fill in the {{page.titleEscaped}} page content.
+// Generated once; future regenerations will not overwrite this file.
+export default function {{page.componentName}}() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-1 max-w-3xl w-full mx-auto px-6 py-24">
+        <h1 className="text-4xl font-semibold mb-6">{{page.titleEscaped}}</h1>
+        <p className="text-lg text-foreground/70 leading-relaxed">
+          {/* TODO: replace this placeholder with the {{page.titleEscaped}} page content. */}
+          Coming soon.
+        </p>
+      </main>
+      <Footer />
+    </div>
+  );
+}
