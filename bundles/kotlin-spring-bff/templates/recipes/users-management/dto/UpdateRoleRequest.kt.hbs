@@ -1,0 +1,8 @@
+package {{packageName}}.dto
+
+import jakarta.validation.constraints.Pattern
+
+data class UpdateRoleRequest(
+    @field:Pattern(regexp = "USER|ADMIN", message = "role must be USER or ADMIN")
+    val role: String,
+)

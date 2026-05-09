@@ -1,5 +1,10 @@
 import type { Context, SpecMetadata } from 'fixedcode';
-import { parseSpec, type AuthMode, type RecipeName } from './spec.js';
+import {
+  parseSpec,
+  type AuthMode,
+  type RecipeName,
+  type NormalizedUsersManagementConfig,
+} from './spec.js';
 import { generateVariants, toFlatPackageSegment, type NamingVariants } from './naming.js';
 
 export interface ServiceContext {
@@ -44,6 +49,13 @@ export interface KotlinSpringBffContext extends Context {
   authEnabled: boolean;
   recipes: RecipeName[];
   recipeImageUpload: boolean;
+  recipeUsersManagement: boolean;
+  usersManagement: NormalizedUsersManagementConfig;
+  /**
+   * Effective auth wiring after recipes apply: when users-management is enabled,
+   * the bundle becomes a JWT issuer/verifier even if features.auth was 'none'.
+   */
+  effectiveAuthJwt: boolean;
 }
 
 export function enrich(
@@ -69,6 +81,24 @@ export function enrich(
     };
   });
 
+  const recipeUsersManagement = spec.recipes.includes('users-management');
+
+  // The users-management recipe persists users + password hashes — that requires JPA.
+  if (recipeUsersManagement && !spec.features.database) {
+    throw new Error(
+      '[kotlin-spring-bff:users-management] recipe "users-management" requires features.database: true ' +
+        '(it persists users + password hashes via Spring Data JPA + Flyway). ' +
+        'Set `features: { database: true }` in your spec.',
+    );
+  }
+
+  const authJwt = spec.features.auth === 'jwt';
+  const authOauth2 = spec.features.auth === 'oauth2';
+  const authEnabled = spec.features.auth !== 'none' || recipeUsersManagement;
+  // The recipe brings JJWT + Spring Security regardless of features.auth — so
+  // build.gradle conditionals can key off effectiveAuthJwt.
+  const effectiveAuthJwt = authJwt || recipeUsersManagement;
+
   return {
     appName,
     packageName,
@@ -81,10 +111,13 @@ export function enrich(
     services,
     hasServices: services.length > 0,
     features: spec.features,
-    authJwt: spec.features.auth === 'jwt',
-    authOauth2: spec.features.auth === 'oauth2',
-    authEnabled: spec.features.auth !== 'none',
+    authJwt,
+    authOauth2,
+    authEnabled,
     recipes: spec.recipes,
     recipeImageUpload: spec.recipes.includes('image-upload'),
+    recipeUsersManagement,
+    usersManagement: spec.usersManagement,
+    effectiveAuthJwt,
   };
 }

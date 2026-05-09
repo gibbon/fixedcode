@@ -1,0 +1,15 @@
+package {{packageName}}.dto
+
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
+
+data class SignUpRequest(
+    @field:NotBlank
+    @field:Email
+    val email: String,
+
+    @field:NotBlank
+    @field:Size(min = 8, max = 256, message = "password must be between 8 and 256 chars")
+    val password: String,
+)

@@ -77,8 +77,26 @@
     "recipes": {
       "type": "array",
       "description": "Named feature recipes to include in the generated project",
-      "items": { "type": "string", "enum": ["image-upload"] },
+      "items": { "type": "string", "enum": ["image-upload", "users-management"] },
       "default": []
+    },
+    "usersManagement": {
+      "type": "object",
+      "description": "Configuration for the users-management recipe (no effect unless users-management is enabled)",
+      "properties": {
+        "tokenTtlMinutes": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1440,
+          "description": "Lifetime of issued JWTs in minutes"
+        },
+        "defaultAdminEmail": {
+          "type": "string",
+          "default": "admin@example.com",
+          "description": "Email seeded as the initial ADMIN user (dev profile only)"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

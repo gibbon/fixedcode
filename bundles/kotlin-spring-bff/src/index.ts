@@ -76,6 +76,84 @@ export function generateFiles(ctx: KotlinSpringBffContext): FileEntry[] {
     });
   }
 
+  // Recipe: users-management
+  if (ctx.recipeUsersManagement) {
+    files.push(
+      {
+        template: 'recipes/users-management/api/AuthController.kt.hbs',
+        output: `src/main/kotlin/${pkg}/api/AuthController.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/api/UsersController.kt.hbs',
+        output: `src/main/kotlin/${pkg}/api/UsersController.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/auth/JwtAuthenticationFilter.kt.hbs',
+        output: `src/main/kotlin/${pkg}/auth/JwtAuthenticationFilter.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/auth/JwtService.kt.hbs',
+        output: `src/main/kotlin/${pkg}/auth/JwtService.kt`,
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/users-management/auth/PasswordHasher.kt.hbs',
+        output: `src/main/kotlin/${pkg}/auth/PasswordHasher.kt`,
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/users-management/domain/User.kt.hbs',
+        output: `src/main/kotlin/${pkg}/domain/User.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/domain/UserRepository.kt.hbs',
+        output: `src/main/kotlin/${pkg}/domain/UserRepository.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/dto/UserDto.kt.hbs',
+        output: `src/main/kotlin/${pkg}/dto/UserDto.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/dto/SignUpRequest.kt.hbs',
+        output: `src/main/kotlin/${pkg}/dto/SignUpRequest.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/dto/SignInRequest.kt.hbs',
+        output: `src/main/kotlin/${pkg}/dto/SignInRequest.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/dto/AuthResponse.kt.hbs',
+        output: `src/main/kotlin/${pkg}/dto/AuthResponse.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/dto/UpdateRoleRequest.kt.hbs',
+        output: `src/main/kotlin/${pkg}/dto/UpdateRoleRequest.kt`,
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/resources/application-users-management.yml.hbs',
+        output: 'src/main/resources/application-users-management.yml',
+        ctx: c,
+      },
+      {
+        template: 'recipes/users-management/resources/db/V001__users.sql.hbs',
+        output: 'src/main/resources/db/migration/V001__users.sql',
+        ctx: c,
+      },
+    );
+  }
+
   // Recipe: image-upload
   if (ctx.recipeImageUpload) {
     files.push(
