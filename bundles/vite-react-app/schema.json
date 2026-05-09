@@ -47,7 +47,7 @@
       "description": "Named feature recipes to include in the generated app",
       "items": {
         "type": "string",
-        "enum": ["image-upload", "admin-screen", "users-management", "pricing-page"]
+        "enum": ["image-upload", "admin-screen", "users-management", "pricing-page", "dashboard"]
       },
       "default": []
     },
@@ -79,6 +79,37 @@
         },
         "basePath": { "type": "string", "default": "/admin" },
         "apiBaseUrl": { "type": "string", "default": "" }
+      },
+      "additionalProperties": false
+    },
+    "dashboard": {
+      "type": "object",
+      "description": "Configuration for the dashboard recipe (no effect unless dashboard is enabled)",
+      "properties": {
+        "title": { "type": "string", "default": "Dashboard" },
+        "stats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "endpoint"],
+            "properties": {
+              "name": { "type": "string" },
+              "endpoint": { "type": "string" },
+              "units": { "type": "string" },
+              "format": {
+                "type": "string",
+                "enum": ["number", "currency", "percent"],
+                "default": "number"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "timeRanges": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["7d", "30d", "90d"]
+        }
       },
       "additionalProperties": false
     },

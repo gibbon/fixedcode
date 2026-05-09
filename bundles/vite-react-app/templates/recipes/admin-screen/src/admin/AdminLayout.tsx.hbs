@@ -9,7 +9,8 @@ export interface AdminLayoutProps {
 }
 
 const SIDEBAR_LINKS = [
-{{#each adminScreen.aggregates}}  { label: '{{namePluralPascal}}', href: '{{../adminScreen.basePath}}/{{namePluralKebab}}' },
+{{#if hasDashboardRecipe}}  { label: 'Dashboard', href: '/dashboard' },
+{{/if}}{{#each adminScreen.aggregates}}  { label: '{{namePluralPascal}}', href: '{{../adminScreen.basePath}}/{{namePluralKebab}}' },
 {{/each}}];
 
 const rootStyle: CSSProperties = { display: 'flex', minHeight: '100vh' };

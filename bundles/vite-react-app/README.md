@@ -218,6 +218,45 @@ Per-tier fields: `name` (required), `price` (required), `period`, `audience`, `d
 
 Highlight behaviour: exactly the tiers with `highlight: true` render a "Most popular" badge and an inverted CTA. No new npm deps; uses the same Tailwind tokens as the rest of the bundle.
 
+#### `dashboard`
+
+A drop-in admin/metrics dashboard layout. Spec-driven stat tiles, time-range selector (`7d / 30d / 90d` by default), router-agnostic mount, native `fetch` — **no charting library, no new npm deps**.
+
+```yaml
+spec:
+  appName: ops-app
+  recipes:
+    - dashboard
+  dashboard:
+    title: "Ops Dashboard"
+    timeRanges: ["24h", "7d", "30d"]
+    stats:
+      - { name: "Active Users",     endpoint: "/api/metrics/active-users", units: "users" }
+      - { name: "MRR",              endpoint: "/api/metrics/mrr",          units: "$",  format: "currency" }
+      - { name: "Conversion Rate",  endpoint: "/api/metrics/conversion",                format: "percent" }
+```
+
+Generates:
+
+- `src/lib/dashboard.ts` — typed client: `fetchStat(endpoint, range)` (calls `<endpoint>?range=<range>`, expects `{ value: number }`) plus a `formatValue(n, format)` utility (`number` / `currency` / `percent` via `Intl.NumberFormat`)
+- `src/components/StatCard.tsx` — **extension point** (`overwrite: false`). Single tile; `{ name, value, units, format, loading? }` props. Skeleton (animated pulse) until value lands.
+- `src/components/DashboardLayout.tsx` — **extension point**. Page shell: title, time-range selector, stat grid, charts slot. Stat metadata is inlined at generation time.
+- `src/routes/dashboard.tsx` — **extension point**. Default-exports a React component mounting `<DashboardLayout />`. Wire it into your router yourself (snippets in the file header) — same pattern as `pricing-page`.
+
+Spec config (under `spec.dashboard`):
+
+| Field        | Default                | Description                                                  |
+| ------------ | ---------------------- | ------------------------------------------------------------ |
+| `title`      | `"Dashboard"`          | Heading shown above the stat grid                            |
+| `stats`      | `[]`                   | Array of stat objects (see below)                            |
+| `timeRanges` | `["7d", "30d", "90d"]` | Buttons rendered in the header. First entry = initial value. |
+
+Per-stat fields: `name` (required), `endpoint` (required, e.g. `/api/metrics/active-users`), `units` (e.g. `"users"`, `"$"`), `format` (`number` (default) / `currency` / `percent`).
+
+Composes with `admin-screen`: when both recipes are enabled, the admin sidebar (`src/admin/AdminLayout.tsx`) auto-renders a `Dashboard` link as the **first** sidebar item (linking to `/dashboard`). The composition is wired via the `hasDashboardRecipe` context flag.
+
+No charting library is bundled. To add visualisations later, extend `StatResponse` with timeseries fields and drop your favourite (Recharts / Tremor / Chart.js) into the `<section data-slot="charts">` block in `DashboardLayout.tsx` — there's a header comment explaining the integration.
+
 ### Adding a new recipe
 
 1. Add the recipe name to `schema.json` under `properties.recipes.items.enum` and `KNOWN_RECIPES` in `src/enrich/spec.ts`.

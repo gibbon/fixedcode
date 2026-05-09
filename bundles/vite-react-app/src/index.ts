@@ -181,6 +181,35 @@ export function generateFiles(ctx: ViteReactAppContext): FileEntry[] {
     );
   }
 
+  // Recipe: dashboard
+  if (ctx.recipeDashboard) {
+    files.push(
+      {
+        template: 'recipes/dashboard/src/lib/dashboard.ts.hbs',
+        output: 'src/lib/dashboard.ts',
+        ctx: c,
+      },
+      {
+        template: 'recipes/dashboard/src/components/DashboardLayout.tsx.hbs',
+        output: 'src/components/DashboardLayout.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/dashboard/src/components/StatCard.tsx.hbs',
+        output: 'src/components/StatCard.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+      {
+        template: 'recipes/dashboard/src/routes/dashboard.tsx.hbs',
+        output: 'src/routes/dashboard.tsx',
+        ctx: c,
+        overwrite: false,
+      },
+    );
+  }
+
   // Recipe: image-upload
   if (ctx.recipeImageUpload) {
     files.push(
