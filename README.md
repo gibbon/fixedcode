@@ -145,6 +145,7 @@ Pre-1.0; expect API evolution. Tracked in [issues](https://github.com/gibbon/fix
 - Publish bundles + the OpenAPI generator to npm
 - Interactive `enrich` confirmation (#5)
 - More language bundles
+- Feature/capability bundles inside services (image upload, auth, search, etc.) — see [`docs/feature-bundle-roadmap.md`](docs/feature-bundle-roadmap.md)
 
 ## Contributing
 
