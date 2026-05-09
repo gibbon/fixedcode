@@ -1,0 +1,26 @@
+{
+  "name": "@fixedcode/bundle-kotlin-spring-bff",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "fixedcode": "file:../../engine"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "handlebars": "^4.7.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

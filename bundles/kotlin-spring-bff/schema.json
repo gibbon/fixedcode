@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "kotlin-spring-bff spec",
+  "type": "object",
+  "required": ["appName", "groupId"],
+  "properties": {
+    "appName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Application name in kebab-case (e.g. my-bff)"
+    },
+    "groupId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+      "description": "Maven groupId / Kotlin base package (e.g. com.example)"
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535,
+      "default": 8080,
+      "description": "HTTP server port"
+    },
+    "javaVersion": {
+      "type": "integer",
+      "enum": [17, 21],
+      "default": 21,
+      "description": "JDK toolchain version"
+    },
+    "services": {
+      "type": "array",
+      "description": "Composed downstream services this BFF aggregates",
+      "items": {
+        "type": "object",
+        "required": ["name", "baseUrl"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "description": "Service short name in kebab-case"
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Default base URL for the service (overridable via env)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "enum": ["jwt", "oauth2", "none"],
+          "default": "none",
+          "description": "Auth strategy to scaffold"
+        },
+        "database": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include Spring Data JPA + PostgreSQL + Flyway"
+        },
+        "cache": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include Caffeine cache and CacheConfig"
+        },
+        "docker": {
+          "type": "boolean",
+          "default": true,
+          "description": "Generate a Dockerfile"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

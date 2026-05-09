@@ -1,0 +1,38 @@
+package {{packageName}}.clients
+
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.stereotype.Component
+import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
+
+/**
+ * Typed client for the `{{service.name}}` downstream service.
+ * Base URL is wired in {@link {{appName.pascal}}Application}'s `RestClientConfig`
+ * via the `{{service.naming.camel}}WebClient` bean (config key `app.services.{{service.configKey}}.base-url`,
+ * env override `{{service.envVar}}`).
+ *
+ * Wraps every call in a Resilience4j circuit breaker (instance: `default`).
+ * The fallback returns an empty Mono — replace with whatever signals upstream-degraded
+ * to your callers.
+ */
+@Component
+class {{service.naming.pascal}}Client(
+    @Qualifier("{{service.naming.camel}}WebClient") private val webClient: WebClient,
+) {
+
+    /**
+     * Generic GET that decodes the response body to [T].
+     * Add typed methods for each downstream endpoint you call.
+     */
+    @CircuitBreaker(name = "default", fallbackMethod = "getFallback")
+    fun <T : Any> get(path: String, responseType: Class<T>): Mono<T> =
+        webClient.get()
+            .uri(path)
+            .retrieve()
+            .bodyToMono(responseType)
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun <T : Any> getFallback(path: String, responseType: Class<T>, ex: Throwable): Mono<T> =
+        Mono.empty()
+}

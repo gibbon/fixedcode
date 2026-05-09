@@ -1,0 +1,97 @@
+server:
+  port: {{port}}
+
+spring:
+  application:
+    name: {{appName.kebab}}
+{{#if features.database}}
+
+  datasource:
+    url: {{springProp "DATABASE_URL" (concat "jdbc:postgresql://localhost:5432/" appName.snake)}}
+    username: {{springProp "DATABASE_USERNAME" "postgres"}}
+    password: {{springProp "DATABASE_PASSWORD" "postgres"}}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+{{/if}}
+{{#if features.cache}}
+
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=30m
+{{/if}}
+{{#if authOauth2}}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: {{springProp "OAUTH2_ISSUER_URI" ""}}
+{{/if}}
+{{#if authJwt}}
+
+# JWT auth
+jwt:
+  secret: {{springProp "JWT_SECRET" "change-me-in-production-min-32-chars"}}
+  expiration-ms: {{springProp "JWT_EXPIRATION_MS" "86400000"}}
+{{/if}}
+{{#if hasServices}}
+
+# Composed downstream services
+app:
+  services:
+{{#each services}}
+    {{configKey}}:
+      base-url: {{springProp envVar baseUrl}}
+{{/each}}
+{{/if}}
+
+# Resilience4j defaults
+resilience4j:
+  circuitbreaker:
+    instances:
+      default:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+  retry:
+    instances:
+      default:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+  timelimiter:
+    instances:
+      default:
+        timeout-duration: 30s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers,retries
+  endpoint:
+    health:
+      show-details: when_authorized
+
+logging:
+  level:
+    {{packageName}}: INFO
+    org.springframework.web: INFO
+    io.github.resilience4j: WARN

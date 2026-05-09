@@ -1,0 +1,56 @@
+package {{packageName}}.config
+
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig
+import io.github.resilience4j.retry.RetryConfig
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
+import org.springframework.web.reactive.function.client.WebClient
+import reactor.netty.http.client.HttpClient
+import java.time.Duration
+
+/**
+ * WebClient builder + a named WebClient per composed downstream service.
+ * Default Resilience4j circuit breaker / retry configs are also exposed so
+ * services and clients can reuse them by name (`@CircuitBreaker(name = "default")`).
+ */
+@Configuration
+class RestClientConfig(
+{{#each services}}
+    @Value("\${app.services.{{configKey}}.base-url}") private val {{naming.camel}}BaseUrl: String,
+{{/each}}
+) {
+
+    @Bean
+    fun webClientBuilder(): WebClient.Builder {
+        val httpClient = HttpClient.create()
+            .responseTimeout(Duration.ofSeconds(30))
+            .keepAlive(true)
+        return WebClient.builder()
+            .clientConnector(ReactorClientHttpConnector(httpClient))
+            .codecs { it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }
+    }
+
+{{#each services}}
+    @Bean("{{naming.camel}}WebClient")
+    fun {{naming.camel}}WebClient(builder: WebClient.Builder): WebClient =
+        builder.baseUrl({{naming.camel}}BaseUrl).build()
+
+{{/each}}
+    @Bean
+    fun defaultCircuitBreakerConfig(): CircuitBreakerConfig =
+        CircuitBreakerConfig.custom()
+            .failureRateThreshold(50.0f)
+            .waitDurationInOpenState(Duration.ofSeconds(30))
+            .slidingWindowSize(10)
+            .minimumNumberOfCalls(5)
+            .build()
+
+    @Bean
+    fun defaultRetryConfig(): RetryConfig =
+        RetryConfig.custom<Any>()
+            .maxAttempts(3)
+            .waitDuration(Duration.ofSeconds(1))
+            .build()
+}

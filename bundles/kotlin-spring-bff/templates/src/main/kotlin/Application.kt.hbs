@@ -1,0 +1,17 @@
+package {{packageName}}
+
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
+{{#if features.cache}}
+import org.springframework.cache.annotation.EnableCaching
+{{/if}}
+
+@SpringBootApplication
+{{#if features.cache}}
+@EnableCaching
+{{/if}}
+class {{appName.pascal}}Application
+
+fun main(args: Array<String>) {
+    runApplication<{{appName.pascal}}Application>(*args)
+}
