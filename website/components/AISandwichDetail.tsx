@@ -84,6 +84,24 @@ export default function AISandwichDetail() {
           the output is severed.
         </p>
 
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">You already trust some of this</h2>
+        <p>
+          Most engineers already trust deterministic codegen for one thing: API clients. You
+          write an OpenAPI spec, you run{" "}
+          <code className="text-gray-200">openapi-generator</code>, and you get a typed client in
+          TypeScript or Kotlin or Python. Every team gets the same client for the same API.
+          Nobody hand-rolls HTTP code, because the spec to client transformation is too
+          obviously a function to do by hand.
+        </p>
+        <p>
+          OpenAPI works because the contract between the spec and the generated code is
+          unambiguous, the regeneration loop is fast, and the cost of a hand-edit is so high
+          that nobody is tempted. None of that is unique to HTTP. The same property is available
+          for auth, persistence, event publishing, audit, and the rest of the structural layer.
+          You just need a generator that handles them with the same discipline. That is what
+          FixedCode is. The AI sandwich is what you do once you have one.
+        </p>
+
         <h2 className="text-2xl font-bold text-white mt-12 mb-4">The sandwich</h2>
         <p>The architecture is to put deterministic generation between two layers of AI.</p>
 
@@ -266,6 +284,16 @@ Bottom layer (AI):       business logic  ->  extension points`}
           . <code className="text-gray-200">npm install fixedcode</code>. I would love feedback,
           especially from teams who have tried something in this shape and run into walls I have
           not seen yet.
+        </p>
+        <p className="text-gray-400 text-sm pt-2">
+          Follow-up post on the implementation:{" "}
+          <a
+            href="/blog/regeneration"
+            className="text-purple-400 hover:text-purple-300 underline"
+          >
+            How regenerating code stays out of your way
+          </a>{" "}
+          (interfaces, default implementations, local overrides, and library publication).
         </p>
       </div>
 
