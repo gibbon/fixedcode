@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { useTheme } from "./ThemeProvider";
 
 export default function Navbar() {
@@ -26,35 +27,35 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="/" className="text-xl font-bold text-gradient">
+        <Link href="/" className="text-xl font-bold text-gradient">
           FixedCode
-        </a>
+        </Link>
 
         <div className="flex items-center gap-6">
-          <a
+          <Link
             href="/#problem"
             className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
           >
             The Problem
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#how-it-works"
             className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
           >
             How It Works
-          </a>
-          <a
+          </Link>
+          <Link
             href="/ai-sandwich"
             className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
           >
             AI Sandwich
-          </a>
-          <a
+          </Link>
+          <Link
             href="/pricing"
             className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
           >
             Pricing
-          </a>
+          </Link>
           <button
             onClick={toggle}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-surface-light transition-all"

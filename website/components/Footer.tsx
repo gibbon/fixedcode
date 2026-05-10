@@ -1,14 +1,16 @@
 "use client";
 
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="border-t border-border py-16 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-12">
           <div>
-            <a href="/" className="text-2xl font-bold text-gradient">
+            <Link href="/" className="text-2xl font-bold text-gradient">
               FixedCode
-            </a>
+            </Link>
             <p className="text-gray-500 mt-2 text-sm">
               AI creates. FixedCode guarantees. You ship.
             </p>
