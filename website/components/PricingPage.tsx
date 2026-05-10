@@ -18,7 +18,7 @@ const tiers = [
     ctaHref: "https://www.npmjs.com/package/fixedcode",
     ctaClass: "border border-border text-gray-300 hover:bg-surface-light",
     features: [
-      { text: "FixedCode CLI — capture, generate, validate", included: true },
+      { text: "FixedCode CLI: capture, generate, validate", included: true },
       { text: "Local schemas and bundles", included: true },
       { text: "AI-assisted spec drafting", included: true },
       { text: "Regeneration contract", included: true },
@@ -93,7 +93,7 @@ const tiers = [
     ctaClass: "border border-border text-foreground hover:bg-surface-light",
     features: [
       { text: "Everything in Organisation", included: true },
-      { text: "Full audit logs — who generated what, when, from which template", included: true },
+      { text: "Full audit logs: who generated what, when, from which template", included: true },
       { text: "Compliance manifests for regulators", included: true },
       { text: "SSO / SAML integration", included: true },
       { text: "Custom schema design consulting", included: true },
@@ -205,7 +205,7 @@ export default function PricingPage() {
           <div className="rounded-xl border border-border bg-surface p-5">
             <h3 className="text-sm font-semibold text-white mb-2">Is the engine really free?</h3>
             <p className="text-sm text-gray-400">
-              The CLI is free for non-commercial use, personal projects, and evaluation — no time limit. Commercial
+              The CLI is free for non-commercial use, personal projects, and evaluation. No time limit. Commercial
               use requires a paid tier starting at Team. This lets you try everything before committing, while
               ensuring the project is sustainable.
             </p>
@@ -213,7 +213,7 @@ export default function PricingPage() {
           <div className="rounded-xl border border-border bg-surface p-5">
             <h3 className="text-sm font-semibold text-white mb-2">What about the schemas and bundles?</h3>
             <p className="text-sm text-gray-400">
-              Starter schemas ship with the engine as examples. Your production schemas and bundles are yours — you
+              Starter schemas ship with the engine as examples. Your production schemas and bundles are yours. You
               build them with AI, store them in your git, and they encode your org&apos;s specific standards. We
               don&apos;t host or sell bundles. The product is the engine and the workflow.
             </p>

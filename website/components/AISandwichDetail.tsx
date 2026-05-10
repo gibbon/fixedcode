@@ -3,291 +3,269 @@ import SandwichDiagram from "./SandwichDiagram";
 export default function AISandwichDetail() {
   return (
     <article className="max-w-3xl mx-auto px-6 pb-24 pt-8">
-      <header className="mb-12">
+      <header className="mb-10">
         <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">Essay</p>
         <h1 className="text-4xl sm:text-5xl font-bold mb-6 leading-tight">
           The AI Sandwich
         </h1>
         <p className="text-xl text-gray-300 leading-relaxed">
-          AI is good at writing code. It is not good at writing the same code twice.
+          AI is good at writing code. It is bad at writing the same code twice.
         </p>
       </header>
 
       <div className="prose-content text-gray-300 leading-relaxed space-y-6 text-[17px]">
         <p>
-          This is the bug at the heart of the current AI-codegen wave. Individual developers are
-          dramatically faster. Whole organisations are not &mdash; and in many cases they are
-          getting slower in the way that actually matters: the time it takes for an idea in
-          someone&apos;s head to become a service in production that meets the rest of the
-          org&apos;s standards.
+          For the past two years I have been watching teams adopt AI coding tools and ship more
+          services per week than they ever did. The same teams have been quietly drifting. Every
+          new service has slightly different auth wiring, slightly different log formatting,
+          slightly different audit trails. Each version is reasonable on its own. None of them
+          match each other.
         </p>
+        <p>This is fine if you ship one service. It is a real problem if you ship fifty.</p>
         <p>
-          We built FixedCode to make this go away. The structural answer we landed on is
-          something we call the AI sandwich. On reflection it is fairly obvious. It is not what
-          most teams are doing right now, though, and the gap between &ldquo;what we&apos;re
-          doing&rdquo; and &ldquo;what would actually work&rdquo; is large enough that it&apos;s
-          worth writing down.
+          I built FixedCode because I think the fix is structural. The architecture I landed on
+          is something I call the AI sandwich, and it is the rest of this post.
         </p>
 
         <h2 className="text-2xl font-bold text-white mt-12 mb-4">Two kinds of code</h2>
         <p>
-          Every backend service contains two categories of code, and they have different
-          requirements.
+          Every backend service contains two kinds of code, and they want different things from
+          a generator.
         </p>
         <p>
-          The first is <strong className="text-white">structural code</strong>. Authentication.
-          Logging. Persistence. Audit trails. Event publishing. Migrations. Tests for all of the
-          above. This code should be functionally identical across every service in the org. If
-          your <code className="text-gray-200">OrderService</code> and your{" "}
+          The first is structural code: authentication, logging, persistence, audit trails,
+          event publishing, migrations, tests for all of it. This code should be functionally
+          identical across every service in the org. If your{" "}
+          <code className="text-gray-200">OrderService</code> and your{" "}
           <code className="text-gray-200">InvoiceService</code> handle auth differently, you have
-          a bug &mdash; possibly a security bug. The fact that nobody filed it as a bug means
-          nothing.
+          a bug. Possibly a security bug.
         </p>
         <p>
-          The second is <strong className="text-white">business logic</strong>. The validation
-          rules that say an order can&apos;t have a negative quantity. The pricing function that
-          depends on customer tier and region. The integration with whatever third-party API
-          exists in your particular industry. This code is, by definition, different in every
-          service. That&apos;s the point.
+          The second is business logic: validation rules, pricing functions, integrations with
+          whatever third-party API your industry happens to use. This code is, by definition,
+          different in every service. That is the point.
         </p>
         <p>
-          Existing AI coding tools &mdash; Cursor, Claude Code, Copilot, the whole genre &mdash;
-          generate both categories with the same machinery. You ask for &ldquo;an order
-          management service with validation and pagination&rdquo;, and the model writes you a
-          service. The pricing function looks reasonable. The auth code is also reasonable. It
-          is not, however, the same as the auth code in the other forty-seven services your org
-          has shipped this quarter. Each of them is, in its own quiet way, slightly wrong.
+          Existing AI coding tools generate both kinds with the same machinery. You ask for
+          &ldquo;an order management service with validation and pagination&rdquo; and the model
+          writes you a service. The pricing function looks reasonable. The auth code is also
+          reasonable. It is not the same as the auth code in the other forty-seven services your
+          org has shipped this quarter.
         </p>
-        <p>This is fine if you have one service. It is a real problem if you have fifty.</p>
+        <p>That is the whole problem in one sentence.</p>
 
-        <h2 className="text-2xl font-bold text-white mt-12 mb-4">
-          What scaffolding got right, and wrong
-        </h2>
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">What scaffolding got right</h2>
         <p>
-          Deterministic scaffolding has been around forever. Yeoman, Cookiecutter, Rails
-          generators, the Backstage scaffolder, internal tools at every reasonably-sized
-          company. The shape is always the same: write some templates, parameterise them, run a
-          generator, get back a project skeleton.
+          Deterministic scaffolding has been around for ever. Yeoman, Cookiecutter, Rails
+          generators, Backstage, every reasonably-sized company&apos;s internal tools. Same shape
+          every time: write some templates, parameterise them, run a generator, get a project
+          skeleton.
         </p>
         <p>
-          What scaffolding gets right is the property AI lacks: same input, same output. If your
-          template is correct, every service generated from it is correct in the same way. You
-          can review the template once and inherit confidence in everything downstream of it.
+          What scaffolding got right is the property AI lacks: same input, same output. Review
+          the template once and you have reviewed every service generated from it.
         </p>
-        <p>What scaffolding gets wrong is everything else.</p>
+
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">What scaffolding got wrong</h2>
         <p>
-          The interface is hostile. Authoring a YAML spec to describe a service that
-          doesn&apos;t exist yet is tedious in a way that LLMs are specifically good at
-          relieving. Maintaining the templates themselves is worse &mdash; anyone who has tried
-          to keep an organisation-wide cookiecutter alive past the first eighteen months knows
-          what a slow grind it becomes.
+          The interface is hostile. Writing YAML to describe a service that does not exist yet
+          is tedious, and tedium is exactly what AI is good at relieving.
         </p>
         <p>
-          Then there is the regeneration problem. Most scaffolding is fire-and-forget. It
-          generates your project skeleton and walks away. When you improve the template six
-          months later, you have no way to ship the improvement to existing services &mdash;
-          they have forked. The clean structural property dissolves immediately. Backstage tried
-          to solve this with templated software catalogues, but the experience is still
-          substantively that you generate, customise, and then the template&apos;s connection to
-          the output is severed. If you want to change auth across all your services, you find
-          them, you patch them, you cry.
+          Maintaining the templates is worse. Anyone who has tried to keep an org-wide
+          cookiecutter alive for eighteen months knows it slowly turns into a second job.
+        </p>
+        <p>
+          And most scaffolding is fire-and-forget. You generate the project skeleton and the
+          generator walks away. When you improve the template six months later there is no path
+          to ship the improvement to existing services. They have forked. Backstage tried to
+          solve this with templated software catalogues, but the experience is still
+          substantively that you generate, you customise, and the template&apos;s connection to
+          the output is severed.
         </p>
 
         <h2 className="text-2xl font-bold text-white mt-12 mb-4">The sandwich</h2>
+        <p>The architecture is to put deterministic generation between two layers of AI.</p>
+
+        <pre className="rounded-lg border border-border bg-surface/60 p-5 text-sm overflow-x-auto text-gray-300">
+{`Top layer    (AI):       intent          ->  spec
+Middle       (engine):   spec            ->  code   (deterministic)
+Bottom layer (AI):       business logic  ->  extension points`}
+        </pre>
+
         <p>
-          The structural answer is to put deterministic generation between two layers of AI:
+          Top: an AI agent translates plain English (&ldquo;we need an order management service
+          with line items and payment integration&rdquo;) into a YAML spec that conforms to the
+          org&apos;s schema.
         </p>
-        <ul className="list-disc pl-6 space-y-3">
-          <li>
-            <strong className="text-white">Top slice (AI).</strong> Translate intent into a
-            spec. Translate examples into templates. The creative work that benefits from a
-            model that can think about meaning.
-          </li>
-          <li>
-            <strong className="text-white">Middle (deterministic).</strong> A spec, a template,
-            an engine. Same input, identical output, every time. The reproducible work that
-            benefits from being a function rather than a chat.
-          </li>
-          <li>
-            <strong className="text-white">Bottom slice (AI).</strong> Fill in business logic in
-            clearly-marked extension points after generation. The bespoke work that has to be
-            different in every service.
-          </li>
-        </ul>
+        <p>
+          Middle: the FixedCode engine reads the spec and generates a complete service. Same
+          spec, same files, every time. About three seconds for a typical Spring Kotlin service.
+        </p>
+        <p>
+          Bottom: the engine leaves clearly-marked extension points. Validation rules, pricing
+          functions, the parts that have to be unique to this service. AI fills those in too.
+        </p>
+        <p>The model never touches structural code. The engine never tries to be creative.</p>
+
+        <p>Here is what running the middle slice looks like:</p>
+
+        <pre className="rounded-lg border border-border bg-surface/60 p-5 text-sm overflow-x-auto text-gray-300">
+{`$ fixedcode generate order.yaml -o order-service
+✓ Schema valid: ddd/1.0
+✓ Generated 47 files in 2.3s
+✓ Extension points: OrderValidator.kt, OrderScorer.kt`}
+        </pre>
 
         <div className="my-10">
           <SandwichDiagram />
         </div>
 
-        <p>
-          The model never touches the structural code. It writes the spec that describes what
-          should exist, and it writes the bespoke logic that goes inside the generated shell.
-          The engine is responsible for the part that has to be the same across services. The
-          model is responsible for the parts that have to be different.
-        </p>
-        <p>
-          This is not a clever architecture. It is what you get when you ask which parts of the
-          system should be deterministic and which parts should be creative, and answer the
-          question honestly.
-        </p>
-
         <h2 className="text-2xl font-bold text-white mt-12 mb-4">
           Why deterministic belongs in the middle
         </h2>
         <p>
-          There are three properties that deterministic generation gives you, and that AI
-          generation cannot.
+          Three properties that you cannot get out of an LLM, no matter how good your prompt is.
         </p>
         <p>
-          <strong className="text-white">Reviewability.</strong> When you review a template
-          once, you have reviewed every service generated from it. When you review the output of
-          an LLM, you have reviewed only that output. At one service this distinction is
-          invisible. At fifty services it is the entire ballgame. Most engineering
-          organisations cannot review fifty services per quarter at the depth that would
-          actually catch the auth, logging and audit issues that matter &mdash; and so they
-          don&apos;t.
+          <strong className="text-white">Reviewability.</strong> Review the template once and
+          you have reviewed every service generated from it. Review LLM output and you have
+          reviewed only that output. At one service this distinction is invisible. At fifty it
+          dominates the math, because no engineering org reviews fifty services per quarter at
+          the depth that would catch the auth, logging and audit issues that matter.
         </p>
         <p>
           <strong className="text-white">Regeneration.</strong> Because the output is a function
           of the input, you can run the function again. When the template improves, every
-          service inherits the improvement on the next regeneration. This sounds obvious; in
-          practice it is the property that scaffolding has historically failed to deliver,
-          because once you have hand-edited the generated code to add business logic,
+          service inherits the improvement on the next run. Scaffolding has historically failed
+          to deliver this, because once you hand-edit generated code to add business logic,
           regeneration overwrites your work.
         </p>
         <p>
           <strong className="text-white">Auditability.</strong> The contents of any generated
-          file are derivable from the spec, the template and the engine version. Compliance
-          people care about this a great deal &mdash; they want to know not just{" "}
-          <em>what</em> code is in production but <em>why</em>. &ldquo;Generated from spec at
-          hash X by engine version Y&rdquo; is a much better answer than &ldquo;an LLM emitted
-          it on the third attempt&rdquo;.
+          file are derivable from the spec, the template and the engine version.
+          &ldquo;Generated from spec at hash X by engine version Y&rdquo; is a much better
+          answer for a compliance reviewer than &ldquo;an LLM emitted it on the third
+          attempt&rdquo;.
         </p>
         <p>
-          The sandwich preserves all three because the middle layer is genuinely deterministic.
-          The top and bottom layers can be as creative and stochastic as you like &mdash; they
-          are producing inputs and extensions, not the structural code that has to be reviewed,
-          regenerated and audited.
+          The sandwich preserves all three because the middle layer is deterministic. The top
+          and bottom layers can be as creative as you like. They produce inputs and extensions,
+          not the structural code that has to be reviewed, regenerated and audited.
         </p>
 
-        <h2 className="text-2xl font-bold text-white mt-12 mb-4">The regeneration contract</h2>
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">
+          How regeneration works without losing your code
+        </h2>
+        <p>Three categories of files.</p>
         <p>
-          Regeneration only works if there is a clear protocol for which files the engine owns
-          and which files the human owns. We landed on three categories.
+          <strong className="text-white">Regenerated files</strong> are owned by the engine.
+          Overwritten on every run. You do not edit them. The repo&apos;s{" "}
+          <code className="text-gray-200">.fixedcode-manifest.json</code> records every one with
+          its hash. If you do edit one, the next run surfaces the drift and erases it.
         </p>
         <p>
-          <strong className="text-white">Regenerated files</strong> are owned by the engine and
-          overwritten on every run. You do not edit these. The repository&apos;s{" "}
-          <code className="text-gray-200">.fixedcode-manifest.json</code> records every one of
-          them with its hash. If you do edit one, you have created drift, which the engine will
-          surface and the next regeneration will erase.
-        </p>
-        <p>
-          <strong className="text-white">Once files</strong> are created by the engine the first
-          time and then never touched again. These are typically configuration files where the
-          engine has an opinion about the initial contents but the team will evolve them
-          afterwards: <code className="text-gray-200">application.yml</code>, the root README,
-          the Dockerfile.
+          <strong className="text-white">Once files</strong> are created the first time and then
+          never touched again. Configuration files where the engine has an opinion about the
+          initial contents but the team will evolve them:{" "}
+          <code className="text-gray-200">application.yml</code>, the root README, the
+          Dockerfile.
         </p>
         <p>
           <strong className="text-white">Extension points</strong> are stub files the engine
-          creates if missing and ignores if present. This is where business logic goes. The
-          engine creates <code className="text-gray-200">OrderValidator.kt</code> with a default
-          implementation that does nothing useful; the developer (or the model) replaces it with
-          the actual validation rules; from then on regeneration leaves it alone.
+          creates if missing and ignores if present. Business logic goes here. The engine
+          creates <code className="text-gray-200">OrderValidator.kt</code> with a default
+          implementation that does nothing useful. Developer (or model) fills in real validation
+          rules. From then on regeneration leaves it alone.
         </p>
         <p>
-          Together these three categories make the central trick possible: you can keep
-          regenerating forever without losing custom work, because the engine has explicit,
-          declared ownership of every file it touches.
+          This is the core trick. You can keep regenerating forever without losing custom work,
+          because the engine has explicit, declared ownership of every file it touches.
         </p>
 
-        <h2 className="text-2xl font-bold text-white mt-12 mb-4">
-          What changes about how you build software
-        </h2>
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">The org consequence</h2>
         <p>
-          Once the structural code is generated reliably, the activity of building a service
-          decomposes differently than before.
+          Once structural code is generated reliably, building a service decomposes differently.
         </p>
         <p>
-          The old shape was: someone with domain knowledge writes requirements, hands them to a
-          developer, who hand-wires the service while consulting the platform team about the
+          Old shape: someone with domain knowledge writes requirements, hands them to a
+          developer, who hand-wires the service while consulting the platform team about
           standards. Multiple roles, multiple handoffs, multiple weeks. AI tooling can compress
-          the developer&apos;s part of this loop by perhaps an order of magnitude, but it
-          doesn&apos;t remove the handoffs, and it actively makes the standards-consistency
-          problem worse.
+          the developer&apos;s part of this loop by an order of magnitude. It does not remove
+          the handoffs, and it makes the standards-consistency problem worse.
         </p>
         <p>
-          The sandwich shape is: someone with domain knowledge describes the service in plain
-          English, an AI agent translates that into a spec, the engine generates the structural
-          code, and then the same person (or a different person, it doesn&apos;t matter) fills
-          in the business logic with AI assistance. The platform team&apos;s work is in the
-          templates, where it compounds &mdash; every service ever generated benefits from every
-          template improvement.
+          Sandwich shape: someone with domain knowledge describes the service in plain English,
+          an AI agent translates that into a spec, the engine generates the structural code, and
+          then the same person (or a different person; it does not matter) fills in the business
+          logic with AI assistance.
         </p>
         <p>
           The boundary that dissolves is between PM, developer and platform engineer. What
-          replaces it is a boundary between <strong className="text-white">domain knowledge</strong>{" "}
-          (what should this service do, what are the rules, what is the data model) and{" "}
-          <strong className="text-white">platform knowledge</strong> (how should services be
-          built in this org, what are the patterns, where are the seams). Both are real and
-          necessary. Neither has to be embodied in a particular job title.
+          replaces it is a boundary between domain knowledge (what should this service do, what
+          are the rules, what is the data model) and platform knowledge (how should services be
+          built in this org, what are the patterns, where are the seams). Both are real. Neither
+          has to be embodied in a particular job title.
         </p>
 
-        <h2 className="text-2xl font-bold text-white mt-12 mb-4">What this isn&apos;t</h2>
-        <p>A few things we want to be honest about.</p>
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">What it is not</h2>
         <p>
-          It is not a no-code tool. The bespoke parts of every service still have to be
-          written. The model can help, but somebody still has to know whether the validation
-          rule is right.
+          It is not a no-code tool. The bespoke parts still get written by hand. The model can
+          help; somebody still has to know whether the validation rule is right.
         </p>
         <p>
-          It is not free. Building a good template bundle is real work &mdash; comparable to
-          the effort of writing one good service by hand, except that the result then applies
-          to every subsequent service. The leverage is real but not immediate.
+          It is not free. Building a good template bundle is real engineering work, comparable
+          to writing one good service by hand. The result then applies to every subsequent
+          service, but the leverage is not immediate.
         </p>
         <p>
-          It is not for tiny teams. If you have one service you do not have a consistency
-          problem; the whole apparatus is overhead. The wedge appears around the time you have
-          five or ten services and a small platform team that is already overloaded. It widens
-          from there.
+          It is not for tiny teams. One service has no consistency problem; the whole apparatus
+          is overhead. The wedge appears around five or ten services and a small platform team
+          that is already overloaded. It widens from there.
         </p>
         <p>
-          It is not anti-AI. Quite the opposite. The sandwich exists specifically so the model
-          can be fully unleashed on the parts where its creativity is an asset, without being
-          asked to also be deterministic in the parts where it can&apos;t. Asking an LLM to be
-          reproducible is asking a fish to walk.
+          It is not anti-AI. The point is to let the model do the parts where its creativity is
+          an asset, without asking it to also be deterministic in the parts where it cannot be.
         </p>
 
-        <h2 className="text-2xl font-bold text-white mt-12 mb-4">
-          Why this hasn&apos;t happened already
-        </h2>
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">Why now</h2>
         <p>
-          It has, sort of. Big tech firms have been building variants of the sandwich
-          internally for years &mdash; Google&apos;s protobuf-driven service generation,
-          Meta&apos;s codegen chains, Amazon&apos;s Smithy. These are all instances of the same
-          idea: define the service in a spec, generate the structural code from it, and let
-          humans focus on the bespoke parts. The model layer is recent. The underlying shape
-          isn&apos;t.
+          Big tech firms have been building variants of this internally for years.
+          Google&apos;s protobuf-driven service generation. Meta&apos;s codegen chains.
+          Amazon&apos;s Smithy. Define the service in a spec, generate the structural code, let
+          humans focus on the bespoke parts. The model layer is recent. The shape is not.
         </p>
         <p>
-          What&apos;s different now is that the top and bottom slices can be genuinely
-          automated for the first time. Spec authoring used to be the bottleneck that kept this
-          approach from spreading beyond companies that could afford a dedicated DSL team. AI
-          removes that bottleneck. The engine that does the deterministic middle is
-          straightforward &mdash; most of the engineering at FixedCode has gone into making the
-          regeneration contract bulletproof and the templates pleasant to write &mdash; but
-          it&apos;s the AI layer on either side that turns the architecture into something a
-          normal engineering org can actually adopt.
+          What is different now is that the top and bottom slices can be automated. Spec
+          authoring used to be the bottleneck that kept this approach inside companies that
+          could afford a dedicated DSL team. AI removes that bottleneck. The deterministic
+          engine in the middle is straightforward; most of my engineering effort has gone into
+          making the regeneration contract bulletproof and the templates pleasant to write. It
+          is the AI layers on either side that turn the architecture into something a normal
+          engineering org can actually adopt.
         </p>
         <p>
-          If you have more than a handful of services and you&apos;re starting to feel the
-          consistency drift that AI-accelerated development tends to cause, the sandwich is the
-          shape to consider. It doesn&apos;t have to be ours &mdash; you can build it
-          yourself, and we have a reasonable amount of detail in the docs about how to do
-          exactly that &mdash; but the principle is what matters. Don&apos;t ask the model to
-          be deterministic. Put a deterministic engine between two layers of model, and you can
-          have both.
+          If you have more than a handful of services and you are starting to feel the
+          consistency drift that AI-accelerated development causes, the sandwich is the shape to
+          consider. It does not have to be FixedCode. You can build it yourself; the docs
+          include enough detail that doing so is reasonable. The principle is what matters: do
+          not ask the model to be deterministic. Put a deterministic engine between two layers
+          of model and you can have both.
+        </p>
+
+        <p className="pt-4">
+          The repo is at{" "}
+          <a
+            href="https://github.com/gibbon/fixedcode"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-purple-400 hover:text-purple-300 underline"
+          >
+            github.com/gibbon/fixedcode
+          </a>
+          . <code className="text-gray-200">npm install fixedcode</code>. I would love feedback,
+          especially from teams who have tried something in this shape and run into walls I have
+          not seen yet.
         </p>
       </div>
 

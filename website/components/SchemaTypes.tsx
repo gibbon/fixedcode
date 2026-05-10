@@ -83,7 +83,7 @@ export default function SchemaTypes() {
             One engine. <span className="text-gradient">Any pattern.</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            The engine doesn&apos;t care what it generates. Define a spec format, build a template bundle, and generate anything — services, agents, orchestrators, infrastructure.
+            The engine doesn&apos;t care what it generates. Define a spec format, build a template bundle, and generate anything: services, agents, orchestrators, infrastructure.
           </p>
           <p className="text-gray-500 text-sm mt-2">
             These are examples. Your team would build bundles for whatever your org&apos;s patterns are.

@@ -140,7 +140,7 @@ agent:
         ],
       },
     ] as FileNode[],
-    caption: "Same engine, different spec format + bundle. Agent with auth, tools, middleware — all generated.",
+    caption: "Same engine, different spec format + bundle. Agent with auth, tools, middleware. All generated.",
   },
   {
     id: "orchestrator",

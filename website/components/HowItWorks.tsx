@@ -15,7 +15,7 @@ const steps = [
     badge: "Human",
     badgeClass: "bg-purple-500/20 text-purple-400",
     icon: <PersonIcon className="w-7 h-7" />,
-    description: "Anyone creates a ticket, Slack message, or doc. Plain English requirements. No YAML, no terminal. The role doesn't matter — PM, developer, domain expert.",
+    description: "Anyone creates a ticket, Slack message, or doc. Plain English requirements. No YAML, no terminal. PM, developer, domain expert: the role does not matter.",
     code: [
       { text: "# Ticket ORD-42 (Jira / Linear / Notion / Slack)", color: "text-gray-500" },
       { text: "" },
@@ -60,7 +60,7 @@ const steps = [
     description: "Spec pushed to standards repo. CI triggers fixedcode generate. Code pushed to service repo. CI/CD deploys. Every CFR built in automatically.",
     code: [
       { text: "$ fixedcode generate --spec order.yaml", color: "text-gray-400" },
-      { text: "\u2713 Schema validated — ddd/1.0", color: "text-green-400" },
+      { text: "\u2713 Schema validated: ddd/1.0", color: "text-green-400" },
       { text: "\u2713 Generated 47 files in ~3s", color: "text-green-400" },
       { text: "\u2713 Auth, audit, logging, events, tests", color: "text-green-400" },
       { text: "\u2713 Pushed to order-service repo", color: "text-green-400" },
@@ -74,7 +74,7 @@ const steps = [
     badge: "Human + AI",
     badgeClass: "bg-cyan-500/20 text-cyan-400",
     icon: <PersonIcon className="w-7 h-7" />,
-    description: "The same person — PM, developer, whoever — fills in business logic in extension points with AI assistance. The 10% that's unique. The role boundary has dissolved.",
+    description: "The same person (PM, developer, whoever) fills in business logic in extension points with AI assistance. The 10% that is unique. The role boundary has dissolved.",
     code: [
       { text: "// extensions/OrderValidator.kt", color: "text-gray-500" },
       { text: "class OrderValidator :", color: "text-blue-400" },
@@ -123,7 +123,7 @@ export default function HowItWorks() {
             Anyone writes a request. AI handles the translation. The engine handles the guarantees. Humans handle the business logic.
           </p>
           <p className="text-gray-500 text-sm mt-2">
-            The line between PM and developer blurs — with AI + deterministic generation, anyone who understands the domain can ship a service.
+            The line between PM and developer blurs. With AI + deterministic generation, anyone who understands the domain can ship a service.
           </p>
         </motion.div>
 
@@ -196,7 +196,7 @@ export default function HowItWorks() {
             The role boundary is <span className="text-gradient">dissolving</span>
           </p>
           <p className="text-gray-400 text-sm max-w-2xl mx-auto">
-            Step 1 and Step 4 are done by the same person. A PM who understands the domain can request a service and implement the business rules — with AI assistance.
+            Step 1 and Step 4 are done by the same person. A PM who understands the domain can request a service and implement the business rules with AI assistance.
             A developer who understands the platform can improve the templates that make this possible.
             The distinction isn&apos;t PM vs developer. It&apos;s <strong className="text-white">domain knowledge</strong> vs <strong className="text-white">platform knowledge</strong>.
           </p>
