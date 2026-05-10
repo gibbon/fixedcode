@@ -1,382 +1,319 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { useState } from "react";
 import SandwichDiagram from "./SandwichDiagram";
-import { PersonIcon, FactoryIcon } from "./Icons";
-
-function PatentBadge() {
-  const [clicked, setClicked] = useState(false);
-
-  return (
-    <span className="relative inline-block ml-3 align-top">
-      <button
-        onClick={() => setClicked(!clicked)}
-        className="text-[9px] font-medium px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/25 transition-colors cursor-pointer uppercase tracking-wider"
-      >
-        Patent Pending
-      </button>
-      {clicked && (
-        <motion.div
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 rounded-lg bg-surface border border-border shadow-lg whitespace-nowrap z-10"
-        >
-          <p className="text-xs text-gray-400">Just joking. But it&apos;s a good idea.</p>
-        </motion.div>
-      )}
-    </span>
-  );
-}
-
-const fadeUp = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-50px" },
-  transition: { duration: 0.5 },
-};
 
 export default function AISandwichDetail() {
   return (
-    <div className="max-w-4xl mx-auto px-6 pb-24">
-      {/* Header */}
-      <motion.div {...fadeUp} className="text-center mb-16">
-        <h1 className="text-4xl sm:text-5xl font-bold mb-4">
-          The <span className="text-gradient">AI Sandwich</span>
-          <PatentBadge />
+    <article className="max-w-3xl mx-auto px-6 pb-24 pt-8">
+      <header className="mb-12">
+        <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">Essay</p>
+        <h1 className="text-4xl sm:text-5xl font-bold mb-6 leading-tight">
+          The AI Sandwich
         </h1>
-        <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-          AI is creative but inconsistent. Deterministic generation is
-          consistent but can&apos;t think. The AI Sandwich uses both where
-          they&apos;re strongest.
+        <p className="text-xl text-gray-300 leading-relaxed">
+          AI is good at writing code. It is not good at writing the same code twice.
         </p>
-      </motion.div>
+      </header>
 
-      {/* The core concept */}
-      <motion.div {...fadeUp} className="mb-16">
-        <h2 className="text-2xl font-bold mb-6">The Core Idea</h2>
-        <p className="text-gray-400 leading-relaxed mb-4">
-          Every service has two kinds of code: <strong className="text-white">structural code</strong> that
-          should be identical across all services (auth, logging, events, audit,
-          persistence, tests) and <strong className="text-white">business logic</strong> that&apos;s unique to
-          each service. Today, AI generates both — and gets the structural part
-          different every time.
+      <div className="prose-content text-gray-300 leading-relaxed space-y-6 text-[17px]">
+        <p>
+          This is the bug at the heart of the current AI-codegen wave. Individual developers are
+          dramatically faster. Whole organisations are not &mdash; and in many cases they are
+          getting slower in the way that actually matters: the time it takes for an idea in
+          someone&apos;s head to become a service in production that meets the rest of the
+          org&apos;s standards.
         </p>
-        <p className="text-gray-400 leading-relaxed">
-          The AI Sandwich separates them. AI handles the creative work at the
-          top and bottom. Deterministic generation handles the structural
-          guarantees in the middle. Same spec, identical output, every time.
+        <p>
+          We built FixedCode to make this go away. The structural answer we landed on is
+          something we call the AI sandwich. On reflection it is fairly obvious. It is not what
+          most teams are doing right now, though, and the gap between &ldquo;what we&apos;re
+          doing&rdquo; and &ldquo;what would actually work&rdquo; is large enough that it&apos;s
+          worth writing down.
         </p>
-      </motion.div>
 
-      <SandwichDiagram />
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">Two kinds of code</h2>
+        <p>
+          Every backend service contains two categories of code, and they have different
+          requirements.
+        </p>
+        <p>
+          The first is <strong className="text-white">structural code</strong>. Authentication.
+          Logging. Persistence. Audit trails. Event publishing. Migrations. Tests for all of the
+          above. This code should be functionally identical across every service in the org. If
+          your <code className="text-gray-200">OrderService</code> and your{" "}
+          <code className="text-gray-200">InvoiceService</code> handle auth differently, you have
+          a bug &mdash; possibly a security bug. The fact that nobody filed it as a bug means
+          nothing.
+        </p>
+        <p>
+          The second is <strong className="text-white">business logic</strong>. The validation
+          rules that say an order can&apos;t have a negative quantity. The pricing function that
+          depends on customer tier and region. The integration with whatever third-party API
+          exists in your particular industry. This code is, by definition, different in every
+          service. That&apos;s the point.
+        </p>
+        <p>
+          Existing AI coding tools &mdash; Cursor, Claude Code, Copilot, the whole genre &mdash;
+          generate both categories with the same machinery. You ask for &ldquo;an order
+          management service with validation and pagination&rdquo;, and the model writes you a
+          service. The pricing function looks reasonable. The auth code is also reasonable. It
+          is not, however, the same as the auth code in the other forty-seven services your org
+          has shipped this quarter. Each of them is, in its own quiet way, slightly wrong.
+        </p>
+        <p>This is fine if you have one service. It is a real problem if you have fifty.</p>
 
-      {/* Three layers */}
-      <motion.div {...fadeUp} className="mb-16">
-        <h2 className="text-2xl font-bold mb-6">The Three Layers</h2>
-        <div className="flex flex-col gap-4">
-          {/* Layer 1 */}
-          <div className="rounded-xl border border-purple-500/30 bg-purple-600/10 p-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-bold text-white">
-                Layer 1: AI + Human (Creative)
-              </h3>
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-400">
-                Non-deterministic
-              </span>
-            </div>
-            <p className="text-gray-400 text-sm leading-relaxed mb-4">
-              This layer has two distinct activities, done by different people at different times:
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div className="rounded-lg border border-purple-500/20 bg-black/20 p-4">
-                <h4 className="text-sm font-semibold text-white mb-1">Domain Specs</h4>
-                <p className="text-xs text-purple-400 mb-2">PM / Domain Expert</p>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  Defines <em>what</em> to build. A PM writes &quot;we need an order
-                  management service with line items and payment integration&quot;
-                  in a Jira ticket or Slack message. AI translates that into a YAML
-                  domain spec conforming to the org&apos;s schema. The PM never
-                  writes YAML — they write plain English.
-                </p>
-              </div>
-              <div className="rounded-lg border border-purple-500/20 bg-black/20 p-4">
-                <h4 className="text-sm font-semibold text-white mb-1">Template Curation</h4>
-                <p className="text-xs text-purple-400 mb-2">Developer / Platform Team</p>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  Defines <em>how</em> to build it. AI extracts patterns from existing
-                  services into schemas and templates. Human refines iteratively
-                  until the output is production-grade. This isn&apos;t one-click —
-                  it requires domain expertise guiding AI through many iterations.
-                  Done once, benefits every service forever.
-                </p>
-              </div>
-            </div>
-          </div>
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">
+          What scaffolding got right, and wrong
+        </h2>
+        <p>
+          Deterministic scaffolding has been around forever. Yeoman, Cookiecutter, Rails
+          generators, the Backstage scaffolder, internal tools at every reasonably-sized
+          company. The shape is always the same: write some templates, parameterise them, run a
+          generator, get back a project skeleton.
+        </p>
+        <p>
+          What scaffolding gets right is the property AI lacks: same input, same output. If your
+          template is correct, every service generated from it is correct in the same way. You
+          can review the template once and inherit confidence in everything downstream of it.
+        </p>
+        <p>What scaffolding gets wrong is everything else.</p>
+        <p>
+          The interface is hostile. Authoring a YAML spec to describe a service that
+          doesn&apos;t exist yet is tedious in a way that LLMs are specifically good at
+          relieving. Maintaining the templates themselves is worse &mdash; anyone who has tried
+          to keep an organisation-wide cookiecutter alive past the first eighteen months knows
+          what a slow grind it becomes.
+        </p>
+        <p>
+          Then there is the regeneration problem. Most scaffolding is fire-and-forget. It
+          generates your project skeleton and walks away. When you improve the template six
+          months later, you have no way to ship the improvement to existing services &mdash;
+          they have forked. The clean structural property dissolves immediately. Backstage tried
+          to solve this with templated software catalogues, but the experience is still
+          substantively that you generate, customise, and then the template&apos;s connection to
+          the output is severed. If you want to change auth across all your services, you find
+          them, you patch them, you cry.
+        </p>
 
-          {/* Connector */}
-          <div className="flex justify-center">
-            <div className="w-px h-6 bg-gradient-to-b from-purple-500 to-blue-500" />
-          </div>
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">The sandwich</h2>
+        <p>
+          The structural answer is to put deterministic generation between two layers of AI:
+        </p>
+        <ul className="list-disc pl-6 space-y-3">
+          <li>
+            <strong className="text-white">Top slice (AI).</strong> Translate intent into a
+            spec. Translate examples into templates. The creative work that benefits from a
+            model that can think about meaning.
+          </li>
+          <li>
+            <strong className="text-white">Middle (deterministic).</strong> A spec, a template,
+            an engine. Same input, identical output, every time. The reproducible work that
+            benefits from being a function rather than a chat.
+          </li>
+          <li>
+            <strong className="text-white">Bottom slice (AI).</strong> Fill in business logic in
+            clearly-marked extension points after generation. The bespoke work that has to be
+            different in every service.
+          </li>
+        </ul>
 
-          {/* Layer 2 */}
-          <div className="rounded-xl border border-blue-500/30 bg-surface p-6 ring-1 ring-purple-500/20 shadow-lg shadow-black/50">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-bold text-foreground">
-                Layer 2: FixedCode (Deterministic)
-              </h3>
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gradient text-white">
-                Always identical
-              </span>
-            </div>
-            <p className="text-gray-400 text-sm leading-relaxed mb-4">
-              The engine takes a YAML domain spec and generates a complete
-              service from it — deterministically. Same spec produces identical
-              output every time, in about 3 seconds. No randomness, no
-              variation, no drift.
-            </p>
-            <p className="text-gray-400 text-sm leading-relaxed mb-4">
-              Every cross-functional requirement is built in from the templates:
-              auth with policy engine, audit trails on every entity, structured
-              logging with correlation IDs, event sourcing with outbox pattern,
-              database migrations, integration tests, black-box API tests. The
-              developer never wires any of this up. It&apos;s generated.
-            </p>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="rounded-lg border border-border bg-surface-light p-4">
-                <p className="text-xs text-gray-500 mb-2">Generated files include:</p>
-                <ul className="text-sm text-gray-400 space-y-1">
-                  <li>Domain model (aggregates, entities, events)</li>
-                  <li>Command/query handlers with validation</li>
-                  <li>REST controllers + OpenAPI specs</li>
-                  <li>Persistence + Flyway migrations</li>
-                </ul>
-              </div>
-              <div className="rounded-lg border border-border bg-surface-light p-4">
-                <p className="text-xs text-gray-500 mb-2">
-                  Infrastructure (all generated):
-                </p>
-                <ul className="text-sm text-gray-400 space-y-1">
-                  <li>Auth + policy engine with field filtering</li>
-                  <li>Event sourcing with outbox pattern</li>
-                  <li>Structured JSON logging + correlation IDs</li>
-                  <li>Integration + black-box API tests</li>
-                </ul>
-              </div>
-            </div>
-            <div className="rounded-lg border border-purple-500/20 bg-purple-500/5 p-4">
-              <p className="text-xs text-purple-400 mb-2">
-                The regeneration contract:
-              </p>
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="text-white font-medium">Regenerated files</p>
-                  <p className="text-gray-500 text-xs">
-                    Owned by the engine. Overwritten on every run. Never edit
-                    these.
-                  </p>
-                </div>
-                <div>
-                  <p className="text-white font-medium">Once files</p>
-                  <p className="text-gray-500 text-xs">
-                    Created once by the engine. Developer modifies. Never
-                    touched again on regenerate.
-                  </p>
-                </div>
-                <div>
-                  <p className="text-white font-medium">Extension points</p>
-                  <p className="text-gray-500 text-xs">
-                    Stub created if missing. Developer fills in logic. Never
-                    overwritten.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Connector */}
-          <div className="flex justify-center">
-            <div className="w-px h-6 bg-gradient-to-b from-blue-500 to-cyan-500" />
-          </div>
-
-          {/* Layer 3 */}
-          <div className="rounded-xl border border-cyan-500/30 bg-cyan-600/10 p-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-bold text-white">
-                Layer 3: AI + Human (Creative)
-              </h3>
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-400">
-                The custom parts
-              </span>
-            </div>
-            <p className="text-gray-400 text-sm leading-relaxed mb-4">
-              The generated service has clearly marked extension points — interfaces
-              with default implementations. This is where the business logic goes.
-              The parts that are unique to this specific service: validation rules,
-              domain-specific calculations, custom integrations, regional overrides.
-            </p>
-            <p className="text-gray-400 text-sm leading-relaxed mb-4">
-              AI assists here too. A developer (or PM) uses Claude Code, Cursor,
-              or any AI tool to implement the business rules in the extension
-              points. This is the 10% of the code that actually needs human
-              thought — the rest is generated.
-            </p>
-            <div className="rounded-lg border border-border bg-surface p-4">
-              <p className="text-xs text-gray-500 mb-2">
-                What goes in extension points:
-              </p>
-              <ul className="text-sm text-gray-400 space-y-1">
-                <li>Business validation rules (e.g. order minimum, credit checks)</li>
-                <li>Domain-specific calculations (e.g. pricing, scoring)</li>
-                <li>Custom integrations that don&apos;t fit templates (e.g. third-party APIs)</li>
-                <li>Regional overrides (e.g. country-specific tax rules)</li>
-              </ul>
-            </div>
-          </div>
+        <div className="my-10">
+          <SandwichDiagram />
         </div>
-      </motion.div>
 
-      {/* Why this matters */}
-      <motion.div {...fadeUp} className="mb-16">
-        <h2 className="text-2xl font-bold mb-6">Why This Matters</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="rounded-xl border border-border bg-surface p-6">
-            <h3 className="text-lg font-semibold text-white mb-3">
-              Without the sandwich
-            </h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              AI generates everything — structural code and business logic
-              together. The output is different every time. Review agents try to
-              catch violations. Humans review what agents flag. The entire
-              pipeline exists to compensate for non-deterministic output. At 50
-              services, stuff slips through. Every team interprets the patterns
-              differently.
-            </p>
-          </div>
-          <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-6">
-            <h3 className="text-lg font-semibold text-white mb-3">
-              With the sandwich
-            </h3>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Structural code is generated from reviewed templates — known-good
-              by construction. Only extension points need human review (about
-              10% of the code). Templates improve, you regenerate, every service
-              gets the upgrade. Violations are structurally impossible. The
-              review burden drops. The coordination overhead between teams
-              largely disappears.
-            </p>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* The pipeline */}
-      <motion.div {...fadeUp} className="mb-16">
-        <h2 className="text-2xl font-bold mb-6">The Full Pipeline</h2>
-        <p className="text-gray-400 leading-relaxed mb-6">
-          The AI Sandwich isn&apos;t a manual three-step process. It&apos;s an
-          automated pipeline. A PM creates a Jira ticket or Slack message. An
-          AI agent picks it up, translates it to a YAML domain spec, pushes it
-          to a standards repo. CI triggers FixedCode to generate the service.
-          CI/CD deploys it. The PM fills in business logic in extension points
-          with AI help.
+        <p>
+          The model never touches the structural code. It writes the spec that describes what
+          should exist, and it writes the bespoke logic that goes inside the generated shell.
+          The engine is responsible for the part that has to be the same across services. The
+          model is responsible for the parts that have to be different.
         </p>
-        <div className="grid grid-cols-5 gap-2">
-          {[
-            {
-              step: "1",
-              title: "Request",
-              desc: "Jira ticket, Slack, or CLI",
-              color: "text-purple-400",
-              bg: "bg-purple-500/10",
-            },
-            {
-              step: "2",
-              title: "Translate",
-              desc: "AI drafts YAML domain spec",
-              color: "text-purple-400",
-              bg: "bg-purple-500/10",
-            },
-            {
-              step: "3",
-              title: "Generate",
-              desc: "FixedCode, deterministic",
-              color: "text-blue-400",
-              bg: "bg-blue-500/10",
-            },
-            {
-              step: "4",
-              title: "Deploy",
-              desc: "CI/CD, automated",
-              color: "text-blue-400",
-              bg: "bg-blue-500/10",
-            },
-            {
-              step: "5",
-              title: "Enrich",
-              desc: "Business logic, AI-assisted",
-              color: "text-cyan-400",
-              bg: "bg-cyan-500/10",
-            },
-          ].map((s) => (
-            <div
-              key={s.step}
-              className={`rounded-lg border border-border ${s.bg} p-3 text-center`}
-            >
-              <div
-                className={`text-lg font-bold ${s.color} mb-1`}
-              >
-                {s.step}
-              </div>
-              <div className="text-xs font-medium text-white">{s.title}</div>
-              <div className="text-xs text-gray-500 mt-1">{s.desc}</div>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Who does what — roles blur */}
-      <motion.div {...fadeUp}>
-        <h2 className="text-2xl font-bold mb-2">Two Focus Areas, Not Three Roles</h2>
-        <p className="text-gray-400 text-sm mb-6">
-          The traditional PM / developer / platform team split dissolves. What matters is the type of knowledge, not the job title.
+        <p>
+          This is not a clever architecture. It is what you get when you ask which parts of the
+          system should be deterministic and which parts should be creative, and answer the
+          question honestly.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="rounded-xl border border-purple-500/20 bg-surface p-6">
-            <div className="flex items-center gap-2 mb-3">
-              <PersonIcon className="w-5 h-5" />
-              <h3 className="text-lg font-semibold text-foreground">
-                Domain Knowledge
-              </h3>
-            </div>
-            <p className="text-gray-400 text-sm leading-relaxed mb-3">
-              Understands the business: what services are needed, what the rules are,
-              what the domain looks like. Writes requirements, defines specs,
-              implements business logic in extension points — all with AI assistance.
-            </p>
-            <p className="text-gray-500 text-xs">
-              Could be a PM, a business analyst, a domain expert, or a developer
-              who understands the domain. The title doesn&apos;t matter.
-            </p>
-          </div>
-          <div className="rounded-xl border border-blue-500/20 bg-surface p-6">
-            <div className="flex items-center gap-2 mb-3">
-              <FactoryIcon className="w-5 h-5" />
-              <h3 className="text-lg font-semibold text-foreground">
-                Platform Knowledge
-              </h3>
-            </div>
-            <p className="text-gray-400 text-sm leading-relaxed mb-3">
-              Understands the infrastructure: how services should be built, what
-              patterns to use, where the boundaries are. Curates templates, evolves
-              schemas, handles code that doesn&apos;t fit generation.
-            </p>
-            <p className="text-gray-500 text-xs">
-              Could be a developer, a platform engineer, or a tech lead. They
-              improve the system that everyone else generates from.
-            </p>
-          </div>
+
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">
+          Why deterministic belongs in the middle
+        </h2>
+        <p>
+          There are three properties that deterministic generation gives you, and that AI
+          generation cannot.
+        </p>
+        <p>
+          <strong className="text-white">Reviewability.</strong> When you review a template
+          once, you have reviewed every service generated from it. When you review the output of
+          an LLM, you have reviewed only that output. At one service this distinction is
+          invisible. At fifty services it is the entire ballgame. Most engineering
+          organisations cannot review fifty services per quarter at the depth that would
+          actually catch the auth, logging and audit issues that matter &mdash; and so they
+          don&apos;t.
+        </p>
+        <p>
+          <strong className="text-white">Regeneration.</strong> Because the output is a function
+          of the input, you can run the function again. When the template improves, every
+          service inherits the improvement on the next regeneration. This sounds obvious; in
+          practice it is the property that scaffolding has historically failed to deliver,
+          because once you have hand-edited the generated code to add business logic,
+          regeneration overwrites your work.
+        </p>
+        <p>
+          <strong className="text-white">Auditability.</strong> The contents of any generated
+          file are derivable from the spec, the template and the engine version. Compliance
+          people care about this a great deal &mdash; they want to know not just{" "}
+          <em>what</em> code is in production but <em>why</em>. &ldquo;Generated from spec at
+          hash X by engine version Y&rdquo; is a much better answer than &ldquo;an LLM emitted
+          it on the third attempt&rdquo;.
+        </p>
+        <p>
+          The sandwich preserves all three because the middle layer is genuinely deterministic.
+          The top and bottom layers can be as creative and stochastic as you like &mdash; they
+          are producing inputs and extensions, not the structural code that has to be reviewed,
+          regenerated and audited.
+        </p>
+
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">The regeneration contract</h2>
+        <p>
+          Regeneration only works if there is a clear protocol for which files the engine owns
+          and which files the human owns. We landed on three categories.
+        </p>
+        <p>
+          <strong className="text-white">Regenerated files</strong> are owned by the engine and
+          overwritten on every run. You do not edit these. The repository&apos;s{" "}
+          <code className="text-gray-200">.fixedcode-manifest.json</code> records every one of
+          them with its hash. If you do edit one, you have created drift, which the engine will
+          surface and the next regeneration will erase.
+        </p>
+        <p>
+          <strong className="text-white">Once files</strong> are created by the engine the first
+          time and then never touched again. These are typically configuration files where the
+          engine has an opinion about the initial contents but the team will evolve them
+          afterwards: <code className="text-gray-200">application.yml</code>, the root README,
+          the Dockerfile.
+        </p>
+        <p>
+          <strong className="text-white">Extension points</strong> are stub files the engine
+          creates if missing and ignores if present. This is where business logic goes. The
+          engine creates <code className="text-gray-200">OrderValidator.kt</code> with a default
+          implementation that does nothing useful; the developer (or the model) replaces it with
+          the actual validation rules; from then on regeneration leaves it alone.
+        </p>
+        <p>
+          Together these three categories make the central trick possible: you can keep
+          regenerating forever without losing custom work, because the engine has explicit,
+          declared ownership of every file it touches.
+        </p>
+
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">
+          What changes about how you build software
+        </h2>
+        <p>
+          Once the structural code is generated reliably, the activity of building a service
+          decomposes differently than before.
+        </p>
+        <p>
+          The old shape was: someone with domain knowledge writes requirements, hands them to a
+          developer, who hand-wires the service while consulting the platform team about the
+          standards. Multiple roles, multiple handoffs, multiple weeks. AI tooling can compress
+          the developer&apos;s part of this loop by perhaps an order of magnitude, but it
+          doesn&apos;t remove the handoffs, and it actively makes the standards-consistency
+          problem worse.
+        </p>
+        <p>
+          The sandwich shape is: someone with domain knowledge describes the service in plain
+          English, an AI agent translates that into a spec, the engine generates the structural
+          code, and then the same person (or a different person, it doesn&apos;t matter) fills
+          in the business logic with AI assistance. The platform team&apos;s work is in the
+          templates, where it compounds &mdash; every service ever generated benefits from every
+          template improvement.
+        </p>
+        <p>
+          The boundary that dissolves is between PM, developer and platform engineer. What
+          replaces it is a boundary between <strong className="text-white">domain knowledge</strong>{" "}
+          (what should this service do, what are the rules, what is the data model) and{" "}
+          <strong className="text-white">platform knowledge</strong> (how should services be
+          built in this org, what are the patterns, where are the seams). Both are real and
+          necessary. Neither has to be embodied in a particular job title.
+        </p>
+
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">What this isn&apos;t</h2>
+        <p>A few things we want to be honest about.</p>
+        <p>
+          It is not a no-code tool. The bespoke parts of every service still have to be
+          written. The model can help, but somebody still has to know whether the validation
+          rule is right.
+        </p>
+        <p>
+          It is not free. Building a good template bundle is real work &mdash; comparable to
+          the effort of writing one good service by hand, except that the result then applies
+          to every subsequent service. The leverage is real but not immediate.
+        </p>
+        <p>
+          It is not for tiny teams. If you have one service you do not have a consistency
+          problem; the whole apparatus is overhead. The wedge appears around the time you have
+          five or ten services and a small platform team that is already overloaded. It widens
+          from there.
+        </p>
+        <p>
+          It is not anti-AI. Quite the opposite. The sandwich exists specifically so the model
+          can be fully unleashed on the parts where its creativity is an asset, without being
+          asked to also be deterministic in the parts where it can&apos;t. Asking an LLM to be
+          reproducible is asking a fish to walk.
+        </p>
+
+        <h2 className="text-2xl font-bold text-white mt-12 mb-4">
+          Why this hasn&apos;t happened already
+        </h2>
+        <p>
+          It has, sort of. Big tech firms have been building variants of the sandwich
+          internally for years &mdash; Google&apos;s protobuf-driven service generation,
+          Meta&apos;s codegen chains, Amazon&apos;s Smithy. These are all instances of the same
+          idea: define the service in a spec, generate the structural code from it, and let
+          humans focus on the bespoke parts. The model layer is recent. The underlying shape
+          isn&apos;t.
+        </p>
+        <p>
+          What&apos;s different now is that the top and bottom slices can be genuinely
+          automated for the first time. Spec authoring used to be the bottleneck that kept this
+          approach from spreading beyond companies that could afford a dedicated DSL team. AI
+          removes that bottleneck. The engine that does the deterministic middle is
+          straightforward &mdash; most of the engineering at FixedCode has gone into making the
+          regeneration contract bulletproof and the templates pleasant to write &mdash; but
+          it&apos;s the AI layer on either side that turns the architecture into something a
+          normal engineering org can actually adopt.
+        </p>
+        <p>
+          If you have more than a handful of services and you&apos;re starting to feel the
+          consistency drift that AI-accelerated development tends to cause, the sandwich is the
+          shape to consider. It doesn&apos;t have to be ours &mdash; you can build it
+          yourself, and we have a reasonable amount of detail in the docs about how to do
+          exactly that &mdash; but the principle is what matters. Don&apos;t ask the model to
+          be deterministic. Put a deterministic engine between two layers of model, and you can
+          have both.
+        </p>
+      </div>
+
+      <footer className="mt-16 pt-8 border-t border-border flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+        <div className="text-sm text-gray-500">
+          FixedCode is open source under Apache-2.0.
         </div>
-      </motion.div>
-    </div>
+        <div className="flex gap-3">
+          <a
+            href="https://github.com/gibbon/fixedcode"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm px-4 py-2 rounded-lg border border-border text-gray-300 hover:bg-surface-light hover:border-gray-600 transition-all"
+          >
+            View on GitHub
+          </a>
+          <a
+            href="https://www.npmjs.com/package/fixedcode"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm px-4 py-2 rounded-lg bg-gradient text-white hover:opacity-90 transition-opacity"
+          >
+            npm install fixedcode
+          </a>
+        </div>
+      </footer>
+    </article>
   );
 }

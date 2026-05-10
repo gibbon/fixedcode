@@ -50,12 +50,6 @@ export default function Navbar() {
             AI Sandwich
           </a>
           <a
-            href="/#before-after"
-            className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
-          >
-            The Org Change
-          </a>
-          <a
             href="/pricing"
             className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
           >

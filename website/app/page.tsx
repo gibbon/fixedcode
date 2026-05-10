@@ -1,15 +1,10 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Problem from "@/components/Problem";
-import WhyBoth from "@/components/WhyBoth";
-import AISandwich from "@/components/AISandwich";
 import HowItWorks from "@/components/HowItWorks";
-import BeforeAfter from "@/components/BeforeAfter";
-import WhoItsFor from "@/components/WhoItsFor";
-import HowItScales from "@/components/HowItScales";
 import CodeExample from "@/components/CodeExample";
 import SchemaTypes from "@/components/SchemaTypes";
-import Bundles from "@/components/Bundles";
+import WhoItsFor from "@/components/WhoItsFor";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -19,15 +14,10 @@ export default function Home() {
       <main>
         <Hero />
         <Problem />
-        <WhyBoth />
-        <AISandwich />
         <HowItWorks />
-        <BeforeAfter />
-        <WhoItsFor />
-        <HowItScales />
         <CodeExample />
         <SchemaTypes />
-        <Bundles />
+        <WhoItsFor />
       </main>
       <Footer />
     </>
