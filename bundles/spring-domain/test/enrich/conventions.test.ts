@@ -58,7 +58,7 @@ describe('deriveHttp', () => {
     expect(h.path).toBe('/orders/by-status');
   });
   it('Find with multi-word suffix → GET /orders/by-date-range', () => {
-    const h = deriveHttp('Find', 'orders', false, undefined, '', 'FindWorkspacesByDateRange');
+    const h = deriveHttp('Find', 'orders', false, undefined, '', 'FindOrdersByDateRange');
     expect(h.path).toBe('/orders/by-date-range');
   });
   it('Find with explicit path param uses withId', () => {
@@ -68,7 +68,7 @@ describe('deriveHttp', () => {
       true,
       'subscriberId',
       '',
-      'FindWorkspacesBySubscriber',
+      'FindOrdersBySubscriber',
     );
     expect(h.path).toBe('/orders/{subscriberId}');
   });

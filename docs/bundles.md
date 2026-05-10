@@ -120,10 +120,10 @@ describe('my-bundle enrich', () => {
       { /* metadata */ } as any,
     );
     expect(ctx).toMatchObject({
-      namePascal: 'WorkspaceService',
-      nameCamel: 'workspaceService',
+      namePascal: 'OrderService',
+      nameCamel: 'orderService',
       nameKebab: 'order-service',
-      nameSnake: 'workspace_service',
+      nameSnake: 'order_service',
     });
   });
 });

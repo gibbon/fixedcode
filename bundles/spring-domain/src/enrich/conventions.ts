@@ -121,7 +121,7 @@ export function deriveAuth(pattern: OperationPattern, resource = ''): AuthMetada
   const action = actionMap[pattern];
   return {
     action,
-    expression: `hasAuthority('${action}') or hasRole('ADMIN')`,
+    expression: `hasAuthority('${action}') or hasQuantity('ADMIN')`,
   };
 }
 

@@ -35,7 +35,7 @@ spec:
             orderId: uuid
           commands:
             - name: AddLineItem
-              body: [productSku, role]
+              body: [productSku, quantity]
               emits: LineItemAdded
           events:
             LineItemAdded:

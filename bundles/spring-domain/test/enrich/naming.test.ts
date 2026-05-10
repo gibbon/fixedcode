@@ -14,17 +14,17 @@ describe('generateVariants', () => {
   });
 
   it('handles multi-word PascalCase input', () => {
-    const v = generateVariants('WorkspaceReference');
-    expect(v.pascal).toBe('WorkspaceReference');
-    expect(v.camel).toBe('workspaceReference');
+    const v = generateVariants('OrderReference');
+    expect(v.pascal).toBe('OrderReference');
+    expect(v.camel).toBe('orderReference');
     expect(v.kebab).toBe('order-reference');
-    expect(v.snake).toBe('workspace_reference');
+    expect(v.snake).toBe('order_reference');
   });
 
   it('handles irregular plurals', () => {
-    const v = generateVariants('LineItem');
-    expect(v.plural).toBe('lineItems');
-    expect(v.pluralKebab).toBe('lineItems');
+    const v = generateVariants('Currency');
+    expect(v.plural).toBe('currencies');
+    expect(v.pluralKebab).toBe('currencies');
   });
 
   it('accepts a plural override', () => {
@@ -37,7 +37,7 @@ describe('generateVariants', () => {
   it('handles command-style input (verb + noun)', () => {
     const v = generateVariants('CreateOrder');
     expect(v.pascal).toBe('CreateOrder');
-    expect(v.camel).toBe('createWorkspace');
+    expect(v.camel).toBe('createOrder');
     expect(v.kebab).toBe('create-order');
   });
 });

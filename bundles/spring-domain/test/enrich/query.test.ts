@@ -25,7 +25,7 @@ describe('enrichQuery', () => {
 
   it('FindBySubscriber with explicit query param', () => {
     const q = enrichQuery(
-      { name: 'FindWorkspacesBySubscriber', query: ['subscriberId'], returns: 'OrderList' },
+      { name: 'FindOrdersBySubscriber', query: ['subscriberId'], returns: 'OrderList' },
       aggCtx as any,
     );
     expect(q.params.query[0].name).toBe('subscriberId');

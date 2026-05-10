@@ -161,17 +161,17 @@ describe('build — migration consolidation', () => {
     mkdirSync(migDir, { recursive: true });
 
     writeFileSync(
-      join(migDir, 'V001__create_workspace_table.sql'),
+      join(migDir, 'V001__create_order_table.sql'),
       [
         '-- order table',
         'CREATE TABLE order (id UUID PRIMARY KEY);',
-        'ALTER TABLE order ADD CONSTRAINT fk_workspace_owner FOREIGN KEY (owner_id) REFERENCES owners(id);',
+        'ALTER TABLE order ADD CONSTRAINT fk_order_owner FOREIGN KEY (owner_id) REFERENCES owners(id);',
       ].join('\n') + '\n',
       'utf-8',
     );
 
     writeFileSync(
-      join(migDir, 'V001__create_party_table.sql'),
+      join(migDir, 'V001__create_lineItem_table.sql'),
       ['-- lineItem table', 'CREATE TABLE lineItem (id UUID PRIMARY KEY);'].join('\n') + '\n',
       'utf-8',
     );
@@ -187,7 +187,7 @@ describe('build — migration consolidation', () => {
     expect(content).toContain('CREATE TABLE order');
     expect(content).toContain('CREATE TABLE lineItem');
     expect(content).toContain(
-      'ALTER TABLE order ADD CONSTRAINT fk_workspace_owner FOREIGN KEY',
+      'ALTER TABLE order ADD CONSTRAINT fk_order_owner FOREIGN KEY',
     );
   });
 
@@ -248,7 +248,7 @@ describe('build — migration consolidation', () => {
     mkdirSync(migDir, { recursive: true });
 
     writeFileSync(
-      join(migDir, 'V001__create_workspace_table.sql'),
+      join(migDir, 'V001__create_order_table.sql'),
       'CREATE TABLE order (id UUID PRIMARY KEY);\n',
       'utf-8',
     );

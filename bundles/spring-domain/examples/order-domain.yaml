@@ -17,7 +17,7 @@ spec:
         channel: string = Channel
         currency: string
         placedAt?: date
-        labels?: object
+        notes?: object
 
       commands:
         - name: CreateOrder
@@ -47,8 +47,8 @@ spec:
           fields: [orderId]
 
       enumDefaults:
-        Status: [CREATED, PREPARED, APPROVED, CLOSED]
-        Channel: [TRANSFER, MORTGAGE, CAVEAT]
+        Status: [PENDING, PAID, FULFILLED, CANCELLED]
+        Channel: [WEB, MOBILE, POS]
 
       entities:
         LineItem:
@@ -56,13 +56,13 @@ spec:
             lineItemId: uuid
             orderId: uuid
             productSku: string = ProductSku
-            role: string = Role
+            quantity: string = Quantity
             pricing: object
             description?: object
 
           commands:
             - name: AddLineItem
-              body: [productSku, role, pricing, description?]
+              body: [productSku, quantity, pricing, description?]
               emits: LineItemAdded
             - name: UpdateLineItem
               body: [pricing?, description?]
@@ -76,12 +76,12 @@ spec:
 
           events:
             LineItemAdded:
-              fields: [orderId, lineItemId, productSku, role]
+              fields: [orderId, lineItemId, productSku, quantity]
             LineItemUpdated:
               fields: [orderId, lineItemId]
             LineItemRemoved:
               fields: [orderId, lineItemId]
 
           enumDefaults:
-            ProductSku: [INDIVIDUAL, COMPANY, TRUST]
-            Role: [BUYER, SELLER, BORROWER, LENDER]
+            ProductSku: [SKU_A, SKU_B, SKU_C]
+            Quantity: [SMALL, MEDIUM, LARGE]

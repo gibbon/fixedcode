@@ -24,7 +24,7 @@ describe('spring-domain e2e', () => {
     expect(paths.some((p) => p.endsWith('OrderEvents.kt'))).toBe(true);
     expect(paths.some((p) => p.endsWith('OrderCommandService.kt'))).toBe(true);
     expect(paths.some((p) => p.endsWith('OrderApiDelegateImpl.kt'))).toBe(true);
-    expect(paths.some((p) => p.endsWith('WorkspaceReadRepositoryImpl.kt'))).toBe(true);
+    expect(paths.some((p) => p.endsWith('OrderReadRepositoryImpl.kt'))).toBe(true);
 
     // Commands
     expect(paths.some((p) => p.endsWith('CreateOrderCommand.kt'))).toBe(true);

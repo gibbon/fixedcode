@@ -106,7 +106,7 @@ spec:
 - `fieldName?: type` — optional field (? suffix)
 - `fieldName: type = Default` — field with default value
 - First `uuid` attribute = identity field (used for path params)
-- `plural: partys` — override auto-pluralization
+- `plural: lineitemz` — override auto-pluralization
 - Command naming conventions: `Create*` → POST, `Update*` → PUT, `Delete*` → DELETE, `Get*` → GET by ID, `Search*` → GET paged, `Find*By*` → GET with derived path
 
 ## Architecture

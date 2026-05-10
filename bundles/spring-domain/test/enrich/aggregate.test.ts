@@ -37,21 +37,21 @@ describe('enrichAggregate', () => {
 
   it('supports plural override on aggregates and entities', () => {
     const agg = enrichAggregate('Order', {
-      plural: 'workspacez',
+      plural: 'orderz',
       attributes: { orderId: 'uuid' },
       commands: [{ name: 'CreateOrder', body: ['status'] }],
       entities: {
         LineItem: {
-          plural: 'partys',
+          plural: 'lineitemz',
           attributes: { lineItemId: 'uuid' },
           commands: [{ name: 'AddLineItem', body: ['productSku'] }],
         },
       },
     });
 
-    expect(agg.names.pluralKebab).toBe('workspacez');
-    expect(agg.commands[0].http.path).toBe('/workspacez');
-    expect(agg.entities[0].names.pluralKebab).toBe('partys');
-    expect(agg.entities[0].commands[0].http.path).toBe('/partys');
+    expect(agg.names.pluralKebab).toBe('orderz');
+    expect(agg.commands[0].http.path).toBe('/orderz');
+    expect(agg.entities[0].names.pluralKebab).toBe('lineitemz');
+    expect(agg.entities[0].commands[0].http.path).toBe('/lineitemz');
   });
 });
