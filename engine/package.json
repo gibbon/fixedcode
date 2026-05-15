@@ -62,7 +62,7 @@
     "yaml": "^2.7.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^25.8.0",
     "@types/picomatch": "^4.0.3",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
