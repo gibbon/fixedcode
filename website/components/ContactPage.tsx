@@ -117,45 +117,9 @@ export default function ContactPage() {
       <section>
         <h2 className="text-2xl font-bold text-white mt-12 mb-4">Booking</h2>
         <p className="text-gray-300 leading-relaxed text-[17px] mb-6">
-          Email is the whole funnel. Tell me what you are running and when, and I
-          will reply with availability and an outline. If it helps, describe it the
-          way FixedCode would:
+          Email is the whole funnel. Tell me what you are running, the audience,
+          and when, and I will reply with availability and an outline.
         </p>
-
-        <pre className="rounded-lg border border-border bg-surface p-5 font-mono text-sm leading-relaxed overflow-x-auto mb-8">
-          <code>
-            <span className="text-gray-500">apiVersion:</span>{" "}
-            <span className="text-gray-300">&quot;1.0&quot;</span>
-            {"\n"}
-            <span className="text-gray-500">kind:</span>{" "}
-            <span className="text-gray-300">talk</span>
-             <span className="text-gray-500">{"            # talk | workshop | consultancy"}</span>
-            {"\n"}
-            <span className="text-gray-500">metadata:</span>
-            {"\n"}
-            {"  "}
-            <span className="text-gray-500">name:</span>{" "}
-            <span className="text-gray-300">your-conference-or-company</span>
-            {"\n"}
-            <span className="text-gray-500">spec:</span>
-            {"\n"}
-            {"  "}
-            <span className="text-gray-500">audience:</span>{" "}
-            <span className="text-gray-300">120 backend engineers</span>
-            {"\n"}
-            {"  "}
-            <span className="text-gray-500">where:</span>{" "}
-            <span className="text-gray-300">Berlin, or remote</span>
-            {"\n"}
-            {"  "}
-            <span className="text-gray-500">when:</span>{" "}
-            <span className="text-gray-300">2026-10</span>
-            {"\n"}
-            {"  "}
-            <span className="text-gray-500">topics:</span>{" "}
-            <span className="text-gray-300">[ai-sandwich, regeneration]</span>
-          </code>
-        </pre>
 
         <ObfuscatedEmail subject="Speaking and consultancy enquiry" />
       </section>
