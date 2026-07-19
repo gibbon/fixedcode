@@ -51,10 +51,10 @@ export default function Navbar() {
             AI Sandwich
           </Link>
           <Link
-            href="/pricing"
+            href="/contact"
             className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
           >
-            Pricing
+            Contact
           </Link>
           <button
             onClick={toggle}
