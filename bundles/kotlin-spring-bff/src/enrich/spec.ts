@@ -1,10 +1,7 @@
 export type AuthMode = 'jwt' | 'oauth2' | 'none';
 
 export type RecipeName =
-  | 'image-upload'
-  | 'users-management'
-  | 'pagination-filter-sort'
-  | 'audit-log';
+  'image-upload' | 'users-management' | 'pagination-filter-sort' | 'audit-log';
 export const KNOWN_RECIPES: readonly RecipeName[] = [
   'image-upload',
   'users-management',

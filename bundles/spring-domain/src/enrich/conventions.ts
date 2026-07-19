@@ -1,15 +1,7 @@
 import pluralize from 'pluralize';
 
 export type OperationPattern =
-  | 'Create'
-  | 'Update'
-  | 'Delete'
-  | 'Archive'
-  | 'Add'
-  | 'Remove'
-  | 'Get'
-  | 'Search'
-  | 'Find';
+  'Create' | 'Update' | 'Delete' | 'Archive' | 'Add' | 'Remove' | 'Get' | 'Search' | 'Find';
 
 export function detectPattern(name: string): OperationPattern {
   if (name.startsWith('Create')) return 'Create';
