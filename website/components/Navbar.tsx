@@ -51,6 +51,12 @@ export default function Navbar() {
             AI Sandwich
           </Link>
           <Link
+            href="/token-min-maxxing"
+            className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
+          >
+            Token Min-Maxxing
+          </Link>
+          <Link
             href="/contact"
             className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
           >
