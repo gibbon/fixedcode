@@ -9,6 +9,12 @@ const talks = [
     href: "/ai-sandwich",
   },
   {
+    title: "Token min-maxxing",
+    blurb:
+      "Tokenmaxxing is half right. Minimise the tokens spent on deterministic code, maximise the ones that buy judgment: 600 tokens of spec instead of 8,000 tokens of code.",
+    href: "/token-min-maxxing",
+  },
+  {
     title: "Code you can regenerate",
     blurb:
       "Regeneration contracts, extension points, and how generated code survives a year of human edits without a merge conflict.",
