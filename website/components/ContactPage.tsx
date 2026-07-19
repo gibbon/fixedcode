@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ObfuscatedEmail from "./ObfuscatedEmail";
 
 const talks = [
   {
@@ -150,12 +151,7 @@ export default function ContactPage() {
           </code>
         </pre>
 
-        <a
-          href="mailto:gibbon@gmail.com?subject=Speaking%20and%20consultancy%20enquiry"
-          className="inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-medium bg-gradient hover:opacity-90 transition-opacity"
-        >
-          Email gibbon@gmail.com
-        </a>
+        <ObfuscatedEmail subject="Speaking and consultancy enquiry" />
       </section>
     </article>
   );
