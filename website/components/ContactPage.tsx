@@ -117,8 +117,8 @@ export default function ContactPage() {
       <section>
         <h2 className="text-2xl font-bold text-white mt-12 mb-4">Booking</h2>
         <p className="text-gray-300 leading-relaxed text-[17px] mb-6">
-          Email is the whole funnel. Tell me what you are running, the audience,
-          and when, and I will reply with availability and an outline.
+          Tell me what you are running, the audience, and when, and I will reply
+          with availability and an outline.
         </p>
 
         <ObfuscatedEmail subject="Speaking and consultancy enquiry" />
