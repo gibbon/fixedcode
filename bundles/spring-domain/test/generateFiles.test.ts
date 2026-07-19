@@ -37,9 +37,7 @@ describe('generateFiles', () => {
     expect(paths).toContain(
       'src/main/kotlin/io/example/order/application/order/OrderCommandService.kt',
     );
-    expect(paths).toContain(
-      'src/main/kotlin/io/example/order/api/order/OrderApiDelegateImpl.kt',
-    );
+    expect(paths).toContain('src/main/kotlin/io/example/order/api/order/OrderApiDelegateImpl.kt');
 
     // Per command
     expect(paths).toContain(
@@ -50,9 +48,7 @@ describe('generateFiles', () => {
     );
 
     // Per entity
-    expect(paths).toContain(
-      'src/main/kotlin/io/example/order/domain/order/entities/LineItem.kt',
-    );
+    expect(paths).toContain('src/main/kotlin/io/example/order/domain/order/entities/LineItem.kt');
 
     // Per entity command
     expect(paths).toContain(
@@ -60,9 +56,7 @@ describe('generateFiles', () => {
     );
 
     // Tests
-    expect(paths).toContain(
-      'src/test/kotlin/io/example/order/domain/order/OrderTest.kt',
-    );
+    expect(paths).toContain('src/test/kotlin/io/example/order/domain/order/OrderTest.kt');
   });
 
   it('passes correct context to each file', () => {

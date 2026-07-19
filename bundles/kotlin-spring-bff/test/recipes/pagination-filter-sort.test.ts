@@ -56,9 +56,9 @@ describe('kotlin-spring-bff pagination-filter-sort recipe', () => {
     const files = generateFiles(ctx);
     const paginationOutputs = files.filter((f) => f.output.includes('/pagination/'));
     expect(paginationOutputs).toEqual([]);
-    expect(
-      files.some((f) => f.output.endsWith('application-pagination-filter-sort.yml')),
-    ).toBe(false);
+    expect(files.some((f) => f.output.endsWith('application-pagination-filter-sort.yml'))).toBe(
+      false,
+    );
   });
 
   it('works without features.database (recipe is JPA-agnostic)', () => {
@@ -123,7 +123,9 @@ describe('kotlin-spring-bff pagination-filter-sort recipe', () => {
       'utf-8',
     );
     expect(propsTpl).toContain('@ConfigurationProperties(prefix = "app.pagination")');
-    expect(propsTpl).toContain('val defaultPageSize: Int = {{paginationFilterSort.defaultPageSize}}');
+    expect(propsTpl).toContain(
+      'val defaultPageSize: Int = {{paginationFilterSort.defaultPageSize}}',
+    );
     expect(propsTpl).toContain('val maxPageSize: Int = {{paginationFilterSort.maxPageSize}}');
   });
 
@@ -147,16 +149,7 @@ describe('kotlin-spring-bff pagination-filter-sort recipe', () => {
 
   it('application.yml renders an `include:` block listing every active recipe profile', () => {
     const tpl = readFileSync(
-      join(
-        __dirname,
-        '..',
-        '..',
-        'templates',
-        'src',
-        'main',
-        'resources',
-        'application.yml.hbs',
-      ),
+      join(__dirname, '..', '..', 'templates', 'src', 'main', 'resources', 'application.yml.hbs'),
       'utf-8',
     );
     expect(tpl).toContain('{{#if hasRecipeProfiles}}');

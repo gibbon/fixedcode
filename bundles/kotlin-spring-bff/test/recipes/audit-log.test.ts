@@ -37,10 +37,7 @@ function renderTemplate(templatePath: string, ctx: Record<string, unknown>): str
     const params = args.slice(0, -1);
     return params.map((p) => String(p ?? '')).join('');
   });
-  const src = readFileSync(
-    join(__dirname, '..', '..', 'templates', templatePath),
-    'utf-8',
-  );
+  const src = readFileSync(join(__dirname, '..', '..', 'templates', templatePath), 'utf-8');
   return hb.compile(src, { noEscape: true })(ctx);
 }
 
@@ -78,7 +75,10 @@ describe('kotlin-spring-bff audit-log recipe', () => {
     const files = generateFiles(ctx);
     const outputs = files.map((f) => f.output);
     for (const tail of AUDIT_FILE_TAILS) {
-      expect(outputs.some((o) => o.endsWith(tail)), `missing ${tail}`).toBe(true);
+      expect(
+        outputs.some((o) => o.endsWith(tail)),
+        `missing ${tail}`,
+      ).toBe(true);
     }
     expect(outputs).toContain('src/main/resources/application-audit-log.yml');
     expect(outputs).toContain('src/main/resources/db/migration/V100__audit_log.sql');
@@ -162,10 +162,9 @@ describe('kotlin-spring-bff audit-log recipe', () => {
   });
 
   it('AuditLogPublisher exposes created/updated/deleted facade methods', () => {
-    const rendered = renderTemplate(
-      'recipes/audit-log/audit/AuditLogPublisher.kt.hbs',
-      { packageName: 'com.example.mybff' } as unknown as Record<string, unknown>,
-    );
+    const rendered = renderTemplate('recipes/audit-log/audit/AuditLogPublisher.kt.hbs', {
+      packageName: 'com.example.mybff',
+    } as unknown as Record<string, unknown>);
     expect(rendered).toContain('fun created(');
     expect(rendered).toContain('fun updated(');
     expect(rendered).toContain('fun deleted(');
@@ -207,10 +206,6 @@ describe('kotlin-spring-bff audit-log recipe', () => {
     expect(ctx.recipeUsersManagement).toBe(true);
     expect(ctx.recipePaginationFilterSort).toBe(true);
     // Profile order is fixed by enrich(), independent of recipe-list order.
-    expect(ctx.recipeProfiles).toEqual([
-      'users-management',
-      'pagination-filter-sort',
-      'audit-log',
-    ]);
+    expect(ctx.recipeProfiles).toEqual(['users-management', 'pagination-filter-sort', 'audit-log']);
   });
 });

@@ -64,7 +64,10 @@ describe('spring-domain transactional-outbox recipe', () => {
     const files = generateFiles(ctx);
     const outputs = files.map((f) => f.output);
     for (const tail of OUTBOX_FILE_TAILS) {
-      expect(outputs.some((o) => o.endsWith(tail)), `missing ${tail}`).toBe(true);
+      expect(
+        outputs.some((o) => o.endsWith(tail)),
+        `missing ${tail}`,
+      ).toBe(true);
     }
     expect(outputs).toContain('src/main/resources/application-outbox.yml');
     expect(outputs).toContain('src/main/resources/db/migration/V099__outbox.sql');
@@ -112,10 +115,9 @@ describe('spring-domain transactional-outbox recipe', () => {
   });
 
   it('OutboxRecorder uses MANDATORY propagation so callers can never accidentally record outside a transaction', () => {
-    const rendered = renderTemplate(
-      'recipes/transactional-outbox/outbox/OutboxRecorder.kt.hbs',
-      { packageDot: 'io.example.order' } as unknown as Record<string, unknown>,
-    );
+    const rendered = renderTemplate('recipes/transactional-outbox/outbox/OutboxRecorder.kt.hbs', {
+      packageDot: 'io.example.order',
+    } as unknown as Record<string, unknown>);
     expect(rendered).toContain('@Transactional(propagation = Propagation.MANDATORY)');
     // Records the topic via the existing DomainEvent contract — no new public surface.
     expect(rendered).toContain('event.getTopicName()');
@@ -133,15 +135,16 @@ describe('spring-domain transactional-outbox recipe', () => {
     );
     // The fixedDelayString placeholder lets ops override at runtime, but the
     // default echoes the spec — pin both halves.
-    expect(rendered).toContain('@Scheduled(fixedDelayString = "${app.outbox.poll-interval-ms:2500}")');
+    expect(rendered).toContain(
+      '@Scheduled(fixedDelayString = "${app.outbox.poll-interval-ms:2500}")',
+    );
     expect(rendered).toContain('@Transactional(propagation = Propagation.REQUIRES_NEW)');
   });
 
-  it('OutboxRepository uses pessimistic locking so multiple service instances don\'t double-publish', () => {
-    const rendered = renderTemplate(
-      'recipes/transactional-outbox/outbox/OutboxRepository.kt.hbs',
-      { packageDot: 'io.example.order' } as unknown as Record<string, unknown>,
-    );
+  it("OutboxRepository uses pessimistic locking so multiple service instances don't double-publish", () => {
+    const rendered = renderTemplate('recipes/transactional-outbox/outbox/OutboxRepository.kt.hbs', {
+      packageDot: 'io.example.order',
+    } as unknown as Record<string, unknown>);
     expect(rendered).toContain('@Lock(LockModeType.PESSIMISTIC_WRITE)');
     // Skip rows that have hit max attempts — operator inspection only.
     expect(rendered).toContain('e.attempts < :maxAttempts');
@@ -162,10 +165,9 @@ describe('spring-domain transactional-outbox recipe', () => {
   });
 
   it('MessagePublisher is a fun interface so callers can wire a lambda in tests', () => {
-    const rendered = renderTemplate(
-      'recipes/transactional-outbox/outbox/MessagePublisher.kt.hbs',
-      { packageDot: 'io.example.order' } as unknown as Record<string, unknown>,
-    );
+    const rendered = renderTemplate('recipes/transactional-outbox/outbox/MessagePublisher.kt.hbs', {
+      packageDot: 'io.example.order',
+    } as unknown as Record<string, unknown>);
     expect(rendered).toContain('fun interface MessagePublisher');
     expect(rendered).toContain('fun publish(event: OutboxEvent)');
   });

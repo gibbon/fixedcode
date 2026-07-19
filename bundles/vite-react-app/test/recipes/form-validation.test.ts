@@ -45,10 +45,7 @@ describe('vite-react-app form-validation recipe', () => {
   });
 
   it('generates all form files and adds the validation deps when enabled', () => {
-    const ctx = enrich(
-      { appName: 'forms-app', recipes: ['form-validation'] },
-      meta,
-    );
+    const ctx = enrich({ appName: 'forms-app', recipes: ['form-validation'] }, meta);
     expect(ctx.recipeFormValidation).toBe(true);
 
     expect(ctx.dependencies['react-hook-form']).toMatch(/^\^7/);

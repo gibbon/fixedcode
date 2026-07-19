@@ -62,14 +62,7 @@ describe('deriveHttp', () => {
     expect(h.path).toBe('/orders/by-date-range');
   });
   it('Find with explicit path param uses withId', () => {
-    const h = deriveHttp(
-      'Find',
-      'orders',
-      true,
-      'subscriberId',
-      '',
-      'FindOrdersBySubscriber',
-    );
+    const h = deriveHttp('Find', 'orders', true, 'subscriberId', '', 'FindOrdersBySubscriber');
     expect(h.path).toBe('/orders/{subscriberId}');
   });
 });
@@ -83,8 +76,7 @@ describe('deriveAuth', () => {
 });
 
 describe('deriveResponse', () => {
-  it('Create → entity 201', () =>
-    expect(deriveResponse('Create', 'Order').type).toBe('entity'));
+  it('Create → entity 201', () => expect(deriveResponse('Create', 'Order').type).toBe('entity'));
   it('Delete → void 204', () => expect(deriveResponse('Delete', 'Order').type).toBe('void'));
   it('Get → entity 200', () => expect(deriveResponse('Get', 'Order').type).toBe('entity'));
   it('Search → paged 200', () => expect(deriveResponse('Search', 'Order').type).toBe('paged'));

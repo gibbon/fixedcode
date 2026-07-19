@@ -15,10 +15,7 @@ describe('enrichQuery', () => {
   });
 
   it('SearchOrder → GET /orders 200 paged', () => {
-    const q = enrichQuery(
-      { name: 'SearchOrder', returns: 'PagedOrderList' },
-      aggCtx as any,
-    );
+    const q = enrichQuery({ name: 'SearchOrder', returns: 'PagedOrderList' }, aggCtx as any);
     expect(q.http.path).toBe('/orders');
     expect(q.response.type).toBe('paged');
   });

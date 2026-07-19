@@ -57,29 +57,20 @@ describe('findNeighbours', () => {
   };
 
   it('finds same-directory neighbours', () => {
-    const neighbours = findNeighbours(
-      'src/domain/order/DefaultOrderBusinessService.kt',
-      manifest,
-    );
+    const neighbours = findNeighbours('src/domain/order/DefaultOrderBusinessService.kt', manifest);
     expect(neighbours).toContain('src/domain/order/Order.kt');
     expect(neighbours).toContain('src/domain/order/OrderBusinessService.kt');
     expect(neighbours).toContain('src/domain/order/OrderEvents.kt');
   });
 
   it('excludes other extension points', () => {
-    const neighbours = findNeighbours(
-      'src/domain/order/DefaultOrderBusinessService.kt',
-      manifest,
-    );
+    const neighbours = findNeighbours('src/domain/order/DefaultOrderBusinessService.kt', manifest);
     // Should not include itself or other overwrite:false files
     expect(neighbours).not.toContain('src/domain/order/DefaultOrderBusinessService.kt');
   });
 
   it('includes parent-directory files with name affinity', () => {
-    const neighbours = findNeighbours(
-      'src/domain/order/DefaultOrderBusinessService.kt',
-      manifest,
-    );
+    const neighbours = findNeighbours('src/domain/order/DefaultOrderBusinessService.kt', manifest);
     // Parent dir file with name affinity (contains "Order") should be included
     expect(neighbours).toContain('src/domain/OrderRepository.kt');
     // Far-away file should not be included

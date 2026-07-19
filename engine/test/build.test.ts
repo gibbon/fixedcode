@@ -186,9 +186,7 @@ describe('build — migration consolidation', () => {
     const content = readFileSync(v002Path, 'utf-8');
     expect(content).toContain('CREATE TABLE order');
     expect(content).toContain('CREATE TABLE lineItem');
-    expect(content).toContain(
-      'ALTER TABLE order ADD CONSTRAINT fk_order_owner FOREIGN KEY',
-    );
+    expect(content).toContain('ALTER TABLE order ADD CONSTRAINT fk_order_owner FOREIGN KEY');
   });
 
   it('moves FK constraints after CREATE TABLE statements', async () => {
