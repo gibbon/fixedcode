@@ -3,7 +3,7 @@ export default function RegenerationDetail() {
     <article className="max-w-3xl mx-auto px-6 pb-24 pt-8">
       <header className="mb-10">
         <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">
-          Blog · 2026-05-10
+          2026-05-10
         </p>
         <h1 className="text-4xl sm:text-5xl font-bold mb-6 leading-tight">
           How regenerating code stays out of your way

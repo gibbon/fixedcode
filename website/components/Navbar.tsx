@@ -8,7 +8,8 @@ import { useTheme } from "./ThemeProvider";
 const links = [
   { href: "/#problem", label: "The Problem" },
   { href: "/#how-it-works", label: "How It Works" },
-  { href: "/blog", label: "Blog" },
+  { href: "/ai-sandwich", label: "AI Sandwich" },
+  { href: "/token-min-maxxing", label: "Token Min-Maxxing" },
   { href: "/contact", label: "Contact" },
 ];
 
