@@ -61,6 +61,14 @@ export default function Footer() {
               <ul className="space-y-2">
                 <li>
                   <a
+                    href="/blog"
+                    className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a
                     href="https://github.com/gibbon/fixedcode"
                     target="_blank"
                     rel="noopener noreferrer"

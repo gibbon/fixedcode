@@ -45,16 +45,10 @@ export default function Navbar() {
             How It Works
           </Link>
           <Link
-            href="/ai-sandwich"
+            href="/blog"
             className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
           >
-            AI Sandwich
-          </Link>
-          <Link
-            href="/token-min-maxxing"
-            className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block"
-          >
-            Token Min-Maxxing
+            Blog
           </Link>
           <Link
             href="/contact"

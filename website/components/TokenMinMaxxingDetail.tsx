@@ -2,7 +2,9 @@ export default function TokenMinMaxxingDetail() {
   return (
     <article className="max-w-3xl mx-auto px-6 pb-24 pt-8">
       <header className="mb-10">
-        <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">Essay</p>
+        <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">
+          Blog · 2026-07-20
+        </p>
         <h1 className="text-4xl sm:text-5xl font-bold mb-6 leading-tight">
           Token min-maxxing
         </h1>

@@ -4,7 +4,9 @@ export default function AISandwichDetail() {
   return (
     <article className="max-w-3xl mx-auto px-6 pb-24 pt-8">
       <header className="mb-10">
-        <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">Essay</p>
+        <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">
+          Blog · 2026-03-29
+        </p>
         <h1 className="text-4xl sm:text-5xl font-bold mb-6 leading-tight">
           The AI Sandwich
         </h1>
