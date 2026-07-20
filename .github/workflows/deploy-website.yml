@@ -40,9 +40,12 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Via env, not inline ${{ }} interpolation: quotes or backticks in a
+          # commit message would break (or inject into) the shell command.
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           npx -y wrangler@latest pages deploy out \
             --project-name=fixedcode-ai \
             --branch=main \
-            --commit-message="${{ github.event.head_commit.message }}" \
+            --commit-message="$COMMIT_MESSAGE" \
             --commit-hash="${{ github.sha }}"
