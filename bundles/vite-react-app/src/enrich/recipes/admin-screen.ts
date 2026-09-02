@@ -202,6 +202,7 @@ function loadDomainSpec(absolutePath: string): RawDomainSpec {
     const msg = err instanceof Error ? err.message : String(err);
     throw new Error(
       `[vite-react-app:admin-screen] failed to parse domainSpec YAML at "${absolutePath}": ${msg}`,
+      { cause: err },
     );
   }
   if (!raw || typeof raw !== 'object') {
